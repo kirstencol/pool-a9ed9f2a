@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check, Copy, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useMeeting } from "@/context/MeetingContext";
 import Avatar from "@/components/Avatar";
 import TimeSlotCard from "@/components/TimeSlotCard";
@@ -13,8 +13,13 @@ const TimeConfirmation = () => {
   const { currentUser, participants, timeSlots } = useMeeting();
   const [copied, setCopied] = useState(false);
 
-  if (!currentUser || !timeSlots.length) {
-    navigate("/");
+  useEffect(() => {
+    if (!currentUser || !timeSlots.length) {
+      navigate("/");
+    }
+  }, [currentUser, timeSlots, navigate]);
+
+  if (!currentUser) {
     return null;
   }
 
