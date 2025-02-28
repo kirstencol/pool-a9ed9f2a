@@ -16,12 +16,12 @@ const Avatar = ({ initial, size = "md", className }: AvatarProps) => {
 
   const getAvatarClass = (letter: string) => {
     const formattedLetter = letter.toUpperCase();
-    if (formattedLetter === 'A') return 'avatar-a';
-    if (formattedLetter === 'J') return 'avatar-j';
-    if (formattedLetter === 'S') return 'avatar-s';
+    if (formattedLetter === 'A') return 'bg-orange-500';
+    if (formattedLetter === 'J') return 'bg-purple-500';
+    if (formattedLetter === 'S') return 'bg-green-500';
     
     // Default color based on letter
-    const colors = ['bg-orange-DEFAULT', 'bg-purple-DEFAULT', 'bg-green-DEFAULT', 'bg-blue-500', 'bg-yellow-500', 'bg-red-500'];
+    const colors = ['bg-orange-500', 'bg-purple-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500', 'bg-red-500'];
     const index = letter.charCodeAt(0) % colors.length;
     return colors[index];
   };
