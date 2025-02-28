@@ -32,12 +32,23 @@ const TimeSlotCard = ({
 
   // Format date for display (e.g., "Friday, October 25")
   const formatDate = (dateString: string) => {
+    // Ensure we're not affected by timezone when displaying the date
+    // Add a time component (noon) to avoid timezone shifts
+    const dateParts = dateString.split('-');
+    if (dateParts.length !== 3) return dateString;
+    
+    const year = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1; // JS months are 0-indexed
+    const day = parseInt(dateParts[2]);
+    
+    const date = new Date(year, month, day, 12, 0, 0);
+    
     const options: Intl.DateTimeFormatOptions = { 
       weekday: 'long', 
       month: 'long', 
       day: 'numeric' 
     };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    return date.toLocaleDateString('en-US', options);
   };
 
   const handleStartTimeChange = (newTime: string) => {

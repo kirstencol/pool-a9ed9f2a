@@ -31,7 +31,14 @@ const DateTimePicker = ({
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
       setDate(selectedDate);
-      const formattedDate = format(selectedDate, "yyyy-MM-dd");
+      
+      // Fix for timezone issue - preserve the selected date exactly as shown in the calendar
+      // Use YYYY-MM-DD format and add a time of noon to avoid timezone issues
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+      
       onDateChange(formattedDate);
       setIsCalendarOpen(false);
     }
