@@ -88,6 +88,17 @@ const ProposeTime = () => {
     setTimeSlots(updatedSlots);
   };
 
+  const clearTimeSlot = (index: number) => {
+    const updatedSlots = [...timeSlots];
+    updatedSlots[index] = { 
+      date: "", 
+      startTime: "--", 
+      endTime: "--", 
+      isValid: true 
+    };
+    setTimeSlots(updatedSlots);
+  };
+
   const handleSendToFriends = () => {
     // Only add valid time slots
     timeSlots.forEach(slot => {
@@ -136,6 +147,7 @@ const ProposeTime = () => {
               startTime={slot.startTime}
               endTime={slot.endTime}
               isValid={slot.isValid}
+              onClear={() => clearTimeSlot(index)}
             />
           </div>
         ))}
@@ -152,7 +164,7 @@ const ProposeTime = () => {
 
         <button
           onClick={handleSendToFriends}
-          className={`action-button mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300' : 'bg-purple-500 hover:bg-purple-600'}`}
+          className={`action-button mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300 cursor-not-allowed' : 'bg-purple-500 hover:bg-purple-600'}`}
           disabled={!hasValidTimeSlots()}
         >
           Send to friends

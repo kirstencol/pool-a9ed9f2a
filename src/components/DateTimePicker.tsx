@@ -13,6 +13,7 @@ interface DateTimePickerProps {
   startTime?: string;
   endTime?: string;
   isValid?: boolean;
+  onClear?: () => void;
 }
 
 const DateTimePicker = ({ 
@@ -21,7 +22,8 @@ const DateTimePicker = ({
   onEndTimeChange,
   startTime = "--",
   endTime = "--",
-  isValid = true
+  isValid = true,
+  onClear
 }: DateTimePickerProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -43,16 +45,37 @@ const DateTimePicker = ({
     onEndTimeChange(newTime);
   };
 
+  const handleClear = () => {
+    setDate(undefined);
+    if (onClear) {
+      onClear();
+    }
+  };
+
   return (
-    <div className="mb-2 animate-fade-in">
-      <div className="mb-4">
+    <div className="animate-fade-in">
+      <div>
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
-            <button className="w-full border-b border-gray-300 focus:border-purple-500 focus:outline-none py-2 flex items-center">
-              <Calendar className="mr-2 text-gray-500" size={20} />
-              <span className="text-gray-700">
-                {date ? format(date, "EEEE, MMMM d, yyyy") : "Select a date"}
-              </span>
+            <button className="w-full border-b border-gray-300 focus:border-purple-500 focus:outline-none py-2 flex items-center justify-between">
+              <div className="flex items-center">
+                <Calendar className="mr-2 text-gray-500" size={20} />
+                <span className="text-gray-700">
+                  {date ? format(date, "EEEE, MMMM d, yyyy") : "Select a date"}
+                </span>
+              </div>
+              {date && (
+                <button 
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClear();
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -61,11 +84,12 @@ const DateTimePicker = ({
               selected={date}
               onSelect={handleDateSelect}
               initialFocus
+              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
             />
           </PopoverContent>
         </Popover>
       </div>
-      <div className={`flex items-center ${!isValid ? 'text-red-500' : 'text-gray-700'}`}>
+      <div className={`flex items-center ${!isValid ? 'text-red-500' : 'text-gray-700'} mt-3`}>
         <Clock className="mr-2" size={20} />
         <div className="flex items-center justify-between w-full">
           <TimeSelector 
