@@ -17,16 +17,16 @@ const Avatar = ({ initial, size = "md", className }: AvatarProps) => {
   const getAvatarClass = (letter: string) => {
     const formattedLetter = letter.toUpperCase();
     
-    // First, handle specific initials with fixed colors
-    if (formattedLetter === 'A') return 'bg-orange-500';
-    if (formattedLetter === 'J') return 'bg-purple-500';
-    if (formattedLetter === 'S') return 'bg-green-500';
+    // First, handle specific initials with fixed colors for common letters
+    if (formattedLetter === 'A') return 'bg-purple-300'; // Light purple
+    if (formattedLetter === 'J') return 'bg-purple-700'; // Deep purple
+    if (formattedLetter === 'S') return 'bg-green-300'; // Light lime green
     
-    // For other initials, use a deterministic but varied approach
+    // For other initials, use a deterministic approach with our three colors
     const charCode = letter.charCodeAt(0);
-    if (charCode % 3 === 0) return 'bg-orange-500';
-    if (charCode % 3 === 1) return 'bg-purple-500';
-    return 'bg-green-500';
+    if (charCode % 3 === 0) return 'bg-purple-300'; // Light purple
+    if (charCode % 3 === 1) return 'bg-green-300';  // Light lime green
+    return 'bg-purple-700'; // Deep purple
   };
 
   return (
