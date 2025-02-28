@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
 import { useMeeting } from "@/context/MeetingContext";
 import Avatar from "@/components/Avatar";
 import TimeSlotCard from "@/components/TimeSlotCard";
@@ -65,7 +64,6 @@ const TimeConfirmation = () => {
         className="action-button"
       >
         Copy link to send to {participantNames}
-        <ArrowRight className="ml-2" size={20} />
       </button>
     </div>
   );
