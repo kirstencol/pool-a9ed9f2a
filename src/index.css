@@ -73,11 +73,31 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-gray-200 text-foreground font-sans antialiased;
   }
 }
 
 @layer components {
+  .phone-frame {
+    @apply relative w-full max-w-[375px] mx-auto p-4 pb-12 bg-white rounded-[40px] border-[12px] border-lime-400 overflow-hidden shadow-lg min-h-[85vh] pt-10;
+  }
+  
+  .phone-notch {
+    @apply absolute top-0 left-1/2 transform -translate-x-1/2 w-[120px] h-[30px] bg-black rounded-b-xl z-10;
+  }
+  
+  .status-bar {
+    @apply absolute top-[8px] left-0 right-0 px-6 flex justify-between items-center z-10 text-sm;
+  }
+  
+  .status-bar-time {
+    @apply text-black font-medium;
+  }
+  
+  .status-bar-icons {
+    @apply flex space-x-1;
+  }
+  
   .avatar-circle {
     @apply flex items-center justify-center rounded-full text-white font-medium;
   }
@@ -95,7 +115,7 @@
   }
 
   .time-slot-card {
-    @apply border border-border rounded-xl p-4 mb-4 transition-all hover:shadow-sm animate-fade-in;
+    @apply mb-4 transition-all animate-fade-in;
   }
   
   .time-slot-card.selected {
@@ -123,11 +143,15 @@
   }
   
   .action-button {
-    @apply bg-purple-500 text-white font-medium px-6 py-3 rounded-xl flex items-center justify-center w-full transition-all hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-purple-200 text-black font-medium px-6 py-3 rounded-full flex items-center justify-center w-full transition-all hover:bg-purple-300 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .secondary-button {
     @apply text-gray-500 font-medium py-2 rounded-xl flex items-center justify-center w-full transition-all hover:text-gray-700;
+  }
+
+  .app-input {
+    @apply w-full border border-gray-300 rounded-md py-3 px-4 focus:outline-none focus:ring-1 focus:ring-gray-400 mb-4;
   }
 
   .celebration-animation {
