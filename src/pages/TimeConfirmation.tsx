@@ -17,6 +17,7 @@ const TimeConfirmation = () => {
       navigate("/");
     }
     // For debugging
+    console.log("Current user:", currentUser);
     console.log("Current time slots:", timeSlots);
     console.log("Current participants:", participants);
   }, [currentUser, timeSlots, navigate, participants]);
@@ -38,7 +39,9 @@ const TimeConfirmation = () => {
   };
 
   // Create a string of participant names for the share message
-  const participantNames = participants.map(p => p.name).join(" & ");
+  const participantNames = participants.length > 0 
+    ? participants.map(p => p.name).join(" & ")
+    : "your friends";
 
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
