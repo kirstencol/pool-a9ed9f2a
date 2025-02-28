@@ -41,7 +41,7 @@ const TimeConfirmation = () => {
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
       <div className="flex items-center mb-8">
-        <Avatar initial={currentUser.initial} size="lg" className="mr-4" />
+        <Avatar initial={currentUser.initial} position="first" size="lg" className="mr-4" />
         <div>
           <h1 className="text-2xl font-semibold">Perfect, done!</h1>
           <p className="text-gray-600">Let's share your availability.</p>

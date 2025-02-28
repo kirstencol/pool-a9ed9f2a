@@ -66,9 +66,9 @@ const Welcome = () => {
 
         {name && friend1 && friend2 && (
           <div className="flex -space-x-2 my-8 justify-center">
-            <Avatar initial={name.charAt(0)} className="border-2 border-white" />
-            <Avatar initial={friend1.charAt(0)} className="border-2 border-white" />
-            <Avatar initial={friend2.charAt(0)} className="border-2 border-white" />
+            <Avatar initial={name.charAt(0)} position="first" className="border-2 border-white" />
+            <Avatar initial={friend1.charAt(0)} position="second" className="border-2 border-white" />
+            <Avatar initial={friend2.charAt(0)} position="third" className="border-2 border-white" />
           </div>
         )}
         
@@ -77,8 +77,7 @@ const Welcome = () => {
           className="action-button"
           disabled={!name.trim() || !friend1.trim() || !friend2.trim()}
         >
-          Next
-          <ArrowRight className="ml-2" size={20} />
+          <ArrowRight size={20} />
         </button>
       </form>
     </div>

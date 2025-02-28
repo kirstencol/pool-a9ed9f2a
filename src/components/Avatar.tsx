@@ -5,25 +5,29 @@ interface AvatarProps {
   initial: string;
   size?: "sm" | "md" | "lg";
   className?: string;
+  position?: "first" | "second" | "third";
 }
 
-const Avatar = ({ initial, size = "md", className }: AvatarProps) => {
+const Avatar = ({ initial, size = "md", className, position }: AvatarProps) => {
   const sizeClasses = {
     sm: "w-8 h-8 text-sm",
     md: "w-12 h-12 text-lg",
     lg: "w-16 h-16 text-2xl",
   };
 
-  const getAvatarClass = (letter: string) => {
+  const getAvatarClass = (letter: string, position?: string) => {
+    // If position is provided, use that to determine color
+    if (position === "first") return 'bg-green-300'; // Light lime green for Friend A
+    if (position === "second") return 'bg-purple-700'; // Deep purple for Friend B
+    if (position === "third") return 'bg-purple-300'; // Light purple for Friend C
+    
+    // Fallback to using initials-based colors if no position specified
     const formattedLetter = letter.toUpperCase();
     
-    // First, handle specific initials with fixed colors for common letters
     if (formattedLetter === 'A') return 'bg-purple-300'; // Light purple
     if (formattedLetter === 'J') return 'bg-purple-700'; // Deep purple
     if (formattedLetter === 'S') return 'bg-green-300'; // Light lime green
     
-    // For other initials, use a deterministic approach with our three colors
-    // Modified to make sure we get more variation
     const charCode = letter.charCodeAt(0);
     if (charCode % 4 === 0) return 'bg-purple-300'; // Light purple
     if (charCode % 4 === 1 || charCode % 4 === 3) return 'bg-green-300';  // Light lime green
@@ -34,7 +38,7 @@ const Avatar = ({ initial, size = "md", className }: AvatarProps) => {
     <div 
       className={cn(
         "avatar-circle", 
-        getAvatarClass(initial), 
+        getAvatarClass(initial, position), 
         sizeClasses[size], 
         className
       )}
