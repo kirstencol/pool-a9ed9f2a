@@ -52,35 +52,8 @@ const TimeConfirmation = () => {
         </div>
       </div>
 
-      <div className="mb-8">
-        <h2 className="font-medium mb-4">Share with your friends:</h2>
-        <div className="flex -space-x-2 mb-4">
-          {participants.map((participant) => (
-            <Avatar 
-              key={participant.id} 
-              initial={participant.initial}
-              className="border-2 border-white" 
-            />
-          ))}
-        </div>
-        
-        <div 
-          className="border border-gray-300 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:border-purple-500"
-          onClick={copyLink}
-        >
-          <div className="truncate flex-grow">
-            <span className="text-gray-600 text-sm">{shareableLink}</span>
-          </div>
-          {copied ? (
-            <Check className="text-green-500 ml-2" size={20} />
-          ) : (
-            <Copy className="text-gray-500 ml-2" size={20} />
-          )}
-        </div>
-      </div>
-
       <button
-        onClick={() => navigate("/respond/12345")}
+        onClick={copyLink}
         className="action-button"
       >
         Copy link to send to {participantNames}

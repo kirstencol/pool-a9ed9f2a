@@ -167,8 +167,7 @@ const ProposeTime = () => {
           className={`action-button mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300 cursor-not-allowed' : 'bg-purple-500 hover:bg-purple-600'}`}
           disabled={!hasValidTimeSlots()}
         >
-          Send to friends
-          <ArrowRight className="ml-2" size={20} />
+          <ArrowRight size={20} />
         </button>
       </div>
     </div>
