@@ -71,7 +71,7 @@ const TimeSlotCard = ({
       {showTimeSelector && selectedByUser && (
         <div className="bg-purple-100 rounded-lg p-4 my-3">
           <div className="text-center mb-3 font-medium">What time works for you?</div>
-          <div className="flex justify-center space-x-8 items-center">
+          <div className="flex justify-center space-x-4 items-center">
             <TimeSelector 
               time={startTime} 
               onTimeChange={handleStartTimeChange} 

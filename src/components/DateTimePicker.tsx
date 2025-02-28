@@ -18,8 +18,8 @@ const DateTimePicker = ({
   onEndTimeChange 
 }: DateTimePickerProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [startTime, setStartTime] = useState("9:00 am");
-  const [endTime, setEndTime] = useState("10:00 am");
+  const [startTime, setStartTime] = useState("10:00 am");
+  const [endTime, setEndTime] = useState("10:00 pm");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
@@ -65,7 +65,7 @@ const DateTimePicker = ({
       </div>
       <div className="flex items-center">
         <Clock className="mr-2 text-gray-500" size={20} />
-        <div className="flex justify-between w-full items-center">
+        <div className="flex items-center justify-between w-full">
           <TimeSelector 
             time={startTime} 
             onTimeChange={handleStartTimeChange}

@@ -19,13 +19,17 @@ const ProposeTime = () => {
   // Initialize with one time slot
   useEffect(() => {
     if (timeSlots.length === 0) {
-      setTimeSlots([{ date: "", startTime: "9:00 am", endTime: "10:00 am" }]);
+      setTimeSlots([
+        { date: "", startTime: "10:00 am", endTime: "10:00 pm" },
+        { date: "", startTime: "10:00 am", endTime: "10:00 pm" },
+        { date: "", startTime: "10:00 am", endTime: "10:00 pm" }
+      ]);
     }
   }, []);
 
   const addNewTimeSlot = () => {
     if (timeSlots.length < 3) {
-      setTimeSlots([...timeSlots, { date: "", startTime: "9:00 am", endTime: "10:00 am" }]);
+      setTimeSlots([...timeSlots, { date: "", startTime: "10:00 am", endTime: "10:00 pm" }]);
     }
   };
 
