@@ -11,6 +11,7 @@ interface LocationCardProps {
   onSelect?: () => void;
   onNoteChange?: (note: string) => void;
   className?: string;
+  onClick?: () => void;
 }
 
 const LocationCard = ({
@@ -19,7 +20,8 @@ const LocationCard = ({
   showNoteInput = false,
   onSelect,
   onNoteChange,
-  className
+  className,
+  onClick
 }: LocationCardProps) => {
   const [note, setNote] = useState("");
 
@@ -30,6 +32,11 @@ const LocationCard = ({
     }
   };
 
+  const handleClick = () => {
+    if (onClick) onClick();
+    if (onSelect) onSelect();
+  };
+
   return (
     <div 
       className={cn(
@@ -37,7 +44,7 @@ const LocationCard = ({
         selectedByUser && "selected",
         className
       )}
-      onClick={onSelect}
+      onClick={handleClick}
     >
       <div className="flex items-start">
         <div className="flex-grow">
@@ -55,7 +62,7 @@ const LocationCard = ({
         <div className="mt-4">
           <textarea
             placeholder="Add a note (optional)"
-            className="w-full p-2 rounded-lg bg-white border border-gray-200 focus:outline-none focus:border-purple-DEFAULT text-sm"
+            className="w-full p-2 rounded-lg bg-white border border-gray-200 focus:outline-none focus:border-purple-500 text-sm"
             value={note}
             onChange={handleNoteChange}
             rows={2}

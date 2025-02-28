@@ -13,6 +13,7 @@ interface TimeSlotCardProps {
   cannotMakeItText?: string;
   creatorAvailable?: boolean;
   className?: string;
+  onClick?: () => void;
 }
 
 const TimeSlotCard = ({
@@ -23,7 +24,8 @@ const TimeSlotCard = ({
   onCannotMakeIt,
   cannotMakeItText = "I can't make it",
   creatorAvailable = true,
-  className
+  className,
+  onClick
 }: TimeSlotCardProps) => {
   const [startTime, setStartTime] = useState(timeSlot.startTime);
   const [endTime, setEndTime] = useState(timeSlot.endTime);
@@ -49,11 +51,14 @@ const TimeSlotCard = ({
   };
 
   return (
-    <div className={cn(
-      "time-slot-card",
-      selectedByUser && "selected",
-      className
-    )}>
+    <div 
+      className={cn(
+        "time-slot-card",
+        selectedByUser && "selected",
+        className
+      )}
+      onClick={onClick}
+    >
       <div className="mb-2">
         <div className="font-medium">{formatDate(timeSlot.date)}</div>
         {creatorAvailable && (
@@ -64,7 +69,7 @@ const TimeSlotCard = ({
       </div>
 
       {showTimeSelector && selectedByUser && (
-        <div className="bg-purple-light rounded-lg p-4 my-3">
+        <div className="bg-purple-100 rounded-lg p-4 my-3">
           <div className="text-center mb-3 font-medium">What time works for you?</div>
           <div className="flex justify-center space-x-4 items-center">
             <TimeSelector 
@@ -83,7 +88,7 @@ const TimeSlotCard = ({
       {onCannotMakeIt && (
         <button 
           onClick={onCannotMakeIt}
-          className="text-purple-dark text-sm hover:underline mt-2"
+          className="text-purple-500 text-sm hover:underline mt-2"
         >
           {cannotMakeItText}
         </button>

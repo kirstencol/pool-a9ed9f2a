@@ -34,7 +34,7 @@ const RespondToInvite = () => {
 
   const handleSubmit = () => {
     if (selectedSlotId) {
-      const selectedSlot = timeSlots.find(slot => slot.id === id);
+      const selectedSlot = timeSlots.find(slot => slot.id === selectedSlotId);
       if (selectedSlot) {
         setSelectedTimeSlot({
           ...selectedSlot,
