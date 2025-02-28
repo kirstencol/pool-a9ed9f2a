@@ -18,8 +18,8 @@ const DateTimePicker = ({
   onEndTimeChange 
 }: DateTimePickerProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [startTime, setStartTime] = useState("10:00 am");
-  const [endTime, setEndTime] = useState("10:00 pm");
+  const [startTime, setStartTime] = useState("--");
+  const [endTime, setEndTime] = useState("--");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
@@ -74,6 +74,8 @@ const DateTimePicker = ({
           <TimeSelector 
             time={endTime} 
             onTimeChange={handleEndTimeChange}
+            isEndTime={true}
+            startTime={startTime}
           />
         </div>
       </div>

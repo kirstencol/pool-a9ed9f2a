@@ -16,20 +16,20 @@ const ProposeTime = () => {
     endTime: string;
   }[]>([]);
 
-  // Initialize with one time slot
+  // Initialize with three time slots
   useEffect(() => {
     if (timeSlots.length === 0) {
       setTimeSlots([
-        { date: "", startTime: "10:00 am", endTime: "10:00 pm" },
-        { date: "", startTime: "10:00 am", endTime: "10:00 pm" },
-        { date: "", startTime: "10:00 am", endTime: "10:00 pm" }
+        { date: "", startTime: "--", endTime: "--" },
+        { date: "", startTime: "--", endTime: "--" },
+        { date: "", startTime: "--", endTime: "--" }
       ]);
     }
   }, []);
 
   const addNewTimeSlot = () => {
     if (timeSlots.length < 3) {
-      setTimeSlots([...timeSlots, { date: "", startTime: "10:00 am", endTime: "10:00 pm" }]);
+      setTimeSlots([...timeSlots, { date: "", startTime: "--", endTime: "--" }]);
     }
   };
 
@@ -42,7 +42,7 @@ const ProposeTime = () => {
   const handleSendToFriends = () => {
     // Validate and add time slots
     timeSlots.forEach(slot => {
-      if (slot.date && slot.startTime && slot.endTime) {
+      if (slot.date && slot.startTime !== "--" && slot.endTime !== "--") {
         addTimeSlot({
           id: crypto.randomUUID(),
           date: slot.date,
@@ -58,7 +58,7 @@ const ProposeTime = () => {
 
   const hasValidTimeSlots = () => {
     return timeSlots.some(slot => 
-      slot.date && slot.startTime && slot.endTime
+      slot.date && slot.startTime !== "--" && slot.endTime !== "--"
     );
   };
 

@@ -79,7 +79,9 @@ const TimeSlotCard = ({
             <span className="text-gray-500">to</span>
             <TimeSelector 
               time={endTime} 
-              onTimeChange={handleEndTimeChange} 
+              onTimeChange={handleEndTimeChange}
+              isEndTime={true}
+              startTime={startTime}
             />
           </div>
         </div>
