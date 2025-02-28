@@ -53,10 +53,15 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				lime: {
+					light: '#E8F2B8',
+					DEFAULT: '#D2E55F',
+					dark: '#B1C343'
+				},
 				purple: {
-					light: '#E4D7F9',
-					DEFAULT: '#c5adfc',
-					dark: '#8467F3'
+					light: '#EAD5F2',
+					DEFAULT: '#DBAAE6',
+					dark: '#BD8ACC'
 				},
 				green: {
 					light: '#D7F9E4',

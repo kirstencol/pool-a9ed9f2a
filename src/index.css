@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
 
-    --primary: 262 90% 75%;
+    --primary: 282 50% 76%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 240 4.8% 95.9%;
@@ -95,19 +95,19 @@
   }
 
   .time-slot-card {
-    @apply border border-border rounded-xl p-4 mb-4 transition-all hover:shadow-sm animate-fade-in;
+    @apply border-2 border-lime rounded-xl p-4 mb-4 transition-all hover:shadow-sm animate-fade-in;
   }
   
   .time-slot-card.selected {
-    @apply border-2 border-purple-500 bg-purple-50;
+    @apply border-2 border-lime bg-lime/10;
   }
   
   .location-card {
-    @apply border border-border rounded-xl p-4 mb-4 transition-all hover:shadow-sm animate-fade-in;
+    @apply border-2 border-lime rounded-xl p-4 mb-4 transition-all hover:shadow-sm animate-fade-in;
   }
   
   .location-card.selected {
-    @apply border-2 border-purple-500 bg-purple-50;
+    @apply border-2 border-purple bg-purple/10;
   }
   
   .time-input {
@@ -123,7 +123,7 @@
   }
   
   .action-button {
-    @apply bg-purple-500 text-white font-medium px-6 py-3 rounded-xl flex items-center justify-center w-full transition-all hover:bg-purple-600 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-purple text-white font-medium px-6 py-3 rounded-xl flex items-center justify-center w-full transition-all hover:bg-purple/90 disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .secondary-button {
