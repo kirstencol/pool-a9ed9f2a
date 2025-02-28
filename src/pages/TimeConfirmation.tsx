@@ -30,6 +30,9 @@ const TimeConfirmation = () => {
     setTimeout(() => setCopied(false), 3000);
   };
 
+  // Create a string of participant names for the share message
+  const participantNames = participants.map(p => p.name).join(" & ");
+
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
       <div className="flex items-center mb-8">
@@ -80,7 +83,7 @@ const TimeConfirmation = () => {
         onClick={() => navigate("/respond/12345")}
         className="action-button"
       >
-        Preview link
+        Copy link to send to {participantNames}
         <ArrowRight className="ml-2" size={20} />
       </button>
     </div>
