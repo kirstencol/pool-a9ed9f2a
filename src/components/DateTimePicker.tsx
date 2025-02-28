@@ -65,7 +65,7 @@ const DateTimePicker = ({
           </PopoverContent>
         </Popover>
       </div>
-      <div className="flex items-center border border-gray-200 rounded-md p-2">
+      <div className={`flex items-center border ${!isValid ? 'border-red-500' : 'border-gray-200'} rounded-md p-2`}>
         <Clock className="mr-2 text-gray-500" size={20} />
         <div className="flex items-center justify-between w-full">
           <TimeSelector 

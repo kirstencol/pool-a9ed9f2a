@@ -23,7 +23,7 @@ const TimeSelector = ({
 }: TimeSelectorProps) => {
   const [hour, setHour] = useState<string>("--");
   const [minute, setMinute] = useState<string>("00");
-  const [period, setPeriod] = useState<string>("am");
+  const [period, setPeriod] = useState<string>("");
   
   // Generate hour options (12, 1, 2, ..., 11)
   const hourOptions = ["--", "12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"];
@@ -36,7 +36,7 @@ const TimeSelector = ({
     if (!time || time === "--") {
       setHour("--");
       setMinute("00");
-      setPeriod("am");
+      setPeriod("");
       return;
     }
 
@@ -55,7 +55,7 @@ const TimeSelector = ({
 
   // When values change, update the parent
   useEffect(() => {
-    if (hour === "--") {
+    if (hour === "--" || period === "") {
       onTimeChange("--");
       return;
     }
@@ -125,7 +125,7 @@ const TimeSelector = ({
         disabled={hour === "--"}
       >
         <SelectTrigger className="w-16 border border-gray-300 rounded-md">
-          <SelectValue placeholder={period} />
+          <SelectValue placeholder="--" />
         </SelectTrigger>
         <SelectContent>
           {periods.map((p) => (

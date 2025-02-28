@@ -75,12 +75,14 @@ const ProposeTime = () => {
       [field]: value 
     };
     
-    // Validate the time range whenever start or end time changes
+    // Only validate when both start and end times are set
     if (field === "startTime" || field === "endTime") {
-      updatedSlots[index].isValid = validateTimeRange(
-        field === "startTime" ? value : updatedSlots[index].startTime,
-        field === "endTime" ? value : updatedSlots[index].endTime
-      );
+      const startTime = field === "startTime" ? value : updatedSlots[index].startTime;
+      const endTime = field === "endTime" ? value : updatedSlots[index].endTime;
+      
+      if (startTime !== "--" && endTime !== "--") {
+        updatedSlots[index].isValid = validateTimeRange(startTime, endTime);
+      }
     }
     
     setTimeSlots(updatedSlots);
@@ -135,11 +137,6 @@ const ProposeTime = () => {
               endTime={slot.endTime}
               isValid={slot.isValid}
             />
-            {!slot.isValid && (
-              <div className="text-red-500 text-sm mt-2">
-                End time must be later than start time
-              </div>
-            )}
           </div>
         ))}
 
@@ -155,7 +152,7 @@ const ProposeTime = () => {
 
         <button
           onClick={handleSendToFriends}
-          className="action-button mt-8"
+          className={`action-button mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300' : 'bg-purple-500 hover:bg-purple-600'}`}
           disabled={!hasValidTimeSlots()}
         >
           Send to friends
