@@ -26,7 +26,10 @@ const TimeConfirmation = () => {
     return null;
   }
 
-  const shareableLink = `${window.location.origin}/respond/12345`;
+  // Generate a real invite ID - in a real app, this would be stored in a database
+  // For demo purposes, we'll create a random ID based on the current timestamp
+  const inviteId = `inv_${Date.now().toString(36)}`;
+  const shareableLink = `${window.location.origin}/respond/${inviteId}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareableLink);

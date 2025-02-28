@@ -11,7 +11,7 @@ const RespondToInvite = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { inviteId } = useParams();
-  const { timeSlots, setSelectedTimeSlot, addParticipant } = useMeeting();
+  const { timeSlots, setSelectedTimeSlot, addParticipant, addTimeSlot, clearTimeSlots } = useMeeting();
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
@@ -31,12 +31,46 @@ const RespondToInvite = () => {
       if (timeSlots.length === 0) {
         // Demo data for testing when accessed directly via URL
         console.log("No time slots found, adding demo data");
-        // In a real app, this would come from your backend
+        
+        // Clear any existing time slots first
+        clearTimeSlots();
+        
+        // Add demo time slots
+        const demoTimeSlots = [
+          {
+            id: "1",
+            date: "March 3",
+            startTime: "2:00 PM",
+            endTime: "5:00 PM",
+            responses: []
+          },
+          {
+            id: "2",
+            date: "March 4",
+            startTime: "10:00 AM",
+            endTime: "1:00 PM",
+            responses: []
+          },
+          {
+            id: "3",
+            date: "March 5",
+            startTime: "3:00 PM",
+            endTime: "6:00 PM",
+            responses: []
+          }
+        ];
+        
+        // Add each demo time slot to the context
+        demoTimeSlots.forEach(slot => {
+          addTimeSlot(slot);
+        });
+        
+        console.log("Added demo time slots:", demoTimeSlots);
       }
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, [inviteId, timeSlots]);
+  }, [inviteId, timeSlots, addTimeSlot, clearTimeSlots]);
 
   // Simulating a user responding to an invite
   const creatorName = "Alex";
