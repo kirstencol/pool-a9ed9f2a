@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 interface TimeSelectorProps {
   time: string;
@@ -78,48 +78,34 @@ const TimeSelector = ({ time, onTimeChange }: TimeSelectorProps) => {
   }, [hour, minute, period]);
 
   return (
-    <div className="time-input flex flex-col items-center">
-      <div className="flex flex-col items-center">
-        <button 
-          onClick={incrementHour}
-          className="time-selector-arrow"
-          aria-label="Increment hour"
-        >
-          <ArrowUp size={16} />
-        </button>
-        <div className="time-selector w-12 text-center font-medium">{hour}</div>
-        <button 
-          onClick={decrementHour}
-          className="time-selector-arrow"
-          aria-label="Decrement hour"
-        >
-          <ArrowDown size={16} />
-        </button>
-      </div>
-      <div className="text-center font-medium">:</div>
-      <div className="flex flex-col items-center">
-        <button 
-          onClick={incrementMinute}
-          className="time-selector-arrow"
-          aria-label="Increment minute"
-        >
-          <ArrowUp size={16} />
-        </button>
-        <div className="time-selector w-12 text-center font-medium">{minute.toString().padStart(2, '0')}</div>
-        <button 
-          onClick={decrementMinute}
-          className="time-selector-arrow"
-          aria-label="Decrement minute"
-        >
-          <ArrowDown size={16} />
-        </button>
-      </div>
-      <div
-        onClick={togglePeriod}
-        className="time-selector w-10 text-center text-sm cursor-pointer font-medium"
+    <div className="flex flex-col items-center bg-white rounded-lg shadow-sm p-1 w-28">
+      <button 
+        onClick={incrementHour}
+        className="w-full flex justify-center py-1 hover:bg-gray-50"
+        aria-label="Increment hour"
       >
-        {period}
+        <ChevronUp size={16} />
+      </button>
+      
+      <div className="flex justify-center items-center w-full py-1">
+        <div className="text-center text-xl font-medium">
+          {hour}:{minute.toString().padStart(2, '0')}
+        </div>
+        <div 
+          onClick={togglePeriod}
+          className="ml-1 text-sm cursor-pointer font-medium text-gray-500 hover:text-gray-700"
+        >
+          {period}
+        </div>
       </div>
+      
+      <button 
+        onClick={decrementHour}
+        className="w-full flex justify-center py-1 hover:bg-gray-50"
+        aria-label="Decrement hour"
+      >
+        <ChevronDown size={16} />
+      </button>
     </div>
   );
 };
