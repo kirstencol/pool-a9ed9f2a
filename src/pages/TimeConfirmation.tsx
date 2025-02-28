@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMeeting } from "@/context/MeetingContext";
+import Avatar from "@/components/Avatar";
+import TimeSlotCard from "@/components/TimeSlotCard";
 import { useToast } from "@/hooks/use-toast";
 
 const TimeConfirmation = () => {
@@ -36,60 +38,36 @@ const TimeConfirmation = () => {
     setTimeout(() => setCopied(false), 3000);
   };
 
-  // Format date for display (e.g., "Thursday, October 25")
-  const formatDate = (dateString: string) => {
-    const dateParts = dateString.split('-');
-    if (dateParts.length !== 3) return dateString;
-    
-    const year = parseInt(dateParts[0]);
-    const month = parseInt(dateParts[1]) - 1; // JS months are 0-indexed
-    const day = parseInt(dateParts[2]);
-    
-    const date = new Date(year, month, day, 12, 0, 0);
-    
-    const options: Intl.DateTimeFormatOptions = { 
-      weekday: 'long', 
-      month: 'long', 
-      day: 'numeric' 
-    };
-    return date.toLocaleDateString('en-US', options);
-  };
-
   return (
-    <div className="bg-gray-200 min-h-screen flex items-center justify-center py-6 px-4">
-      <div className="phone-frame">
-        <div className="phone-notch"></div>
-        <div className="status-bar">
-          <div className="status-bar-time">7:15</div>
-          <div className="status-bar-icons">
-            <span>●●●</span>
-            <span>📶</span>
-            <span>🔋</span>
-          </div>
-        </div>
-        
-        <h1 className="text-2xl font-semibold mb-8 mt-8 text-center">You're free:</h1>
-        
-        <div className="space-y-6 mt-6">
-          {timeSlots.map((timeSlot) => (
-            <div key={timeSlot.id} className="text-center">
-              <div className="font-medium">{formatDate(timeSlot.date)}</div>
-              <div className="text-gray-600">
-                from {timeSlot.startTime} to {timeSlot.endTime}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-12 pb-4">
-          <button
-            onClick={copyLink}
-            className="action-button"
-          >
-            Copy link to send to friends
-          </button>
+    <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
+      <div className="flex items-center mb-8">
+        <Avatar initial={currentUser.initial} position="first" size="lg" className="mr-4" />
+        <div>
+          <h1 className="text-2xl font-semibold">Perfect, done!</h1>
+          <p className="text-gray-600">Let's share your availability.</p>
         </div>
       </div>
+
+      <div className="mb-8">
+        <h2 className="font-medium mb-4">You're free:</h2>
+        <div className="space-y-4">
+          {timeSlots.map((timeSlot) => (
+            <TimeSlotCard 
+              key={timeSlot.id} 
+              timeSlot={timeSlot} 
+              creatorAvailable 
+              creatorName={currentUser.name} 
+            />
+          ))}
+        </div>
+      </div>
+
+      <button
+        onClick={copyLink}
+        className="action-button"
+      >
+        Copy link to send to friends
+      </button>
     </div>
   );
 };

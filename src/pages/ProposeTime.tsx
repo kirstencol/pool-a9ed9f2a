@@ -1,30 +1,137 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, ArrowRight } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { useMeeting } from "@/context/MeetingContext";
+import Avatar from "@/components/Avatar";
 import DateTimePicker from "@/components/DateTimePicker";
-import TimeSlotCard from "@/components/TimeSlotCard";
 import { TimeSlot } from "@/types";
 
 const ProposeTime = () => {
   const navigate = useNavigate();
-  const { currentUser, setTimeSlots } = useMeeting();
-  const [slots, setSlots] = useState<TimeSlot[]>([]);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const { currentUser, addTimeSlot, timeSlots: existingTimeSlots } = useMeeting();
+  const [timeSlots, setTimeSlots] = useState<{
+    date: string;
+    startTime: string;
+    endTime: string;
+    isValid: boolean;
+  }[]>([]);
 
-  const addTimeSlot = (newSlot: TimeSlot) => {
-    setSlots((prev) => [...prev, newSlot]);
-    setShowDatePicker(false);
-  };
-  
-  const removeTimeSlot = (id: string) => {
-    setSlots((prev) => prev.filter((slot) => slot.id !== id));
+  // Debug existing time slots
+  useEffect(() => {
+    console.log("Existing time slots in context:", existingTimeSlots);
+  }, [existingTimeSlots]);
+
+  // Initialize with three time slots
+  useEffect(() => {
+    if (timeSlots.length === 0) {
+      setTimeSlots([
+        { date: "", startTime: "--", endTime: "--", isValid: true },
+        { date: "", startTime: "--", endTime: "--", isValid: true },
+        { date: "", startTime: "--", endTime: "--", isValid: true }
+      ]);
+    }
+  }, []);
+
+  const addNewTimeSlot = () => {
+    if (timeSlots.length < 3) {
+      setTimeSlots([...timeSlots, { date: "", startTime: "--", endTime: "--", isValid: true }]);
+    }
   };
 
-  const handleContinue = () => {
-    setTimeSlots(slots);
+  const validateTimeRange = (startTime: string, endTime: string): boolean => {
+    if (startTime === "--" || endTime === "--") {
+      return true;
+    }
+
+    // Parse times
+    const parseTime = (timeStr: string) => {
+      const match = timeStr.match(/(\d+):(\d+)\s?(am|pm)/i);
+      if (!match) return null;
+
+      let hour = parseInt(match[1]);
+      const minute = parseInt(match[2]);
+      const period = match[3].toLowerCase();
+
+      // Convert to 24-hour format
+      if (period === "pm" && hour < 12) hour += 12;
+      if (period === "am" && hour === 12) hour = 0;
+
+      return { hour, minute };
+    };
+
+    const start = parseTime(startTime);
+    const end = parseTime(endTime);
+
+    if (!start || !end) return true;
+
+    // Compare times
+    if (start.hour > end.hour || (start.hour === end.hour && start.minute >= end.minute)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const updateTimeSlot = (index: number, field: keyof Omit<TimeSlot, "id" | "responses">, value: string) => {
+    const updatedSlots = [...timeSlots];
+    updatedSlots[index] = { 
+      ...updatedSlots[index], 
+      [field]: value 
+    };
+    
+    // Only validate when both start and end times are set
+    if (field === "startTime" || field === "endTime") {
+      const startTime = field === "startTime" ? value : updatedSlots[index].startTime;
+      const endTime = field === "endTime" ? value : updatedSlots[index].endTime;
+      
+      if (startTime !== "--" && endTime !== "--") {
+        updatedSlots[index].isValid = validateTimeRange(startTime, endTime);
+      }
+    }
+    
+    setTimeSlots(updatedSlots);
+  };
+
+  const clearTimeSlot = (index: number) => {
+    const updatedSlots = [...timeSlots];
+    updatedSlots[index] = { 
+      date: "", 
+      startTime: "--", 
+      endTime: "--", 
+      isValid: true 
+    };
+    setTimeSlots(updatedSlots);
+  };
+
+  const handleSendToFriends = () => {
+    // Clear any existing time slots first
+    console.log("Adding time slots to context...");
+    
+    // Only add valid time slots
+    let validSlotsAdded = 0;
+    timeSlots.forEach(slot => {
+      if (slot.date && slot.startTime !== "--" && slot.endTime !== "--" && slot.isValid) {
+        addTimeSlot({
+          id: crypto.randomUUID(),
+          date: slot.date,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          responses: [],
+        });
+        validSlotsAdded++;
+      }
+    });
+    
+    console.log(`Added ${validSlotsAdded} valid time slots`);
+    
     navigate("/time-confirmation");
+  };
+
+  const hasValidTimeSlots = () => {
+    return timeSlots.some(slot => 
+      slot.date && slot.startTime !== "--" && slot.endTime !== "--" && slot.isValid
+    );
   };
 
   if (!currentUser) {
@@ -33,57 +140,47 @@ const ProposeTime = () => {
   }
 
   return (
-    <div className="bg-gray-200 min-h-screen flex items-center justify-center py-6 px-4">
-      <div className="phone-frame">
-        <div className="phone-notch"></div>
-        <div className="status-bar">
-          <div className="status-bar-time">7:15</div>
-          <div className="status-bar-icons">
-            <span>●●●</span>
-            <span>📶</span>
-            <span>🔋</span>
-          </div>
-        </div>
-        
-        <h1 className="text-2xl font-semibold mb-6 mt-8 text-center">When are you free?</h1>
-        
-        {slots.length > 0 && (
-          <div className="mb-6">
-            <h2 className="font-medium mb-4">Your availability:</h2>
-            <div className="space-y-4">
-              {slots.map((timeSlot) => (
-                <TimeSlotCard 
-                  key={timeSlot.id} 
-                  timeSlot={timeSlot}
-                  onCannotMakeIt={() => removeTimeSlot(timeSlot.id)}
-                  cannotMakeItText="Remove"
-                  creatorName={currentUser.name}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+    <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
+      <div className="flex items-center mb-8">
+        <Avatar initial={currentUser.initial} position="first" size="lg" className="mr-4" />
+        <h1 className="text-2xl font-semibold">When are you free?</h1>
+      </div>
 
-        {showDatePicker ? (
-          <DateTimePicker onAddTimeSlot={addTimeSlot} onCancel={() => setShowDatePicker(false)} />
-        ) : (
-          <button
-            onClick={() => setShowDatePicker(true)}
-            className="border border-gray-300 rounded-md py-3 px-4 flex items-center justify-center w-full mb-6"
+      <div className="space-y-8">
+        {timeSlots.map((slot, index) => (
+          <div 
+            key={index} 
+            className={`p-4 ${!slot.isValid ? 'border border-red-500 rounded-xl' : ''}`}
           >
-            <Plus size={20} className="mr-2" />
-            <span>Add a time</span>
+            <DateTimePicker
+              onDateChange={(date) => updateTimeSlot(index, "date", date)}
+              onStartTimeChange={(time) => updateTimeSlot(index, "startTime", time)}
+              onEndTimeChange={(time) => updateTimeSlot(index, "endTime", time)}
+              startTime={slot.startTime}
+              endTime={slot.endTime}
+              isValid={slot.isValid}
+              onClear={() => clearTimeSlot(index)}
+            />
+          </div>
+        ))}
+
+        {timeSlots.length < 3 && (
+          <button
+            onClick={addNewTimeSlot}
+            className="action-button bg-white text-purple-500 border-2 border-purple-500 hover:bg-purple-50 flex items-center justify-center"
+          >
+            <Plus size={18} className="mr-2" />
+            Add another time option
           </button>
         )}
 
-        {slots.length > 0 && (
-          <button
-            onClick={handleContinue}
-            className="action-button mt-6"
-          >
-            <ArrowRight size={20} />
-          </button>
-        )}
+        <button
+          onClick={handleSendToFriends}
+          className={`action-button mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300 cursor-not-allowed' : 'bg-purple-500 hover:bg-purple-600'}`}
+          disabled={!hasValidTimeSlots()}
+        >
+          <ArrowRight size={20} />
+        </button>
       </div>
     </div>
   );

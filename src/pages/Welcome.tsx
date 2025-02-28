@@ -30,64 +30,56 @@ const Welcome = () => {
   };
 
   return (
-    <div className="bg-gray-200 min-h-screen flex items-center justify-center py-6 px-4">
-      <div className="phone-frame">
-        <div className="phone-notch"></div>
-        <div className="status-bar">
-          <div className="status-bar-time">7:15</div>
-          <div className="status-bar-icons">
-            <span>●●●</span>
-            <span>📶</span>
-            <span>🔋</span>
-          </div>
-        </div>
-        
-        <h1 className="text-2xl font-semibold mb-8 mt-8 text-center">Let's get together.</h1>
-        
-        <form onSubmit={handleSubmit} className="mt-8">
+    <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
+      <h1 className="text-2xl font-semibold mb-8">Let's get together.</h1>
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
           <input
             type="text"
             placeholder="Your name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="app-input"
+            className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-purple-DEFAULT"
           />
-          
+        </div>
+        
+        <div>
           <input
             type="text"
             placeholder="Who else?"
             value={friend1}
             onChange={(e) => setFriend1(e.target.value)}
-            className="app-input"
+            className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-purple-DEFAULT"
           />
-          
+        </div>
+        
+        <div>
           <input
             type="text"
             placeholder="One more? Three's the magic number."
             value={friend2}
             onChange={(e) => setFriend2(e.target.value)}
-            className="app-input"
+            className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-purple-DEFAULT"
           />
+        </div>
 
-          <div className="h-32 flex items-center justify-center">
-            {name && friend1 && friend2 && (
-              <div className="flex -space-x-2 justify-center">
-                <Avatar initial={name.charAt(0)} position="first" className="border-2 border-white" />
-                <Avatar initial={friend1.charAt(0)} position="second" className="border-2 border-white" />
-                <Avatar initial={friend2.charAt(0)} position="third" className="border-2 border-white" />
-              </div>
-            )}
+        {name && friend1 && friend2 && (
+          <div className="flex -space-x-2 my-8 justify-center">
+            <Avatar initial={name.charAt(0)} position="first" className="border-2 border-white" />
+            <Avatar initial={friend1.charAt(0)} position="second" className="border-2 border-white" />
+            <Avatar initial={friend2.charAt(0)} position="third" className="border-2 border-white" />
           </div>
-          
-          <button
-            type="submit"
-            className="action-button"
-            disabled={!name.trim() || !friend1.trim() || !friend2.trim()}
-          >
-            <ArrowRight size={20} />
-          </button>
-        </form>
-      </div>
+        )}
+        
+        <button
+          type="submit"
+          className="action-button"
+          disabled={!name.trim() || !friend1.trim() || !friend2.trim()}
+        >
+          <ArrowRight size={20} />
+        </button>
+      </form>
     </div>
   );
 };
