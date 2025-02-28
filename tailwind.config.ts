@@ -63,6 +63,12 @@ export default {
 					DEFAULT: '#DBAAE6',
 					dark: '#BD8ACC'
 				},
+				'purple-700': {
+					DEFAULT: '#4E58B2', // Updated to the new dark purple hex
+				},
+				'purple-300': {
+					DEFAULT: '#DBAAE6', // Light purple
+				},
 				green: {
 					light: '#D7F9E4',
 					DEFAULT: '#4ADE80',
