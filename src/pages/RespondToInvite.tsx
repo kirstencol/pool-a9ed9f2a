@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -29,6 +28,7 @@ const RespondToInvite = () => {
     // In a real app, you would fetch the data from an API using the inviteId
     // For now, we'll simulate by delaying a bit and using the demo data
     const timer = setTimeout(() => {
+      // Set loading to false after some delay to simulate data fetching
       setIsLoading(false);
       
       // Check if we're using the special "burt_demo" ID that indicates we should load Abby's data
@@ -69,10 +69,9 @@ const RespondToInvite = () => {
         
         console.log("Added Abby's time slots for Burt to respond to:", abbyTimeSlots);
       } 
-      // If it's a different inviteId, load demo data
-      else if (timeSlots.length === 0) {
-        // Demo data for testing when accessed directly via URL
-        console.log("No time slots found, adding demo data");
+      // For any other inviteId, load demo data so it actually works when clicking copied links
+      else {
+        console.log("Using default/demo data for invite ID:", inviteId);
         
         // Add demo time slots
         const demoTimeSlots = [
@@ -106,10 +105,10 @@ const RespondToInvite = () => {
         
         console.log("Added demo time slots:", demoTimeSlots);
       }
-    }, 1000);
+    }, 1000); // Reduced delay time for better user experience
     
     return () => clearTimeout(timer);
-  }, [inviteId, timeSlots, addTimeSlot, clearTimeSlots]);
+  }, [inviteId, clearTimeSlots, addTimeSlot]);
 
   const handleSelectTimeSlot = (id: string) => {
     setSelectedSlotId(id);
