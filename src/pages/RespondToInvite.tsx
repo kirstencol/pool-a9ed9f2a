@@ -16,46 +16,85 @@ const RespondToInvite = () => {
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [creatorName, setCreatorName] = useState("Abby");
+  const [responderName, setResponderName] = useState("Burt");
 
   // Simulating fetching meeting data based on inviteId
   useEffect(() => {
     console.log("Loading invite data for ID:", inviteId);
     
+    // Reset time slots
+    clearTimeSlots();
+    
     // In a real app, you would fetch the data from an API using the inviteId
-    // For now, we'll simulate by delaying a bit and using the data from context
+    // For now, we'll simulate by delaying a bit and using the demo data
     const timer = setTimeout(() => {
       setIsLoading(false);
       
-      // If there are no time slots in the context yet (cold start from link),
-      // we would normally fetch and populate them here
-      if (timeSlots.length === 0) {
+      // Check if we're using the special "burt_demo" ID that indicates we should load Abby's data
+      // and show Burt's response view
+      if (inviteId === "burt_demo") {
+        setCreatorName("Abby");
+        setResponderName("Burt");
+        
+        // Load Abby's time slots
+        const abbyTimeSlots = [
+          {
+            id: "1",
+            date: "March 1",
+            startTime: "8:00 AM",
+            endTime: "1:30 PM",
+            responses: []
+          },
+          {
+            id: "2",
+            date: "March 2",
+            startTime: "7:00 AM",
+            endTime: "10:00 AM",
+            responses: []
+          },
+          {
+            id: "3",
+            date: "March 3",
+            startTime: "9:00 AM",
+            endTime: "9:00 PM",
+            responses: []
+          }
+        ];
+        
+        // Add each time slot to the context
+        abbyTimeSlots.forEach(slot => {
+          addTimeSlot(slot);
+        });
+        
+        console.log("Added Abby's time slots for Burt to respond to:", abbyTimeSlots);
+      } 
+      // If it's a different inviteId, load demo data
+      else if (timeSlots.length === 0) {
         // Demo data for testing when accessed directly via URL
         console.log("No time slots found, adding demo data");
-        
-        // Clear any existing time slots first
-        clearTimeSlots();
         
         // Add demo time slots
         const demoTimeSlots = [
           {
             id: "1",
-            date: "March 3",
-            startTime: "2:00 PM",
-            endTime: "5:00 PM",
+            date: "March 1",
+            startTime: "8:00 AM",
+            endTime: "1:30 PM",
             responses: []
           },
           {
             id: "2",
-            date: "March 4",
-            startTime: "10:00 AM",
-            endTime: "1:00 PM",
+            date: "March 2",
+            startTime: "7:00 AM",
+            endTime: "10:00 AM",
             responses: []
           },
           {
             id: "3",
-            date: "March 5",
-            startTime: "3:00 PM",
-            endTime: "6:00 PM",
+            date: "March 3",
+            startTime: "9:00 AM",
+            endTime: "9:00 PM",
             responses: []
           }
         ];
@@ -72,16 +111,28 @@ const RespondToInvite = () => {
     return () => clearTimeout(timer);
   }, [inviteId, timeSlots, addTimeSlot, clearTimeSlots]);
 
-  // Simulating a user responding to an invite
-  const creatorName = "Alex";
-  const responderName = "Jamie";
-
   const handleSelectTimeSlot = (id: string) => {
     setSelectedSlotId(id);
     const selectedSlot = timeSlots.find(slot => slot.id === id);
     if (selectedSlot) {
-      setSelectedStartTime(selectedSlot.startTime);
-      setSelectedEndTime(selectedSlot.endTime);
+      // For Burt-specific data, preset his available times
+      if (responderName === "Burt") {
+        const slotDate = selectedSlot.date;
+        if (slotDate === "March 1") {
+          setSelectedStartTime("8:00 AM");
+          setSelectedEndTime("1:30 PM");
+        } else if (slotDate === "March 2") {
+          setSelectedStartTime("9:00 AM");
+          setSelectedEndTime("10:00 AM");
+        } else {
+          // Burt not available on March 3rd
+          setSelectedStartTime("");
+          setSelectedEndTime("");
+        }
+      } else {
+        setSelectedStartTime(selectedSlot.startTime);
+        setSelectedEndTime(selectedSlot.endTime);
+      }
     }
   };
 
@@ -116,11 +167,20 @@ const RespondToInvite = () => {
   };
 
   const handleCantMakeIt = () => {
-    toast({
-      title: "That's okay!",
-      description: "We'll let them know you can't make these times.",
-      variant: "destructive"
-    });
+    // If Burt can't make it on March 3rd (as per requirements)
+    if (responderName === "Burt" && selectedSlotId === "3") {
+      toast({
+        title: "Not available",
+        description: "Burt is not available on March 3rd.",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "That's okay!",
+        description: "We'll let them know you can't make these times.",
+        variant: "destructive"
+      });
+    }
     // In a real app, you might navigate to a page where they can suggest alternative times
     navigate("/");
   };

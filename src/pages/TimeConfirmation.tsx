@@ -9,18 +9,58 @@ import { useToast } from "@/hooks/use-toast";
 const TimeConfirmation = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentUser, participants, timeSlots } = useMeeting();
+  const { currentUser, participants, timeSlots, clearTimeSlots, addTimeSlot } = useMeeting();
   const [copied, setCopied] = useState(false);
 
+  // Set up Abby's data when the component loads if no current user exists
   useEffect(() => {
-    if (!currentUser || !timeSlots.length) {
-      navigate("/");
+    if (!currentUser) {
+      // For debugging purposes
+      console.log("Setting up Abby's data");
+      
+      // Clear any existing time slots
+      clearTimeSlots();
+      
+      // Add Abby's availability time slots
+      const abbyTimeSlots = [
+        {
+          id: "1",
+          date: "March 1",
+          startTime: "8:00 AM",
+          endTime: "1:30 PM",
+          responses: []
+        },
+        {
+          id: "2",
+          date: "March 2",
+          startTime: "7:00 AM",
+          endTime: "10:00 AM",
+          responses: []
+        },
+        {
+          id: "3",
+          date: "March 3",
+          startTime: "9:00 AM",
+          endTime: "9:00 PM",
+          responses: []
+        }
+      ];
+      
+      abbyTimeSlots.forEach(slot => {
+        addTimeSlot(slot);
+      });
+      
+      // Setup Abby as current user if not set
+      if (!currentUser) {
+        navigate("/");
+      }
     }
+    
     // For debugging
     console.log("Current user:", currentUser);
     console.log("Current time slots:", timeSlots);
     console.log("Current participants:", participants);
-  }, [currentUser, timeSlots, navigate, participants]);
+  }, [currentUser, timeSlots, navigate, participants, clearTimeSlots, addTimeSlot]);
 
   if (!currentUser) {
     return null;
@@ -30,6 +70,9 @@ const TimeConfirmation = () => {
   // For demo purposes, we'll create a random ID based on the current timestamp
   const inviteId = `inv_${Date.now().toString(36)}`;
   const shareableLink = `${window.location.origin}/respond/${inviteId}`;
+  
+  // Create a direct link to Burt's response flow with Abby's data already populated
+  const burtDirectLink = `${window.location.origin}/respond/burt_demo`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareableLink);
@@ -37,6 +80,16 @@ const TimeConfirmation = () => {
     toast({
       title: "Link copied!",
       description: "Share it with your friends",
+    });
+    setTimeout(() => setCopied(false), 3000);
+  };
+  
+  const copyBurtLink = () => {
+    navigator.clipboard.writeText(burtDirectLink);
+    setCopied(true);
+    toast({
+      title: "Burt's direct link copied!",
+      description: "This link will take you directly to Burt's response flow",
     });
     setTimeout(() => setCopied(false), 3000);
   };
@@ -65,12 +118,21 @@ const TimeConfirmation = () => {
         </div>
       </div>
 
-      <button
-        onClick={copyLink}
-        className="action-button"
-      >
-        Copy link to send to friends
-      </button>
+      <div className="space-y-4">
+        <button
+          onClick={copyLink}
+          className="action-button w-full"
+        >
+          Copy link to send to friends
+        </button>
+        
+        <button
+          onClick={copyBurtLink}
+          className="border border-purple-500 text-purple-500 hover:bg-purple-50 px-4 py-2 rounded-md w-full transition-colors"
+        >
+          Copy direct link to Burt's view
+        </button>
+      </div>
     </div>
   );
 };
