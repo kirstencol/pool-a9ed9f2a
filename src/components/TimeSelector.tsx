@@ -21,122 +21,181 @@ const TimeSelector = ({
   isEndTime = false, 
   startTime = "" 
 }: TimeSelectorProps) => {
-  const [timeValue, setTimeValue] = useState<string>("--");
+  const [hour, setHour] = useState<string>("--");
+  const [minute, setMinute] = useState<string>("00");
   const [period, setPeriod] = useState<string>("am");
   
-  // Generate time options in 15-minute increments (1:00, 1:15, 1:30, 1:45, etc.)
-  const timeOptions = [
-    "--",
-    "12:00", "12:15", "12:30", "12:45",
-    "1:00", "1:15", "1:30", "1:45",
-    "2:00", "2:15", "2:30", "2:45",
-    "3:00", "3:15", "3:30", "3:45",
-    "4:00", "4:15", "4:30", "4:45",
-    "5:00", "5:15", "5:30", "5:45",
-    "6:00", "6:15", "6:30", "6:45",
-    "7:00", "7:15", "7:30", "7:45",
-    "8:00", "8:15", "8:30", "8:45",
-    "9:00", "9:15", "9:30", "9:45",
-    "10:00", "10:15", "10:30", "10:45",
-    "11:00", "11:15", "11:30", "11:45",
-  ];
-  
+  // Generate hour options (12, 1, 2, ..., 11)
+  const hourOptions = ["--", "12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"];
+  // Generate minute options in 15-minute increments (00, 15, 30, 45)
+  const minuteOptions = ["00", "15", "30", "45"];
   const periods = ["am", "pm"];
 
   // Parse the incoming time
   useEffect(() => {
     if (!time || time === "--") {
-      setTimeValue("--");
+      setHour("--");
+      setMinute("00");
       setPeriod("am");
       return;
     }
 
     // Parse the time string (e.g., "2:00 pm")
-    const match = time.match(/(\d+:\d+)\s?(am|pm)/i);
+    const match = time.match(/(\d+):(\d+)\s?(am|pm)/i);
     if (match) {
-      const parsedTime = match[1];
-      const parsedPeriod = match[2].toLowerCase();
+      const parsedHour = match[1];
+      const parsedMinute = match[2];
+      const parsedPeriod = match[3].toLowerCase();
 
-      setTimeValue(parsedTime);
+      setHour(parsedHour);
+      setMinute(parsedMinute);
       setPeriod(parsedPeriod);
     }
   }, [time]);
 
-  // When time values change, update the parent
+  // When values change, update the parent
   useEffect(() => {
-    if (timeValue === "--") {
+    if (hour === "--") {
       onTimeChange("--");
       return;
     }
-    const newTime = `${timeValue} ${period}`;
+    const newTime = `${hour}:${minute} ${period}`;
     onTimeChange(newTime);
-  }, [timeValue, period, onTimeChange]);
+  }, [hour, minute, period, onTimeChange]);
 
-  // Filter time options for end time to prevent invalid selections
-  const getAvailableTimeOptions = () => {
+  // Handle period change from start time to automatically update end time
+  useEffect(() => {
+    if (isEndTime && startTime && startTime !== "--") {
+      const match = startTime.match(/(\d+):(\d+)\s?(am|pm)/i);
+      if (match) {
+        const startPeriod = match[3].toLowerCase();
+        // Auto-update end time period to match start time period
+        setPeriod(startPeriod);
+      }
+    }
+  }, [isEndTime, startTime]);
+
+  // Filter hour options for end time to prevent invalid selections
+  const getAvailableHourOptions = () => {
     if (!isEndTime || !startTime || startTime === "--") {
-      return timeOptions;
+      return hourOptions;
     }
 
     const match = startTime.match(/(\d+):(\d+)\s?(am|pm)/i);
-    if (!match) return timeOptions;
+    if (!match) return hourOptions;
 
-    const startTimeHour = parseInt(match[1]);
-    const startTimeMinute = parseInt(match[2]);
-    const startTimePeriod = match[3].toLowerCase();
+    const startHour = parseInt(match[1]);
+    const startMinute = parseInt(match[2]);
+    const startPeriod = match[3].toLowerCase();
 
     // If end time period is different from start time period
-    if (period !== startTimePeriod) {
+    if (period !== startPeriod) {
       // If end time is PM and start time is AM, all options are valid
-      if (period === "pm" && startTimePeriod === "am") {
-        return timeOptions;
+      if (period === "pm" && startPeriod === "am") {
+        return hourOptions;
       }
       // If end time is AM and start time is PM, no valid options (night crossing)
-      if (period === "am" && startTimePeriod === "pm") {
+      if (period === "am" && startPeriod === "pm") {
         return ["--"]; // Only allow the placeholder
       }
     }
 
     // Same period (both AM or both PM)
-    return timeOptions.filter(option => {
-      if (option === "--") return true;
-      
-      const [hourStr, minuteStr] = option.split(":");
-      const hour = parseInt(hourStr);
-      const minute = parseInt(minuteStr);
-      
-      if (hour < startTimeHour) return false;
-      if (hour === startTimeHour && minute <= startTimeMinute) return false;
-      
-      return true;
-    });
+    if (period === startPeriod) {
+      return hourOptions.filter(option => {
+        if (option === "--") return true;
+        
+        const hourVal = option === "12" ? 0 : parseInt(option);
+        const startHourVal = startHour === 12 ? 0 : startHour;
+        
+        return hourVal > startHourVal || (hourVal === startHourVal && getAvailableMinuteOptions().includes(minute));
+      });
+    }
+
+    return hourOptions;
+  };
+
+  // Filter minute options for end time to prevent invalid selections
+  const getAvailableMinuteOptions = () => {
+    if (!isEndTime || !startTime || startTime === "--" || hour === "--") {
+      return minuteOptions;
+    }
+
+    const match = startTime.match(/(\d+):(\d+)\s?(am|pm)/i);
+    if (!match) return minuteOptions;
+
+    const startHour = parseInt(match[1]);
+    const startMinute = parseInt(match[2]);
+    const startPeriod = match[3].toLowerCase();
+
+    // If periods are different, all minute options are valid
+    if (period !== startPeriod) {
+      return minuteOptions;
+    }
+
+    // If same hour in same period, filter minutes
+    const hourVal = hour === "12" ? 0 : parseInt(hour);
+    const startHourVal = startHour === 12 ? 0 : startHour;
+
+    if (hourVal === startHourVal) {
+      return minuteOptions.filter(option => {
+        return parseInt(option) > startMinute;
+      });
+    }
+
+    // If different hours in same period, all minute options are valid
+    return minuteOptions;
   };
 
   return (
     <div className="time-selector-container flex space-x-1">
+      {/* Hour selector */}
       <Select 
-        value={timeValue} 
-        onValueChange={(value) => setTimeValue(value)}
+        value={hour} 
+        onValueChange={(value) => setHour(value)}
       >
-        <SelectTrigger className="w-24">
+        <SelectTrigger className="w-16 border border-gray-300">
           <SelectValue placeholder="--" />
         </SelectTrigger>
         <SelectContent>
-          {getAvailableTimeOptions().map((t) => (
-            <SelectItem key={t} value={t}>
-              {t}
+          {getAvailableHourOptions().map((h) => (
+            <SelectItem key={h} value={h} className="border-b border-gray-200">
+              {h}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
 
-      <Select value={period} onValueChange={(value) => setPeriod(value)}>
-        <SelectTrigger className="w-16">
+      {/* Minute selector (only enabled if hour is selected) */}
+      <Select 
+        value={minute} 
+        onValueChange={(value) => setMinute(value)}
+        disabled={hour === "--"}
+      >
+        <SelectTrigger className="w-16 border border-gray-300">
+          <SelectValue placeholder="00" />
+        </SelectTrigger>
+        <SelectContent>
+          {getAvailableMinuteOptions().map((m) => (
+            <SelectItem key={m} value={m} className="border-b border-gray-200">
+              {m}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* AM/PM selector (only enabled if hour is selected) */}
+      <Select 
+        value={period} 
+        onValueChange={(value) => setPeriod(value)}
+        disabled={hour === "--"}
+      >
+        <SelectTrigger className="w-16 border border-gray-300">
           <SelectValue placeholder={period} />
         </SelectTrigger>
         <SelectContent>
           {periods.map((p) => (
-            <SelectItem key={p} value={p}>
+            <SelectItem key={p} value={p} className="border-b border-gray-200">
               {p}
             </SelectItem>
           ))}
