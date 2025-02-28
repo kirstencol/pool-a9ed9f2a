@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { useMeeting } from "@/context/MeetingContext";
 import Avatar from "@/components/Avatar";
 import DateTimePicker from "@/components/DateTimePicker";
@@ -16,9 +16,16 @@ const ProposeTime = () => {
     endTime: string;
   }[]>([]);
 
+  // Initialize with one time slot
+  useEffect(() => {
+    if (timeSlots.length === 0) {
+      setTimeSlots([{ date: "", startTime: "9:00 am", endTime: "10:00 am" }]);
+    }
+  }, []);
+
   const addNewTimeSlot = () => {
     if (timeSlots.length < 3) {
-      setTimeSlots([...timeSlots, { date: "", startTime: "", endTime: "" }]);
+      setTimeSlots([...timeSlots, { date: "", startTime: "9:00 am", endTime: "10:00 am" }]);
     }
   };
 
@@ -43,6 +50,12 @@ const ProposeTime = () => {
     });
     
     navigate("/time-confirmation");
+  };
+
+  const hasValidTimeSlots = () => {
+    return timeSlots.some(slot => 
+      slot.date && slot.startTime && slot.endTime
+    );
   };
 
   if (!currentUser) {
@@ -70,24 +83,21 @@ const ProposeTime = () => {
         {timeSlots.length < 3 && (
           <button
             onClick={addNewTimeSlot}
-            className="action-button bg-white text-purple-DEFAULT border-2 border-purple-DEFAULT hover:bg-purple-light"
+            className="action-button bg-white text-purple-500 border-2 border-purple-500 hover:bg-purple-50 flex items-center justify-center"
           >
-            Add another time
+            <Plus size={18} className="mr-2" />
+            Add another time option
           </button>
         )}
 
-        {timeSlots.length > 0 && (
-          <button
-            onClick={handleSendToFriends}
-            className="action-button mt-8"
-            disabled={!timeSlots.some(slot => 
-              slot.date && slot.startTime && slot.endTime
-            )}
-          >
-            Send to friends
-            <ArrowRight className="ml-2" size={20} />
-          </button>
-        )}
+        <button
+          onClick={handleSendToFriends}
+          className="action-button mt-8"
+          disabled={!hasValidTimeSlots()}
+        >
+          Send to friends
+          <ArrowRight className="ml-2" size={20} />
+        </button>
       </div>
     </div>
   );

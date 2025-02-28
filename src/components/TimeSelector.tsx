@@ -78,30 +78,48 @@ const TimeSelector = ({ time, onTimeChange }: TimeSelectorProps) => {
   }, [hour, minute, period]);
 
   return (
-    <div className="time-input">
-      <button 
-        onClick={incrementHour}
-        className="time-selector-arrow"
-        aria-label="Increment hour"
-      >
-        <ArrowUp size={16} />
-      </button>
-      <div className="flex items-center">
-        <div className="time-selector w-12 text-center font-medium">{hour}:{minute.toString().padStart(2, '0')}</div>
-        <div 
-          className="time-selector w-8 text-center text-sm cursor-pointer"
-          onClick={togglePeriod}
+    <div className="time-input flex flex-col items-center">
+      <div className="flex flex-col items-center">
+        <button 
+          onClick={incrementHour}
+          className="time-selector-arrow"
+          aria-label="Increment hour"
         >
-          {period}
-        </div>
+          <ArrowUp size={16} />
+        </button>
+        <div className="time-selector w-12 text-center font-medium">{hour}</div>
+        <button 
+          onClick={decrementHour}
+          className="time-selector-arrow"
+          aria-label="Decrement hour"
+        >
+          <ArrowDown size={16} />
+        </button>
       </div>
-      <button 
-        onClick={decrementHour}
-        className="time-selector-arrow"
-        aria-label="Decrement hour"
+      <div className="text-center font-medium">:</div>
+      <div className="flex flex-col items-center">
+        <button 
+          onClick={incrementMinute}
+          className="time-selector-arrow"
+          aria-label="Increment minute"
+        >
+          <ArrowUp size={16} />
+        </button>
+        <div className="time-selector w-12 text-center font-medium">{minute.toString().padStart(2, '0')}</div>
+        <button 
+          onClick={decrementMinute}
+          className="time-selector-arrow"
+          aria-label="Decrement minute"
+        >
+          <ArrowDown size={16} />
+        </button>
+      </div>
+      <div
+        onClick={togglePeriod}
+        className="time-selector w-10 text-center text-sm cursor-pointer font-medium"
       >
-        <ArrowDown size={16} />
-      </button>
+        {period}
+      </div>
     </div>
   );
 };
