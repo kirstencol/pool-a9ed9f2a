@@ -20,9 +20,9 @@ const ProposeTime = () => {
   useEffect(() => {
     if (timeSlots.length === 0) {
       setTimeSlots([
-        { date: "", startTime: "9:00 am", endTime: "10:00 am" },
-        { date: "", startTime: "2:00 pm", endTime: "3:00 pm" },
-        { date: "", startTime: "4:00 pm", endTime: "5:00 pm" }
+        { date: "", startTime: "10:00 am", endTime: "10:00 pm" },
+        { date: "", startTime: "10:00 am", endTime: "10:00 pm" },
+        { date: "", startTime: "10:00 am", endTime: "10:00 pm" }
       ]);
     }
   }, []);

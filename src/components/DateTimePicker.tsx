@@ -19,8 +19,8 @@ interface DateTimePickerProps {
 
 const DateTimePicker = ({
   date,
-  startTime = "9:00 am",
-  endTime = "10:00 am",
+  startTime = "10:00 am",
+  endTime = "10:00 pm",
   onDateChange,
   onStartTimeChange,
   onEndTimeChange
@@ -64,21 +64,16 @@ const DateTimePicker = ({
         </Popover>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Time Range
-        </label>
-        <div className="flex items-center space-x-4">
-          <TimeSelector 
-            time={startTime} 
-            onTimeChange={onStartTimeChange} 
-          />
-          <span className="text-gray-400">to</span>
-          <TimeSelector 
-            time={endTime} 
-            onTimeChange={onEndTimeChange} 
-          />
-        </div>
+      <div className="flex items-center space-x-4">
+        <TimeSelector 
+          time={startTime} 
+          onTimeChange={onStartTimeChange} 
+        />
+        <span className="text-gray-400">to</span>
+        <TimeSelector 
+          time={endTime} 
+          onTimeChange={onEndTimeChange} 
+        />
       </div>
     </div>
   );
