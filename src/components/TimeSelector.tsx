@@ -77,69 +77,6 @@ const TimeSelector = ({
     }
   }, [isEndTime, startTime]);
 
-  // Filter minute options for end time to prevent invalid selections
-  const getAvailableMinuteOptions = () => {
-    if (!isEndTime || !startTime || startTime === "--" || hour === "--") {
-      return minuteOptions;
-    }
-
-    const match = startTime.match(/(\d+):(\d+)\s?(am|pm)/i);
-    if (!match) return minuteOptions;
-
-    const startHour = parseInt(match[1]);
-    const startMinute = parseInt(match[2]);
-    const startPeriod = match[3].toLowerCase();
-
-    // If end time is PM and start time is AM, all minutes are valid
-    if (period === "pm" && startPeriod === "am") {
-      return minuteOptions;
-    }
-
-    // If same hour and same period, filter minutes
-    if (period === startPeriod && hour === match[1]) {
-      return minuteOptions.filter(option => parseInt(option) > startMinute);
-    }
-
-    // For all other cases, all minute options are valid
-    return minuteOptions;
-  };
-
-  // Determine if a given hour is valid for selection
-  const isHourValid = (hourOption: string) => {
-    if (hourOption === "--") return true;
-    if (!isEndTime || !startTime || startTime === "--") return true;
-
-    const match = startTime.match(/(\d+):(\d+)\s?(am|pm)/i);
-    if (!match) return true;
-
-    const startHour = match[1];
-    const startPeriod = match[3].toLowerCase();
-
-    // If periods are different
-    if (period !== startPeriod) {
-      // End time PM, start time AM - all hours valid
-      if (period === "pm" && startPeriod === "am") {
-        return true;
-      }
-      // End time AM, start time PM - night crossing, only valid if we're dealing with the next day
-      if (period === "am" && startPeriod === "pm") {
-        // This would require date comparison which we're not implementing here
-        return true;
-      }
-    }
-
-    // Same period, need to compare hours
-    if (period === startPeriod) {
-      const hourVal = hourOption === "12" ? 0 : parseInt(hourOption);
-      const startHourVal = startHour === "12" ? 0 : parseInt(startHour);
-      
-      // If hours are different, must be later
-      return hourVal > startHourVal;
-    }
-
-    return true;
-  };
-
   return (
     <div className="time-selector-container flex space-x-1">
       {/* Hour selector */}
@@ -147,7 +84,7 @@ const TimeSelector = ({
         value={hour} 
         onValueChange={(value) => setHour(value)}
       >
-        <SelectTrigger className="w-16 border border-gray-300">
+        <SelectTrigger className="w-16 border border-gray-300 rounded-md">
           <SelectValue placeholder="--" />
         </SelectTrigger>
         <SelectContent>
@@ -156,7 +93,6 @@ const TimeSelector = ({
               key={h} 
               value={h} 
               className="border-b border-gray-200"
-              disabled={isEndTime && !isHourValid(h)}
             >
               {h}
             </SelectItem>
@@ -170,11 +106,11 @@ const TimeSelector = ({
         onValueChange={(value) => setMinute(value)}
         disabled={hour === "--"}
       >
-        <SelectTrigger className="w-16 border border-gray-300">
+        <SelectTrigger className="w-16 border border-gray-300 rounded-md">
           <SelectValue placeholder="00" />
         </SelectTrigger>
         <SelectContent>
-          {getAvailableMinuteOptions().map((m) => (
+          {minuteOptions.map((m) => (
             <SelectItem key={m} value={m} className="border-b border-gray-200">
               {m}
             </SelectItem>
@@ -188,7 +124,7 @@ const TimeSelector = ({
         onValueChange={(value) => setPeriod(value)}
         disabled={hour === "--"}
       >
-        <SelectTrigger className="w-16 border border-gray-300">
+        <SelectTrigger className="w-16 border border-gray-300 rounded-md">
           <SelectValue placeholder={period} />
         </SelectTrigger>
         <SelectContent>

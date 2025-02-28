@@ -10,16 +10,20 @@ interface DateTimePickerProps {
   onDateChange: (date: string) => void;
   onStartTimeChange: (time: string) => void;
   onEndTimeChange: (time: string) => void;
+  startTime?: string;
+  endTime?: string;
+  isValid?: boolean;
 }
 
 const DateTimePicker = ({ 
   onDateChange, 
   onStartTimeChange, 
-  onEndTimeChange 
+  onEndTimeChange,
+  startTime = "--",
+  endTime = "--",
+  isValid = true
 }: DateTimePickerProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [startTime, setStartTime] = useState("--");
-  const [endTime, setEndTime] = useState("--");
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
@@ -32,17 +36,15 @@ const DateTimePicker = ({
   };
 
   const handleStartTimeChange = (newTime: string) => {
-    setStartTime(newTime);
     onStartTimeChange(newTime);
   };
 
   const handleEndTimeChange = (newTime: string) => {
-    setEndTime(newTime);
     onEndTimeChange(newTime);
   };
 
   return (
-    <div className="mb-6 animate-fade-in">
+    <div className="mb-2 animate-fade-in">
       <div className="mb-4">
         <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
           <PopoverTrigger asChild>
@@ -63,7 +65,7 @@ const DateTimePicker = ({
           </PopoverContent>
         </Popover>
       </div>
-      <div className="flex items-center">
+      <div className="flex items-center border border-gray-200 rounded-md p-2">
         <Clock className="mr-2 text-gray-500" size={20} />
         <div className="flex items-center justify-between w-full">
           <TimeSelector 

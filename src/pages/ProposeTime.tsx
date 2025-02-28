@@ -14,35 +14,82 @@ const ProposeTime = () => {
     date: string;
     startTime: string;
     endTime: string;
+    isValid: boolean;
   }[]>([]);
 
   // Initialize with three time slots
   useEffect(() => {
     if (timeSlots.length === 0) {
       setTimeSlots([
-        { date: "", startTime: "--", endTime: "--" },
-        { date: "", startTime: "--", endTime: "--" },
-        { date: "", startTime: "--", endTime: "--" }
+        { date: "", startTime: "--", endTime: "--", isValid: true },
+        { date: "", startTime: "--", endTime: "--", isValid: true },
+        { date: "", startTime: "--", endTime: "--", isValid: true }
       ]);
     }
   }, []);
 
   const addNewTimeSlot = () => {
     if (timeSlots.length < 3) {
-      setTimeSlots([...timeSlots, { date: "", startTime: "--", endTime: "--" }]);
+      setTimeSlots([...timeSlots, { date: "", startTime: "--", endTime: "--", isValid: true }]);
     }
   };
 
-  const updateTimeSlot = (index: number, field: keyof TimeSlot, value: string) => {
+  const validateTimeRange = (startTime: string, endTime: string): boolean => {
+    if (startTime === "--" || endTime === "--") {
+      return true;
+    }
+
+    // Parse times
+    const parseTime = (timeStr: string) => {
+      const match = timeStr.match(/(\d+):(\d+)\s?(am|pm)/i);
+      if (!match) return null;
+
+      let hour = parseInt(match[1]);
+      const minute = parseInt(match[2]);
+      const period = match[3].toLowerCase();
+
+      // Convert to 24-hour format
+      if (period === "pm" && hour < 12) hour += 12;
+      if (period === "am" && hour === 12) hour = 0;
+
+      return { hour, minute };
+    };
+
+    const start = parseTime(startTime);
+    const end = parseTime(endTime);
+
+    if (!start || !end) return true;
+
+    // Compare times
+    if (start.hour > end.hour || (start.hour === end.hour && start.minute >= end.minute)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const updateTimeSlot = (index: number, field: keyof Omit<TimeSlot, "id" | "responses">, value: string) => {
     const updatedSlots = [...timeSlots];
-    updatedSlots[index] = { ...updatedSlots[index], [field]: value };
+    updatedSlots[index] = { 
+      ...updatedSlots[index], 
+      [field]: value 
+    };
+    
+    // Validate the time range whenever start or end time changes
+    if (field === "startTime" || field === "endTime") {
+      updatedSlots[index].isValid = validateTimeRange(
+        field === "startTime" ? value : updatedSlots[index].startTime,
+        field === "endTime" ? value : updatedSlots[index].endTime
+      );
+    }
+    
     setTimeSlots(updatedSlots);
   };
 
   const handleSendToFriends = () => {
-    // Validate and add time slots
+    // Only add valid time slots
     timeSlots.forEach(slot => {
-      if (slot.date && slot.startTime !== "--" && slot.endTime !== "--") {
+      if (slot.date && slot.startTime !== "--" && slot.endTime !== "--" && slot.isValid) {
         addTimeSlot({
           id: crypto.randomUUID(),
           date: slot.date,
@@ -58,7 +105,7 @@ const ProposeTime = () => {
 
   const hasValidTimeSlots = () => {
     return timeSlots.some(slot => 
-      slot.date && slot.startTime !== "--" && slot.endTime !== "--"
+      slot.date && slot.startTime !== "--" && slot.endTime !== "--" && slot.isValid
     );
   };
 
@@ -76,12 +123,23 @@ const ProposeTime = () => {
 
       <div className="space-y-8">
         {timeSlots.map((slot, index) => (
-          <div key={index} className="border border-gray-200 rounded-xl p-4">
+          <div 
+            key={index} 
+            className={`border ${!slot.isValid ? 'border-red-500' : 'border-gray-200'} rounded-xl p-4`}
+          >
             <DateTimePicker
               onDateChange={(date) => updateTimeSlot(index, "date", date)}
               onStartTimeChange={(time) => updateTimeSlot(index, "startTime", time)}
               onEndTimeChange={(time) => updateTimeSlot(index, "endTime", time)}
+              startTime={slot.startTime}
+              endTime={slot.endTime}
+              isValid={slot.isValid}
             />
+            {!slot.isValid && (
+              <div className="text-red-500 text-sm mt-2">
+                End time must be later than start time
+              </div>
+            )}
           </div>
         ))}
 
