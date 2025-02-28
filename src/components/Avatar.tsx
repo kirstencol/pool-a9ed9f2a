@@ -23,9 +23,10 @@ const Avatar = ({ initial, size = "md", className }: AvatarProps) => {
     if (formattedLetter === 'S') return 'bg-green-300'; // Light lime green
     
     // For other initials, use a deterministic approach with our three colors
+    // Modified to make sure we get more variation
     const charCode = letter.charCodeAt(0);
-    if (charCode % 3 === 0) return 'bg-purple-300'; // Light purple
-    if (charCode % 3 === 1) return 'bg-green-300';  // Light lime green
+    if (charCode % 4 === 0) return 'bg-purple-300'; // Light purple
+    if (charCode % 4 === 1 || charCode % 4 === 3) return 'bg-green-300';  // Light lime green
     return 'bg-purple-700'; // Deep purple
   };
 
