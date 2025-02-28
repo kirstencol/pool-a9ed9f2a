@@ -176,7 +176,7 @@ const ProposeTime = () => {
 
         <button
           onClick={handleSendToFriends}
-          className={`action-button mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300 cursor-not-allowed' : 'bg-purple-500 hover:bg-purple-600'}`}
+          className={`action-button mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300 cursor-not-allowed' : 'bg-purple hover:bg-purple/90'}`}
           disabled={!hasValidTimeSlots()}
         >
           <ArrowRight size={20} />

@@ -17,7 +17,7 @@ const Avatar = ({ initial, size = "md", className, position }: AvatarProps) => {
 
   const getAvatarClass = (letter: string, position?: string) => {
     // If position is provided, use that to determine color
-    if (position === "first") return 'bg-green-300'; // Light lime green for Friend A
+    if (position === "first") return 'bg-lime'; // Use lime green for Friend A
     if (position === "second") return 'bg-purple-700'; // Deep purple for Friend B
     if (position === "third") return 'bg-purple-300'; // Light purple for Friend C
     
@@ -26,11 +26,11 @@ const Avatar = ({ initial, size = "md", className, position }: AvatarProps) => {
     
     if (formattedLetter === 'A') return 'bg-purple-300'; // Light purple
     if (formattedLetter === 'J') return 'bg-purple-700'; // Deep purple
-    if (formattedLetter === 'S') return 'bg-green-300'; // Light lime green
+    if (formattedLetter === 'S') return 'bg-lime'; // Lime green
     
     const charCode = letter.charCodeAt(0);
     if (charCode % 4 === 0) return 'bg-purple-300'; // Light purple
-    if (charCode % 4 === 1 || charCode % 4 === 3) return 'bg-green-300';  // Light lime green
+    if (charCode % 4 === 1 || charCode % 4 === 3) return 'bg-lime';  // Lime green
     return 'bg-purple-700'; // Deep purple
   };
 
