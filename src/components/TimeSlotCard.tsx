@@ -12,6 +12,7 @@ interface TimeSlotCardProps {
   onCannotMakeIt?: () => void;
   cannotMakeItText?: string;
   creatorAvailable?: boolean;
+  creatorName?: string;
   className?: string;
   onClick?: () => void;
 }
@@ -24,6 +25,7 @@ const TimeSlotCard = ({
   onCannotMakeIt,
   cannotMakeItText = "I can't make it",
   creatorAvailable = true,
+  creatorName = "Alex",
   className,
   onClick
 }: TimeSlotCardProps) => {
@@ -74,7 +76,7 @@ const TimeSlotCard = ({
         <div className="font-medium">{formatDate(timeSlot.date)}</div>
         {creatorAvailable && (
           <div className="text-sm text-gray-600">
-            {`Alex is free ${timeSlot.startTime} - ${timeSlot.endTime}`}
+            {`${creatorName} is free ${timeSlot.startTime} - ${timeSlot.endTime}`}
           </div>
         )}
       </div>

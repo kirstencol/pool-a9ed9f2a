@@ -38,11 +38,6 @@ const TimeConfirmation = () => {
     setTimeout(() => setCopied(false), 3000);
   };
 
-  // Create a string of participant names for the share message
-  const participantNames = participants.length > 0 
-    ? participants.map(p => p.name).join(" & ")
-    : "your friends";
-
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
       <div className="flex items-center mb-8">
@@ -57,7 +52,12 @@ const TimeConfirmation = () => {
         <h2 className="font-medium mb-4">You're free:</h2>
         <div className="space-y-4">
           {timeSlots.map((timeSlot) => (
-            <TimeSlotCard key={timeSlot.id} timeSlot={timeSlot} creatorAvailable />
+            <TimeSlotCard 
+              key={timeSlot.id} 
+              timeSlot={timeSlot} 
+              creatorAvailable 
+              creatorName={currentUser.name} 
+            />
           ))}
         </div>
       </div>
@@ -66,7 +66,7 @@ const TimeConfirmation = () => {
         onClick={copyLink}
         className="action-button"
       >
-        Copy link to send to {participantNames}
+        Copy link to send to friends
       </button>
     </div>
   );
