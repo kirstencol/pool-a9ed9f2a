@@ -63,57 +63,19 @@ const TimeSelector = ({
     onTimeChange(newTime);
   }, [hour, minute, period, onTimeChange]);
 
-  // Handle period change from start time to automatically update end time
+  // Handle period change from start time to automatically update end time period
   useEffect(() => {
     if (isEndTime && startTime && startTime !== "--") {
       const match = startTime.match(/(\d+):(\d+)\s?(am|pm)/i);
       if (match) {
         const startPeriod = match[3].toLowerCase();
-        // Auto-update end time period to match start time period
-        setPeriod(startPeriod);
+        // Only auto-update end time period to PM if start time is PM
+        if (startPeriod === "pm") {
+          setPeriod("pm");
+        }
       }
     }
   }, [isEndTime, startTime]);
-
-  // Filter hour options for end time to prevent invalid selections
-  const getAvailableHourOptions = () => {
-    if (!isEndTime || !startTime || startTime === "--") {
-      return hourOptions;
-    }
-
-    const match = startTime.match(/(\d+):(\d+)\s?(am|pm)/i);
-    if (!match) return hourOptions;
-
-    const startHour = parseInt(match[1]);
-    const startMinute = parseInt(match[2]);
-    const startPeriod = match[3].toLowerCase();
-
-    // If end time period is different from start time period
-    if (period !== startPeriod) {
-      // If end time is PM and start time is AM, all options are valid
-      if (period === "pm" && startPeriod === "am") {
-        return hourOptions;
-      }
-      // If end time is AM and start time is PM, no valid options (night crossing)
-      if (period === "am" && startPeriod === "pm") {
-        return ["--"]; // Only allow the placeholder
-      }
-    }
-
-    // Same period (both AM or both PM)
-    if (period === startPeriod) {
-      return hourOptions.filter(option => {
-        if (option === "--") return true;
-        
-        const hourVal = option === "12" ? 0 : parseInt(option);
-        const startHourVal = startHour === 12 ? 0 : startHour;
-        
-        return hourVal > startHourVal || (hourVal === startHourVal && getAvailableMinuteOptions().includes(minute));
-      });
-    }
-
-    return hourOptions;
-  };
 
   // Filter minute options for end time to prevent invalid selections
   const getAvailableMinuteOptions = () => {
@@ -128,23 +90,54 @@ const TimeSelector = ({
     const startMinute = parseInt(match[2]);
     const startPeriod = match[3].toLowerCase();
 
-    // If periods are different, all minute options are valid
-    if (period !== startPeriod) {
+    // If end time is PM and start time is AM, all minutes are valid
+    if (period === "pm" && startPeriod === "am") {
       return minuteOptions;
     }
 
-    // If same hour in same period, filter minutes
-    const hourVal = hour === "12" ? 0 : parseInt(hour);
-    const startHourVal = startHour === 12 ? 0 : startHour;
-
-    if (hourVal === startHourVal) {
-      return minuteOptions.filter(option => {
-        return parseInt(option) > startMinute;
-      });
+    // If same hour and same period, filter minutes
+    if (period === startPeriod && hour === match[1]) {
+      return minuteOptions.filter(option => parseInt(option) > startMinute);
     }
 
-    // If different hours in same period, all minute options are valid
+    // For all other cases, all minute options are valid
     return minuteOptions;
+  };
+
+  // Determine if a given hour is valid for selection
+  const isHourValid = (hourOption: string) => {
+    if (hourOption === "--") return true;
+    if (!isEndTime || !startTime || startTime === "--") return true;
+
+    const match = startTime.match(/(\d+):(\d+)\s?(am|pm)/i);
+    if (!match) return true;
+
+    const startHour = match[1];
+    const startPeriod = match[3].toLowerCase();
+
+    // If periods are different
+    if (period !== startPeriod) {
+      // End time PM, start time AM - all hours valid
+      if (period === "pm" && startPeriod === "am") {
+        return true;
+      }
+      // End time AM, start time PM - night crossing, only valid if we're dealing with the next day
+      if (period === "am" && startPeriod === "pm") {
+        // This would require date comparison which we're not implementing here
+        return true;
+      }
+    }
+
+    // Same period, need to compare hours
+    if (period === startPeriod) {
+      const hourVal = hourOption === "12" ? 0 : parseInt(hourOption);
+      const startHourVal = startHour === "12" ? 0 : parseInt(startHour);
+      
+      // If hours are different, must be later
+      return hourVal > startHourVal;
+    }
+
+    return true;
   };
 
   return (
@@ -158,8 +151,13 @@ const TimeSelector = ({
           <SelectValue placeholder="--" />
         </SelectTrigger>
         <SelectContent>
-          {getAvailableHourOptions().map((h) => (
-            <SelectItem key={h} value={h} className="border-b border-gray-200">
+          {hourOptions.map((h) => (
+            <SelectItem 
+              key={h} 
+              value={h} 
+              className="border-b border-gray-200"
+              disabled={isEndTime && !isHourValid(h)}
+            >
               {h}
             </SelectItem>
           ))}

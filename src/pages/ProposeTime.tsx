@@ -76,12 +76,13 @@ const ProposeTime = () => {
 
       <div className="space-y-8">
         {timeSlots.map((slot, index) => (
-          <DateTimePicker
-            key={index}
-            onDateChange={(date) => updateTimeSlot(index, "date", date)}
-            onStartTimeChange={(time) => updateTimeSlot(index, "startTime", time)}
-            onEndTimeChange={(time) => updateTimeSlot(index, "endTime", time)}
-          />
+          <div key={index} className="border border-gray-200 rounded-xl p-4">
+            <DateTimePicker
+              onDateChange={(date) => updateTimeSlot(index, "date", date)}
+              onStartTimeChange={(time) => updateTimeSlot(index, "startTime", time)}
+              onEndTimeChange={(time) => updateTimeSlot(index, "endTime", time)}
+            />
+          </div>
         ))}
 
         {timeSlots.length < 3 && (
