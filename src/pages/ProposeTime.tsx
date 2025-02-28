@@ -127,7 +127,7 @@ const ProposeTime = () => {
         {timeSlots.map((slot, index) => (
           <div 
             key={index} 
-            className={`border ${!slot.isValid ? 'border-red-500' : 'border-gray-200'} rounded-xl p-4`}
+            className={`p-4 ${!slot.isValid ? 'border border-red-500 rounded-xl' : ''}`}
           >
             <DateTimePicker
               onDateChange={(date) => updateTimeSlot(index, "date", date)}

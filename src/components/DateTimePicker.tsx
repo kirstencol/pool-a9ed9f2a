@@ -65,14 +65,14 @@ const DateTimePicker = ({
           </PopoverContent>
         </Popover>
       </div>
-      <div className={`flex items-center border ${!isValid ? 'border-red-500' : 'border-gray-200'} rounded-md p-2`}>
-        <Clock className="mr-2 text-gray-500" size={20} />
+      <div className={`flex items-center ${!isValid ? 'text-red-500' : 'text-gray-700'}`}>
+        <Clock className="mr-2" size={20} />
         <div className="flex items-center justify-between w-full">
           <TimeSelector 
             time={startTime} 
             onTimeChange={handleStartTimeChange}
           />
-          <span className="text-gray-500 px-4">to</span>
+          <span className="px-4">to</span>
           <TimeSelector 
             time={endTime} 
             onTimeChange={handleEndTimeChange}

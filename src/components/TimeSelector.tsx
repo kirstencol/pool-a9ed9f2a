@@ -84,15 +84,14 @@ const TimeSelector = ({
         value={hour} 
         onValueChange={(value) => setHour(value)}
       >
-        <SelectTrigger className="w-16 border border-gray-300 rounded-md">
+        <SelectTrigger className="w-16">
           <SelectValue placeholder="--" />
         </SelectTrigger>
         <SelectContent>
           {hourOptions.map((h) => (
             <SelectItem 
               key={h} 
-              value={h} 
-              className="border-b border-gray-200"
+              value={h}
             >
               {h}
             </SelectItem>
@@ -106,12 +105,12 @@ const TimeSelector = ({
         onValueChange={(value) => setMinute(value)}
         disabled={hour === "--"}
       >
-        <SelectTrigger className="w-16 border border-gray-300 rounded-md">
+        <SelectTrigger className="w-16">
           <SelectValue placeholder="00" />
         </SelectTrigger>
         <SelectContent>
           {minuteOptions.map((m) => (
-            <SelectItem key={m} value={m} className="border-b border-gray-200">
+            <SelectItem key={m} value={m}>
               {m}
             </SelectItem>
           ))}
@@ -124,12 +123,12 @@ const TimeSelector = ({
         onValueChange={(value) => setPeriod(value)}
         disabled={hour === "--"}
       >
-        <SelectTrigger className="w-16 border border-gray-300 rounded-md">
+        <SelectTrigger className="w-16">
           <SelectValue placeholder="--" />
         </SelectTrigger>
         <SelectContent>
           {periods.map((p) => (
-            <SelectItem key={p} value={p} className="border-b border-gray-200">
+            <SelectItem key={p} value={p}>
               {p}
             </SelectItem>
           ))}
