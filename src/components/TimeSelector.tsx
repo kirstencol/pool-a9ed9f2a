@@ -52,11 +52,11 @@ const TimeSelector = ({ time, onTimeChange }: TimeSelectorProps) => {
   }, [hour, minute, period]);
 
   // Helper functions for wheel scrolling
-  const handleWheelScroll = (
+  const handleWheelScroll = <T extends number | string>(
     e: React.WheelEvent | TouchEvent,
-    values: number[] | string[],
-    currentValue: number | string,
-    setter: (value: any) => void
+    values: T[],
+    currentValue: T,
+    setter: (value: T) => void
   ) => {
     e.preventDefault();
     const delta = 'deltaY' in e ? e.deltaY : getYDelta(e);
