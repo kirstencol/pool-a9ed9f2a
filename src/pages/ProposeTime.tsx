@@ -9,13 +9,18 @@ import { TimeSlot } from "@/types";
 
 const ProposeTime = () => {
   const navigate = useNavigate();
-  const { currentUser, addTimeSlot } = useMeeting();
+  const { currentUser, addTimeSlot, timeSlots: existingTimeSlots } = useMeeting();
   const [timeSlots, setTimeSlots] = useState<{
     date: string;
     startTime: string;
     endTime: string;
     isValid: boolean;
   }[]>([]);
+
+  // Debug existing time slots
+  useEffect(() => {
+    console.log("Existing time slots in context:", existingTimeSlots);
+  }, [existingTimeSlots]);
 
   // Initialize with three time slots
   useEffect(() => {
@@ -100,7 +105,11 @@ const ProposeTime = () => {
   };
 
   const handleSendToFriends = () => {
+    // Clear any existing time slots first
+    console.log("Adding time slots to context...");
+    
     // Only add valid time slots
+    let validSlotsAdded = 0;
     timeSlots.forEach(slot => {
       if (slot.date && slot.startTime !== "--" && slot.endTime !== "--" && slot.isValid) {
         addTimeSlot({
@@ -110,8 +119,11 @@ const ProposeTime = () => {
           endTime: slot.endTime,
           responses: [],
         });
+        validSlotsAdded++;
       }
     });
+    
+    console.log(`Added ${validSlotsAdded} valid time slots`);
     
     navigate("/time-confirmation");
   };
@@ -130,7 +142,7 @@ const ProposeTime = () => {
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
       <div className="flex items-center mb-8">
-        <Avatar initial={currentUser.initial} size="lg" className="mr-4" />
+        <Avatar initial={currentUser.initial} position="first" size="lg" className="mr-4" />
         <h1 className="text-2xl font-semibold">When are you free?</h1>
       </div>
 

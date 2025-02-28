@@ -22,6 +22,7 @@ interface MeetingContextType {
   meetingNotes: string;
   setMeetingNotes: (notes: string) => void;
   clearMeetingData: () => void;
+  clearTimeSlots: () => void;
   getMeetingData: () => Partial<Meeting>;
 }
 
@@ -50,11 +51,16 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addTimeSlot = (timeSlot: TimeSlot) => {
-    setTimeSlots([...timeSlots, { ...timeSlot, id: crypto.randomUUID() }]);
+    console.log("Adding time slot:", timeSlot);
+    setTimeSlots(prev => [...prev, { ...timeSlot, id: timeSlot.id || crypto.randomUUID() }]);
   };
 
   const removeTimeSlot = (id: string) => {
     setTimeSlots(timeSlots.filter(ts => ts.id !== id));
+  };
+
+  const clearTimeSlots = () => {
+    setTimeSlots([]);
   };
 
   const updateTimeSlot = (id: string, updates: Partial<TimeSlot>) => {
@@ -116,6 +122,7 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
       meetingNotes,
       setMeetingNotes,
       clearMeetingData,
+      clearTimeSlots,
       getMeetingData
     }}>
       {children}

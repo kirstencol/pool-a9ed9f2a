@@ -17,7 +17,10 @@ const TimeConfirmation = () => {
     if (!currentUser || !timeSlots.length) {
       navigate("/");
     }
-  }, [currentUser, timeSlots, navigate]);
+    // For debugging
+    console.log("Current time slots:", timeSlots);
+    console.log("Current participants:", participants);
+  }, [currentUser, timeSlots, navigate, participants]);
 
   if (!currentUser) {
     return null;
