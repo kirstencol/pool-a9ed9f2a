@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { useMeeting } from "@/context/MeetingContext";
 import Avatar from "@/components/Avatar";
 import DateTimePicker from "@/components/DateTimePicker";
@@ -16,16 +16,18 @@ const ProposeTime = () => {
     endTime: string;
   }[]>([]);
 
-  // Initialize with three time slots
+  // Initialize with one time slot
   useEffect(() => {
     if (timeSlots.length === 0) {
-      setTimeSlots([
-        { date: "", startTime: "10:00 am", endTime: "10:00 pm" },
-        { date: "", startTime: "10:00 am", endTime: "10:00 pm" },
-        { date: "", startTime: "10:00 am", endTime: "10:00 pm" }
-      ]);
+      setTimeSlots([{ date: "", startTime: "9:00 am", endTime: "10:00 am" }]);
     }
   }, []);
+
+  const addNewTimeSlot = () => {
+    if (timeSlots.length < 3) {
+      setTimeSlots([...timeSlots, { date: "", startTime: "9:00 am", endTime: "10:00 am" }]);
+    }
+  };
 
   const updateTimeSlot = (index: number, field: keyof TimeSlot, value: string) => {
     const updatedSlots = [...timeSlots];
@@ -72,14 +74,21 @@ const ProposeTime = () => {
         {timeSlots.map((slot, index) => (
           <DateTimePicker
             key={index}
-            date={slot.date}
-            startTime={slot.startTime}
-            endTime={slot.endTime}
             onDateChange={(date) => updateTimeSlot(index, "date", date)}
             onStartTimeChange={(time) => updateTimeSlot(index, "startTime", time)}
             onEndTimeChange={(time) => updateTimeSlot(index, "endTime", time)}
           />
         ))}
+
+        {timeSlots.length < 3 && (
+          <button
+            onClick={addNewTimeSlot}
+            className="action-button bg-white text-purple-500 border-2 border-purple-500 hover:bg-purple-50 flex items-center justify-center"
+          >
+            <Plus size={18} className="mr-2" />
+            Add another time option
+          </button>
+        )}
 
         <button
           onClick={handleSendToFriends}
