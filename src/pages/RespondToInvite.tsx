@@ -33,54 +33,52 @@ const RespondToInvite = () => {
     // Clear existing time slots first
     clearTimeSlots();
     
-    // Define our demo time slots
-    const demoTimeSlots = [
-      {
-        id: "1",
-        date: "March 1",
-        startTime: "8:00 AM",
-        endTime: "1:30 PM",
-        responses: []
-      },
-      {
-        id: "2",
-        date: "March 2",
-        startTime: "7:00 AM",
-        endTime: "10:00 AM",
-        responses: []
-      },
-      {
-        id: "3",
-        date: "March 3",
-        startTime: "9:00 AM",
-        endTime: "9:00 PM",
-        responses: []
+    const timer = setTimeout(() => {
+      // Always generate demo time slots regardless of inviteId
+      const demoTimeSlots = [
+        {
+          id: "1",
+          date: "March 1",
+          startTime: "8:00 AM",
+          endTime: "1:30 PM",
+          responses: []
+        },
+        {
+          id: "2",
+          date: "March 2",
+          startTime: "7:00 AM",
+          endTime: "10:00 AM",
+          responses: []
+        },
+        {
+          id: "3",
+          date: "March 3",
+          startTime: "9:00 AM",
+          endTime: "9:00 PM",
+          responses: []
+        }
+      ];
+      
+      // Set default names
+      if (inviteId && inviteId.toLowerCase() === "burt_demo") {
+        setCreatorName("Abby");
+        setResponderName("Burt");
+      } else {
+        // For any other invite ID, use generic names based on the ID
+        setCreatorName(inviteId ? `User-${inviteId.substring(0, 4)}` : "Abby");
+        setResponderName("Friend");
       }
-    ];
-    
-    // Set names based on inviteId
-    if (inviteId && inviteId.toLowerCase() === "burt_demo") {
-      setCreatorName("Abby");
-      setResponderName("Burt");
-    } else {
-      // For any other invite ID, use generic names
-      setCreatorName(inviteId ? `User-${inviteId.substring(0, 4)}` : "Abby");
-      setResponderName("Friend");
-    }
-    
-    // Always add the demo time slots immediately
-    demoTimeSlots.forEach(slot => {
-      addTimeSlot(slot);
-    });
-    
-    console.log("Added time slots immediately:", demoTimeSlots);
-    
-    // Set loading to false after a very short delay to ensure UI updates
-    setTimeout(() => {
+      
+      // Always add the time slots
+      demoTimeSlots.forEach(slot => {
+        addTimeSlot(slot);
+      });
+      
+      console.log("Added time slots:", demoTimeSlots);
       setIsLoading(false);
-      console.log("Loading set to false, timeSlots:", timeSlots);
-    }, 100);
+    }, 600);
     
+    return () => clearTimeout(timer);
   }, [inviteId, clearTimeSlots, addTimeSlot]);
 
   const handleSelectTimeSlot = (slot: TimeSlot, startTime: string, endTime: string) => {
