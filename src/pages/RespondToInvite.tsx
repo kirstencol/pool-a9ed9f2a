@@ -22,11 +22,11 @@ const RespondToInvite = () => {
   useEffect(() => {
     console.log("Loading invite data for ID:", inviteId);
     
-    // Clear existing time slots first
     clearTimeSlots();
     
     const timer = setTimeout(() => {
-      // Default time slots
+      setIsLoading(false);
+      
       const demoTimeSlots = [
         {
           id: "1",
@@ -51,29 +51,21 @@ const RespondToInvite = () => {
         }
       ];
       
-      // Special case for burt_demo
-      if (inviteId?.toLowerCase() === "burt_demo") {
+      // Load data for any invite link
+      if (inviteId === "burt_demo") {
         setCreatorName("Abby");
         setResponderName("Burt");
         console.log("Added Abby's time slots for Burt to respond to");
       } else {
-        // Generate names based on inviteId for any other invite
-        const creator = inviteId ? `${inviteId.charAt(0).toUpperCase()}${inviteId.slice(1, 4)}` : "Demo";
-        const responder = `Friend of ${creator}`;
-        
-        setCreatorName(creator);
-        setResponderName(responder);
-        console.log(`Added time slots for ${creator} and ${responder}`);
+        console.log("Using default data for invite ID:", inviteId);
       }
       
-      // Always add time slots for any invite ID
       demoTimeSlots.forEach(slot => {
         addTimeSlot(slot);
       });
       
       console.log("Added time slots:", demoTimeSlots);
-      setIsLoading(false);
-    }, 600);
+    }, 600); // Reduced loading time for better mobile experience
     
     return () => clearTimeout(timer);
   }, [inviteId, clearTimeSlots, addTimeSlot]);
