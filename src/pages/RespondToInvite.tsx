@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -50,6 +51,7 @@ const RespondToInvite = () => {
         }
       ];
       
+      // Load data for any invite link
       if (inviteId === "burt_demo") {
         setCreatorName("Abby");
         setResponderName("Burt");
@@ -63,7 +65,7 @@ const RespondToInvite = () => {
       });
       
       console.log("Added time slots:", demoTimeSlots);
-    }, 800);
+    }, 600); // Reduced loading time for better mobile experience
     
     return () => clearTimeout(timer);
   }, [inviteId, clearTimeSlots, addTimeSlot]);
@@ -134,7 +136,7 @@ const RespondToInvite = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
+      <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
         <p className="text-center">Loading invitation details...</p>
       </div>
     );
@@ -142,7 +144,7 @@ const RespondToInvite = () => {
 
   if (!timeSlots.length) {
     return (
-      <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
+      <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
         <div className="text-center">
           <h1 className="text-2xl font-semibold mb-4">Invalid Invitation</h1>
           <p className="text-gray-600 mb-6">This invitation link appears to be invalid or has expired.</p>
@@ -158,11 +160,11 @@ const RespondToInvite = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
-      <div className="flex items-center mb-8">
+    <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
+      <div className="flex items-center mb-6">
         <Avatar initial={creatorName.charAt(0)} position="first" size="lg" className="mr-4" />
         <div>
-          <h1 className="text-2xl font-semibold">You're invited!</h1>
+          <h1 className="text-xl font-semibold">You're invited!</h1>
           <p className="text-gray-600">{creatorName} wants to meet up.</p>
         </div>
       </div>
@@ -173,7 +175,7 @@ const RespondToInvite = () => {
           <h2 className="font-medium">When are you free, {responderName}?</h2>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {timeSlots.map((timeSlot) => (
             <TimeSlotCard 
               key={timeSlot.id} 

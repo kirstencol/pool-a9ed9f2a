@@ -1,0 +1,17 @@
+
+{
+  "name": "Pool Party Planner",
+  "short_name": "Pool",
+  "description": "A simple app to plan meetups with friends",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#D2E55F",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
