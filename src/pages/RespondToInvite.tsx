@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -52,7 +51,7 @@ const RespondToInvite = () => {
       ];
       
       // Load data for any invite link
-      if (inviteId === "burt_demo") {
+      if (inviteId === "burt_demo" || inviteId?.toLowerCase() === "burt_demo") {
         setCreatorName("Abby");
         setResponderName("Burt");
         console.log("Added Abby's time slots for Burt to respond to");
@@ -60,6 +59,7 @@ const RespondToInvite = () => {
         console.log("Using default data for invite ID:", inviteId);
       }
       
+      // Always add time slots regardless of inviteId
       demoTimeSlots.forEach(slot => {
         addTimeSlot(slot);
       });
