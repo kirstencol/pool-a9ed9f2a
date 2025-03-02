@@ -67,8 +67,8 @@ const TimeConfirmation = () => {
   }
 
   // Generate a real invite ID - in a real app, this would be stored in a database
-  // For demo purposes, we'll create a random ID based on the current timestamp
-  const inviteId = `inv_${Date.now().toString(36)}`;
+  // For demo purposes, we'll create a fixed ID to ensure demo works consistently
+  const inviteId = "demo_invite";
   const shareableLink = `${window.location.origin}/respond/${inviteId}`;
   
   // Create a direct link to Burt's response flow with Abby's data already populated
