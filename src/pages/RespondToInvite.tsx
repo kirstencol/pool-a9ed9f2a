@@ -21,6 +21,7 @@ const RespondToInvite = () => {
   } = useMeeting();
   
   const [isLoading, setIsLoading] = useState(true);
+  const [inviteError, setInviteError] = useState<'invalid' | 'expired' | null>(null);
   const [creatorName, setCreatorName] = useState("Abby");
   const [responderName, setResponderName] = useState("Burt");
   const [currentSelectedSlot, setCurrentSelectedSlot] = useState<TimeSlot | null>(null);
@@ -29,6 +30,10 @@ const RespondToInvite = () => {
 
   useEffect(() => {
     console.log("Loading invite data for ID:", inviteId);
+    
+    // Reset states
+    setIsLoading(true);
+    setInviteError(null);
     
     // Clear existing time slots first
     clearTimeSlots();
@@ -59,20 +64,32 @@ const RespondToInvite = () => {
         }
       ];
       
-      // Set default names
-      if (inviteId && inviteId.toLowerCase() === "burt_demo") {
+      // Special handling for different invite types
+      if (!inviteId) {
+        setInviteError('invalid');
+      } else if (inviteId.toLowerCase() === "burt_demo") {
         setCreatorName("Abby");
         setResponderName("Burt");
+        demoTimeSlots.forEach(slot => {
+          addTimeSlot(slot);
+        });
+      } else if (inviteId.toLowerCase() === "demo_invite") {
+        // For the main demo invite ID from TimeConfirmation page
+        setCreatorName("Abby");
+        setResponderName("Friend");
+        demoTimeSlots.forEach(slot => {
+          addTimeSlot(slot);
+        });
       } else {
         // For any other invite ID, use generic names based on the ID
-        setCreatorName(inviteId ? `User-${inviteId.substring(0, 4)}` : "Abby");
+        setCreatorName(`User-${inviteId.substring(0, 4)}`);
         setResponderName("Friend");
+        
+        // Add time slots for all valid invites
+        demoTimeSlots.forEach(slot => {
+          addTimeSlot(slot);
+        });
       }
-      
-      // Always add the time slots
-      demoTimeSlots.forEach(slot => {
-        addTimeSlot(slot);
-      });
       
       console.log("Added time slots:", demoTimeSlots);
       setIsLoading(false);
@@ -120,8 +137,12 @@ const RespondToInvite = () => {
     navigate("/");
   };
 
-  if (timeSlots.length === 0) {
-    return <InvalidInvitation />;
+  if (isLoading) {
+    return <InvalidInvitation reason="loading" />;
+  }
+
+  if (inviteError || timeSlots.length === 0) {
+    return <InvalidInvitation reason={inviteError || 'invalid'} />;
   }
 
   return (
