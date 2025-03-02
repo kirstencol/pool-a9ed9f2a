@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -21,11 +22,11 @@ const RespondToInvite = () => {
   useEffect(() => {
     console.log("Loading invite data for ID:", inviteId);
     
+    // Clear existing time slots first
     clearTimeSlots();
     
     const timer = setTimeout(() => {
-      setIsLoading(false);
-      
+      // Always create the demo time slots
       const demoTimeSlots = [
         {
           id: "1",
@@ -50,8 +51,10 @@ const RespondToInvite = () => {
         }
       ];
       
-      // Load data for any invite link
-      if (inviteId === "burt_demo" || inviteId?.toLowerCase() === "burt_demo") {
+      // Set the names based on inviteId
+      const lowerCaseInviteId = inviteId?.toLowerCase() || '';
+      
+      if (lowerCaseInviteId === "burt_demo") {
         setCreatorName("Abby");
         setResponderName("Burt");
         console.log("Added Abby's time slots for Burt to respond to");
@@ -59,13 +62,14 @@ const RespondToInvite = () => {
         console.log("Using default data for invite ID:", inviteId);
       }
       
-      // Always add time slots regardless of inviteId
+      // Always add time slots for demo purposes
       demoTimeSlots.forEach(slot => {
         addTimeSlot(slot);
       });
       
       console.log("Added time slots:", demoTimeSlots);
-    }, 600); // Reduced loading time for better mobile experience
+      setIsLoading(false);
+    }, 600);
     
     return () => clearTimeout(timer);
   }, [inviteId, clearTimeSlots, addTimeSlot]);

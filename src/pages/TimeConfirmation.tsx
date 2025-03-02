@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMeeting } from "@/context/MeetingContext";
@@ -66,12 +65,11 @@ const TimeConfirmation = () => {
     return null;
   }
 
-  // Generate a real invite ID - in a real app, this would be stored in a database
-  // For demo purposes, we'll create a random ID based on the current timestamp
-  const inviteId = `inv_${Date.now().toString(36)}`;
+  // For demo purposes, we'll use the hardcoded burt_demo ID to ensure it works
+  const inviteId = "burt_demo";
   const shareableLink = `${window.location.origin}/respond/${inviteId}`;
   
-  // Create a direct link to Burt's response flow with Abby's data already populated
+  // Direct link to Burt's demo
   const burtDirectLink = `${window.location.origin}/respond/burt_demo`;
 
   const copyLink = () => {
