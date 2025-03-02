@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Plus } from "lucide-react";
@@ -17,12 +16,10 @@ const ProposeTime = () => {
     isValid: boolean;
   }[]>([]);
 
-  // Debug existing time slots
   useEffect(() => {
     console.log("Existing time slots in context:", existingTimeSlots);
   }, [existingTimeSlots]);
 
-  // Initialize with three time slots
   useEffect(() => {
     if (timeSlots.length === 0) {
       setTimeSlots([
@@ -44,7 +41,6 @@ const ProposeTime = () => {
       return true;
     }
 
-    // Parse times
     const parseTime = (timeStr: string) => {
       const match = timeStr.match(/(\d+):(\d+)\s?(am|pm)/i);
       if (!match) return null;
@@ -53,7 +49,6 @@ const ProposeTime = () => {
       const minute = parseInt(match[2]);
       const period = match[3].toLowerCase();
 
-      // Convert to 24-hour format
       if (period === "pm" && hour < 12) hour += 12;
       if (period === "am" && hour === 12) hour = 0;
 
@@ -65,7 +60,6 @@ const ProposeTime = () => {
 
     if (!start || !end) return true;
 
-    // Compare times
     if (start.hour > end.hour || (start.hour === end.hour && start.minute >= end.minute)) {
       return false;
     }
@@ -80,7 +74,6 @@ const ProposeTime = () => {
       [field]: value 
     };
     
-    // Only validate when both start and end times are set
     if (field === "startTime" || field === "endTime") {
       const startTime = field === "startTime" ? value : updatedSlots[index].startTime;
       const endTime = field === "endTime" ? value : updatedSlots[index].endTime;
@@ -105,10 +98,8 @@ const ProposeTime = () => {
   };
 
   const handleSendToFriends = () => {
-    // Clear any existing time slots first
     console.log("Adding time slots to context...");
     
-    // Only add valid time slots
     let validSlotsAdded = 0;
     timeSlots.forEach(slot => {
       if (slot.date && slot.startTime !== "--" && slot.endTime !== "--" && slot.isValid) {
@@ -140,17 +131,17 @@ const ProposeTime = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
-      <div className="flex items-center mb-8">
+    <div className="max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-12 animate-fade-in">
+      <div className="flex items-center mb-6 sm:mb-8">
         <Avatar initial={currentUser.initial} position="first" size="lg" className="mr-4" />
-        <h1 className="text-2xl font-semibold">When are you free?</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold">When are you free?</h1>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6 sm:space-y-8">
         {timeSlots.map((slot, index) => (
           <div 
             key={index} 
-            className={`p-4 ${!slot.isValid ? 'border border-red-500 rounded-xl' : ''}`}
+            className={`p-3 sm:p-4 ${!slot.isValid ? 'border border-red-500 rounded-xl' : ''}`}
           >
             <DateTimePicker
               onDateChange={(date) => updateTimeSlot(index, "date", date)}
@@ -176,7 +167,7 @@ const ProposeTime = () => {
 
         <button
           onClick={handleSendToFriends}
-          className={`action-button mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300 cursor-not-allowed' : 'bg-purple hover:bg-purple/90'}`}
+          className={`action-button mt-6 sm:mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300 cursor-not-allowed' : 'bg-purple hover:bg-purple/90'}`}
           disabled={!hasValidTimeSlots()}
         >
           <ArrowRight size={20} />

@@ -67,7 +67,7 @@ const DateTimePicker = ({
             <button className="w-full border-b border-gray-300 focus:border-purple-500 focus:outline-none py-2 flex items-center justify-between">
               <div className="flex items-center">
                 <Calendar className="mr-2 text-gray-500" size={20} />
-                <span className="text-gray-700">
+                <span className="text-gray-700 text-sm sm:text-base truncate">
                   {date ? format(date, "EEEE, MMMM d, yyyy") : "Select a date"}
                 </span>
               </div>
@@ -96,14 +96,16 @@ const DateTimePicker = ({
           </PopoverContent>
         </Popover>
       </div>
-      <div className={`flex items-center ${!isValid ? 'text-red-500' : 'text-gray-700'} mt-3`}>
-        <Clock className="mr-2" size={20} />
-        <div className="flex items-center justify-between w-full">
+      <div className={`flex flex-col sm:flex-row sm:items-center ${!isValid ? 'text-red-500' : 'text-gray-700'} mt-3`}>
+        <div className="flex items-center mb-2 sm:mb-0">
+          <Clock className="mr-2 flex-shrink-0" size={20} />
+        </div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full">
           <TimeSelector 
             time={startTime} 
             onTimeChange={handleStartTimeChange}
           />
-          <span className="px-4">to</span>
+          <span className="px-2 py-1 text-center">to</span>
           <TimeSelector 
             time={endTime} 
             onTimeChange={handleEndTimeChange}

@@ -84,7 +84,7 @@ const TimeSelector = ({
         value={hour} 
         onValueChange={(value) => setHour(value)}
       >
-        <SelectTrigger className="w-16">
+        <SelectTrigger className="w-12 px-2">
           <SelectValue placeholder="--" />
         </SelectTrigger>
         <SelectContent>
@@ -105,7 +105,7 @@ const TimeSelector = ({
         onValueChange={(value) => setMinute(value)}
         disabled={hour === "--"}
       >
-        <SelectTrigger className="w-16">
+        <SelectTrigger className="w-14 px-2">
           <SelectValue placeholder="00" />
         </SelectTrigger>
         <SelectContent>
@@ -123,7 +123,7 @@ const TimeSelector = ({
         onValueChange={(value) => setPeriod(value)}
         disabled={hour === "--"}
       >
-        <SelectTrigger className="w-16">
+        <SelectTrigger className="w-14 px-2">
           <SelectValue placeholder="--" />
         </SelectTrigger>
         <SelectContent>
