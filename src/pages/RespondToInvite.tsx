@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -25,52 +24,57 @@ const RespondToInvite = () => {
     // Clear existing time slots first
     clearTimeSlots();
     
-    const timer = setTimeout(() => {
-      // Always generate demo time slots regardless of inviteId
-      const demoTimeSlots = [
-        {
-          id: "1",
-          date: "March 1",
-          startTime: "8:00 AM",
-          endTime: "1:30 PM",
-          responses: []
-        },
-        {
-          id: "2",
-          date: "March 2",
-          startTime: "7:00 AM",
-          endTime: "10:00 AM",
-          responses: []
-        },
-        {
-          id: "3",
-          date: "March 3",
-          startTime: "9:00 AM",
-          endTime: "9:00 PM",
-          responses: []
-        }
-      ];
-      
-      // Set default names
-      if (inviteId && inviteId.toLowerCase() === "burt_demo") {
-        setCreatorName("Abby");
-        setResponderName("Burt");
-      } else {
-        // For any other invite ID, use generic names based on the ID
-        setCreatorName(inviteId ? `User-${inviteId.substring(0, 4)}` : "Abby");
-        setResponderName("Friend");
-      }
-      
-      // Always add the time slots
-      demoTimeSlots.forEach(slot => {
-        addTimeSlot(slot);
-      });
-      
-      console.log("Added time slots:", demoTimeSlots);
-      setIsLoading(false);
-    }, 600);
+    // Force immediate data loading and set isLoading to false in the main execution context
+    // This ensures we always have data ready
     
-    return () => clearTimeout(timer);
+    // Define our demo time slots
+    const demoTimeSlots = [
+      {
+        id: "1",
+        date: "March 1",
+        startTime: "8:00 AM",
+        endTime: "1:30 PM",
+        responses: []
+      },
+      {
+        id: "2",
+        date: "March 2",
+        startTime: "7:00 AM",
+        endTime: "10:00 AM",
+        responses: []
+      },
+      {
+        id: "3",
+        date: "March 3",
+        startTime: "9:00 AM",
+        endTime: "9:00 PM",
+        responses: []
+      }
+    ];
+    
+    // Set names based on inviteId
+    if (inviteId && inviteId.toLowerCase() === "burt_demo") {
+      setCreatorName("Abby");
+      setResponderName("Burt");
+    } else {
+      // For any other invite ID, use generic names
+      setCreatorName(inviteId ? `User-${inviteId.substring(0, 4)}` : "Abby");
+      setResponderName("Friend");
+    }
+    
+    // Always add the demo time slots immediately
+    demoTimeSlots.forEach(slot => {
+      addTimeSlot(slot);
+    });
+    
+    console.log("Added time slots immediately:", demoTimeSlots);
+    
+    // Set loading to false after a very short delay to ensure UI updates
+    setTimeout(() => {
+      setIsLoading(false);
+      console.log("Loading set to false, timeSlots:", timeSlots);
+    }, 100);
+    
   }, [inviteId, clearTimeSlots, addTimeSlot]);
 
   const handleSelectTimeSlot = (id: string) => {
@@ -137,15 +141,7 @@ const RespondToInvite = () => {
     navigate("/");
   };
 
-  if (isLoading) {
-    return (
-      <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
-        <p className="text-center">Loading invitation details...</p>
-      </div>
-    );
-  }
-
-  if (!timeSlots.length) {
+  if (timeSlots.length === 0) {
     return (
       <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
         <div className="text-center">
