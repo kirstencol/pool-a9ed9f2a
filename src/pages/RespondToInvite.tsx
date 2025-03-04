@@ -31,7 +31,7 @@ const RespondToInvite = () => {
     const safetyTimer = setTimeout(() => {
       console.log("RespondToInvite - Safety timeout reached, forcing error state");
       setForcedError('invalid');
-    }, 8000); // 8 second maximum wait time
+    }, 10000); // Extended to 10 seconds to avoid premature errors
     
     return () => {
       clearTimeout(safetyTimer);
@@ -65,8 +65,9 @@ const RespondToInvite = () => {
     return <Loading message="Loading invitation..." subtitle="Please wait while we prepare your time options" />;
   }
 
-  // Check for any error condition
-  if (inviteError || forcedError) {
+  // Only show error if BOTH inviteError is set AND we don't have time slots
+  // This prevents flashing an error when we actually have valid data
+  if ((inviteError || forcedError) && (!inviteTimeSlots || inviteTimeSlots.length === 0)) {
     const errorReason = inviteError || forcedError;
     console.log("RespondToInvite - Error:", errorReason);
     return <InvalidInvitation reason={errorReason} />;
@@ -78,6 +79,8 @@ const RespondToInvite = () => {
     inviteTimeSlotsLength: inviteTimeSlots?.length || 0
   });
   
+  // Let's try to continue with any data we have
+  // Only show error if we truly have no data at all
   if (!inviteTimeSlots || inviteTimeSlots.length === 0) {
     console.log("RespondToInvite - No inviteTimeSlots found for invite:", inviteId);
     return <InvalidInvitation reason="invalid" />;

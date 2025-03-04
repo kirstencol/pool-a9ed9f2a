@@ -39,13 +39,15 @@ export const useInviteData = (inviteId: string | undefined): {
       if (isMounted && isLoading) {
         console.log("useInviteData - Safety timeout reached, forcing load completion");
         setIsLoading(false);
+        
+        // Only set error if we truly have no data
         if (!inviteTimeSlots || inviteTimeSlots.length === 0) {
           setInviteError('invalid');
         }
       }
-    }, 5000); // 5 second maximum wait time
+    }, 7000); // 7 second maximum wait time
     
-    const loadDataWithRetry = async (id: string, retries = 2) => {
+    const loadDataWithRetry = async (id: string, retries = 3) => {
       console.log(`useInviteData - Loading data for ${id}, attempts left: ${retries}`);
       
       if (!isMounted) return;
@@ -60,7 +62,7 @@ export const useInviteData = (inviteId: string | undefined): {
         initializeDemoData();
         
         // Short delay before retry
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 500));
         if (!isMounted) return;
         return loadDataWithRetry(id, retries - 1);
       }
@@ -69,7 +71,11 @@ export const useInviteData = (inviteId: string | undefined): {
       
       if (!meetingData || !meetingData.timeSlots || meetingData.timeSlots.length === 0) {
         console.log("useInviteData - Failed to load data after retries");
-        setInviteError('invalid');
+        
+        // Don't set error immediately if we're still loading
+        // This prevents premature error display
+        setInviteTimeSlots([]);
+        
         // Set loading to false to ensure we don't hang
         setIsLoading(false);
         return;
@@ -107,7 +113,7 @@ export const useInviteData = (inviteId: string | undefined): {
     const timer = setTimeout(() => {
       const idToLoad = inviteId || "demo_invite";
       loadDataWithRetry(idToLoad);
-    }, 300);
+    }, 500);
     
     return () => {
       isMounted = false;
@@ -115,7 +121,7 @@ export const useInviteData = (inviteId: string | undefined): {
       clearTimeout(safetyTimer);
       console.log("useInviteData - Effect cleanup ran");
     };
-  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage, isLoading, inviteTimeSlots]);
+  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]);
 
   return {
     isLoading,

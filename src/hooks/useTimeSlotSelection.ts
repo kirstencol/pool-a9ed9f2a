@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TimeSlot } from "@/types";
 
 interface UseTimeSlotSelectionProps {
@@ -17,34 +17,45 @@ export function useTimeSlotSelection({
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
 
+  // Clear selection when timeSlots change
+  useEffect(() => {
+    console.log("useTimeSlotSelection - timeSlots changed, resetting selection", timeSlots);
+    setSelectedSlotId(null);
+    setSelectedStartTime("");
+    setSelectedEndTime("");
+  }, [timeSlots]);
+
   const handleSelectTimeSlot = (id: string) => {
+    console.log("useTimeSlotSelection - Selected slot id:", id);
     setSelectedSlotId(id);
     const selectedSlot = timeSlots.find(slot => slot.id === id);
     
     if (selectedSlot) {
+      let startTime = selectedSlot.startTime;
+      let endTime = selectedSlot.endTime;
+      
+      // Set default times based on responder
       if (responderName === "Burt") {
         const slotDate = selectedSlot.date;
         if (slotDate === "March 1") {
-          setSelectedStartTime("8:00 AM");
-          setSelectedEndTime("1:30 PM");
+          startTime = "8:00 AM";
+          endTime = "1:30 PM";
         } else if (slotDate === "March 2") {
-          setSelectedStartTime("9:00 AM");
-          setSelectedEndTime("10:00 AM");
-        } else {
-          setSelectedStartTime("");
-          setSelectedEndTime("");
+          startTime = "9:00 AM";
+          endTime = "10:00 AM";
         }
-      } else {
-        setSelectedStartTime(selectedSlot.startTime);
-        setSelectedEndTime(selectedSlot.endTime);
       }
       
+      setSelectedStartTime(startTime);
+      setSelectedEndTime(endTime);
+      
       // Notify parent component of selection
-      onSelectTimeSlot(selectedSlot, selectedStartTime, selectedEndTime);
+      onSelectTimeSlot(selectedSlot, startTime, endTime);
     }
   };
 
   const handleTimeRangeSelect = (start: string, end: string) => {
+    console.log("useTimeSlotSelection - Time range selected:", start, end);
     setSelectedStartTime(start);
     setSelectedEndTime(end);
     

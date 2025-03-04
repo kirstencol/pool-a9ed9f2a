@@ -37,17 +37,25 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
     <div>
       <div className="space-y-3">
         {timeSlots.map((timeSlot) => (
-          <TimeSlotCard 
-            key={timeSlot.id} 
-            timeSlot={timeSlot}
-            selectedByUser={selectedSlotId === timeSlot.id}
-            showTimeSelector={selectedSlotId === timeSlot.id}
-            onSelectTime={handleTimeRangeSelect}
-            onCannotMakeIt={onCannotMakeIt}
-            creatorAvailable
-            creatorName={creatorName}
+          <div 
+            key={timeSlot.id}
+            className={`border rounded-lg p-4 cursor-pointer transition-all ${
+              selectedSlotId === timeSlot.id 
+                ? "border-purple-500 bg-purple-50" 
+                : "border-gray-200 hover:border-purple-300"
+            }`}
             onClick={() => handleSelectTimeSlot(timeSlot.id)}
-          />
+          >
+            <TimeSlotCard 
+              timeSlot={timeSlot}
+              selectedByUser={selectedSlotId === timeSlot.id}
+              showTimeSelector={selectedSlotId === timeSlot.id}
+              onSelectTime={handleTimeRangeSelect}
+              onCannotMakeIt={onCannotMakeIt}
+              creatorAvailable
+              creatorName={creatorName}
+            />
+          </div>
         ))}
       </div>
       
