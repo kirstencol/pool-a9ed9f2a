@@ -25,7 +25,11 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const [currentStartTime, setCurrentStartTime] = useState("");
   const [currentEndTime, setCurrentEndTime] = useState("");
   
-  const { isLoading, finishLoading } = useLoadingState();
+  // Use a longer minimum loading time to ensure all data is loaded
+  const { isLoading, finishLoading } = useLoadingState({
+    minimumLoadingTime: 1500,
+    safetyTimeoutDuration: 5000
+  });
   
   // Initialize demo data on component mount
   useEffect(() => {
@@ -49,17 +53,9 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
     console.log("Selected time slot:", slot, startTime, endTime);
   };
 
-  // Render loading state
-  if (isLoading) {
-    return <Loading message="Preparing time slots..." subtitle="Just a moment while we get your options ready" />;
-  }
-
-  // Render empty state if no time slots
-  if (!localTimeSlots || localTimeSlots.length === 0) {
-    return <NoTimeSlotsView />;
-  }
-
-  // Render time slot selection
+  // Check if time slots are loaded from the TimeSlotLoader component
+  const timeSlotsLoaded = localTimeSlots && localTimeSlots.length > 0;
+  
   return (
     <div className="mb-6">
       {/* This component handles loading time slots */}
@@ -70,14 +66,21 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
         onTimeSlotsLoaded={finishLoading}
       />
       
-      <TimeSlotSelection
-        timeSlots={localTimeSlots}
-        responderName={responderName}
-        creatorName={creatorName}
-        onSelectTimeSlot={handleSelectTimeSlot}
-        onCannotMakeIt={handleCantMakeIt}
-        onSubmit={handleSubmit}
-      />
+      {/* Show loading state while time slots are being loaded */}
+      {isLoading ? (
+        <Loading message="Preparing time slots..." subtitle="Just a moment while we get your options ready" />
+      ) : !timeSlotsLoaded ? (
+        <NoTimeSlotsView />
+      ) : (
+        <TimeSlotSelection
+          timeSlots={localTimeSlots}
+          responderName={responderName}
+          creatorName={creatorName}
+          onSelectTimeSlot={handleSelectTimeSlot}
+          onCannotMakeIt={handleCantMakeIt}
+          onSubmit={handleSubmit}
+        />
+      )}
     </div>
   );
 };
