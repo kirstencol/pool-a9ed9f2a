@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import {
   Select,
   SelectContent,
@@ -31,7 +31,7 @@ const TimeSelector = ({
   const minuteOptions = ["00", "15", "30", "45"];
   const periods = ["am", "pm"];
 
-  // Parse the incoming time
+  // Parse the incoming time (only when it changes)
   useEffect(() => {
     if (!time || time === "--") {
       setHour("--");
@@ -54,14 +54,19 @@ const TimeSelector = ({
   }, [time]);
 
   // When values change, update the parent
+  // Using a separate useEffect to avoid creating new functions on each render
   useEffect(() => {
     if (hour === "--" || period === "") {
-      onTimeChange("--");
       return;
     }
     const newTime = `${hour}:${minute} ${period}`;
-    onTimeChange(newTime);
-  }, [hour, minute, period, onTimeChange]);
+    
+    // Only call onTimeChange if the formatted time is different from current time
+    // This prevents circular updates
+    if (newTime.toLowerCase() !== time.toLowerCase()) {
+      onTimeChange(newTime);
+    }
+  }, [hour, minute, period, onTimeChange, time]);
 
   // Handle period change from start time to automatically update end time period
   useEffect(() => {
@@ -77,12 +82,25 @@ const TimeSelector = ({
     }
   }, [isEndTime, startTime]);
 
+  // Handler functions that avoid closures on time state
+  const handleHourChange = (value: string) => {
+    setHour(value);
+  };
+
+  const handleMinuteChange = (value: string) => {
+    setMinute(value);
+  };
+
+  const handlePeriodChange = (value: string) => {
+    setPeriod(value);
+  };
+
   return (
     <div className="time-selector-container flex space-x-1">
       {/* Hour selector */}
       <Select 
         value={hour} 
-        onValueChange={(value) => setHour(value)}
+        onValueChange={handleHourChange}
       >
         <SelectTrigger className="w-12 px-2">
           <SelectValue placeholder="--" />
@@ -102,7 +120,7 @@ const TimeSelector = ({
       {/* Minute selector (only enabled if hour is selected) */}
       <Select 
         value={minute} 
-        onValueChange={(value) => setMinute(value)}
+        onValueChange={handleMinuteChange}
         disabled={hour === "--"}
       >
         <SelectTrigger className="w-14 px-2">
@@ -120,7 +138,7 @@ const TimeSelector = ({
       {/* AM/PM selector (only enabled if hour is selected) */}
       <Select 
         value={period} 
-        onValueChange={(value) => setPeriod(value)}
+        onValueChange={handlePeriodChange}
         disabled={hour === "--"}
       >
         <SelectTrigger className="w-14 px-2">
@@ -138,4 +156,5 @@ const TimeSelector = ({
   );
 };
 
-export default TimeSelector;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(TimeSelector);

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+
+import { useState, useEffect, useCallback } from "react";
 import { TimeSlot } from "@/types";
 
 interface UseTimeSlotSelectionProps {
@@ -15,13 +16,16 @@ export function useTimeSlotSelection({
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
-
+  
   // Only reset selections when timeSlots array reference changes AND is not empty
+  // and only if the currently selected slot no longer exists
   useEffect(() => {
-    if (timeSlots && timeSlots.length > 0) {
-      console.log("useTimeSlotSelection - timeSlots changed, resetting selection", timeSlots);
-      // Don't reset the selection if timeSlots are the same
-      if (selectedSlotId && !timeSlots.some(slot => slot.id === selectedSlotId)) {
+    if (timeSlots && timeSlots.length > 0 && selectedSlotId) {
+      console.log("useTimeSlotSelection - Checking if selected slot still exists", {selectedSlotId, timeSlots});
+      // Only reset the selection if the currently selected slot no longer exists
+      const slotExists = timeSlots.some(slot => slot.id === selectedSlotId);
+      if (!slotExists) {
+        console.log("useTimeSlotSelection - Selected slot no longer exists, resetting selection");
         setSelectedSlotId(null);
         setSelectedStartTime("");
         setSelectedEndTime("");
@@ -29,7 +33,7 @@ export function useTimeSlotSelection({
     }
   }, [timeSlots, selectedSlotId]);
 
-  const handleSelectTimeSlot = (id: string) => {
+  const handleSelectTimeSlot = useCallback((id: string) => {
     console.log("useTimeSlotSelection - Selected slot id:", id);
     
     // If clicking the same slot again, keep the selection
@@ -63,20 +67,30 @@ export function useTimeSlotSelection({
       // Notify parent component of selection
       onSelectTimeSlot(selectedSlot, startTime, endTime);
     }
-  };
+  }, [timeSlots, selectedSlotId, responderName, onSelectTimeSlot]);
 
-  const handleTimeRangeSelect = (start: string, end: string) => {
+  const handleTimeRangeSelect = useCallback((start: string, end: string) => {
     console.log("useTimeSlotSelection - Time range selected:", start, end);
-    setSelectedStartTime(start);
-    setSelectedEndTime(end);
+    
+    // Only update if times have actually changed
+    if (start !== selectedStartTime) {
+      setSelectedStartTime(start);
+    }
+    
+    if (end !== selectedEndTime) {
+      setSelectedEndTime(end);
+    }
     
     if (selectedSlotId) {
       const selectedSlot = timeSlots.find(slot => slot.id === selectedSlotId);
       if (selectedSlot) {
-        onSelectTimeSlot(selectedSlot, start, end);
+        // Only propagate changes when both start and end times are valid
+        if (start !== "--" && end !== "--") {
+          onSelectTimeSlot(selectedSlot, start, end);
+        }
       }
     }
-  };
+  }, [timeSlots, selectedSlotId, selectedStartTime, selectedEndTime, onSelectTimeSlot]);
 
   return {
     selectedSlotId,

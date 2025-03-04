@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { ArrowRight } from "lucide-react";
 import TimeSlotCard from "@/components/TimeSlotCard";
 import { TimeSlot } from "@/types";
@@ -57,7 +57,11 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
                 selectedByUser={isSelected}
                 showTimeSelector={isSelected}
                 onSelectTime={handleTimeRangeSelect}
-                onCannotMakeIt={onCannotMakeIt}
+                onCannotMakeIt={(e) => {
+                  // Prevent the card click event from firing
+                  e?.stopPropagation?.();
+                  onCannotMakeIt();
+                }}
                 creatorAvailable
                 creatorName={creatorName}
               />
@@ -79,4 +83,5 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
   );
 };
 
-export default TimeSlotSelection;
+// Use memo to prevent unnecessary re-renders
+export default memo(TimeSlotSelection);

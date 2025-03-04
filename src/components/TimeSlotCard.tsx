@@ -1,6 +1,6 @@
 
 import { TimeSlot } from "@/types";
-import { useState } from "react";
+import { useState, useEffect, memo } from "react";
 import { cn } from "@/lib/utils";
 import TimeSelector from "./TimeSelector";
 
@@ -31,6 +31,14 @@ const TimeSlotCard = ({
 }: TimeSlotCardProps) => {
   const [startTime, setStartTime] = useState(timeSlot.startTime);
   const [endTime, setEndTime] = useState(timeSlot.endTime);
+
+  // Set initial times when the card becomes selected
+  useEffect(() => {
+    if (selectedByUser && showTimeSelector) {
+      setStartTime(timeSlot.startTime);
+      setEndTime(timeSlot.endTime);
+    }
+  }, [selectedByUser, showTimeSelector, timeSlot.startTime, timeSlot.endTime]);
 
   // Format date for display (e.g., "Friday, October 25")
   const formatDate = (dateString: string) => {
@@ -102,7 +110,10 @@ const TimeSlotCard = ({
 
       {onCannotMakeIt && (
         <button 
-          onClick={onCannotMakeIt}
+          onClick={(e) => {
+            e.stopPropagation();
+            onCannotMakeIt();
+          }}
           className="text-purple-500 text-sm hover:underline mt-2"
         >
           {cannotMakeItText}
@@ -112,4 +123,5 @@ const TimeSlotCard = ({
   );
 };
 
-export default TimeSlotCard;
+// Memoize the component to prevent unnecessary re-renders
+export default memo(TimeSlotCard);
