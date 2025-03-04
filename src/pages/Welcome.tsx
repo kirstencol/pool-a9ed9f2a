@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useMeeting } from "@/context/MeetingContext";
 import Avatar from "@/components/Avatar";
+import { Button } from "@/components/ui/button";
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const Welcome = () => {
   const [name, setName] = useState("");
   const [friend1, setFriend1] = useState("");
   const [friend2, setFriend2] = useState("");
+  const [showDevTools, setShowDevTools] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +29,18 @@ const Welcome = () => {
     addParticipant(friend2.trim());
 
     navigate("/propose-time");
+  };
+
+  const toggleDevTools = () => {
+    setShowDevTools(!showDevTools);
+  };
+
+  const goToRespondAsFriend = () => {
+    navigate("/respond/demo_invite");
+  };
+
+  const goToRespondAsBurt = () => {
+    navigate("/respond/burt_demo");
   };
 
   return (
@@ -80,6 +94,38 @@ const Welcome = () => {
           <ArrowRight size={20} />
         </button>
       </form>
+
+      {/* Developer tools section */}
+      <div className="mt-12">
+        <button
+          onClick={toggleDevTools}
+          className="text-sm text-gray-500 hover:text-gray-700"
+        >
+          {showDevTools ? "Hide Developer Tools" : "Show Developer Tools"}
+        </button>
+        
+        {showDevTools && (
+          <div className="mt-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+            <h2 className="text-sm font-medium mb-3">Developer Quick Access</h2>
+            <div className="space-y-2">
+              <Button 
+                onClick={goToRespondAsFriend}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                Test Friend's Response Flow
+              </Button>
+              <Button 
+                onClick={goToRespondAsBurt}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                Test Burt's Response Flow
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

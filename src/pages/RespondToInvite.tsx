@@ -8,6 +8,31 @@ import InvitationHeader from "@/components/respond/InvitationHeader";
 import TimeSlotSelection from "@/components/respond/TimeSlotSelection";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
 
+// Demo data for testing
+const DEMO_TIME_SLOTS = [
+  {
+    id: "1",
+    date: "March 1",
+    startTime: "8:00 AM",
+    endTime: "1:30 PM",
+    responses: []
+  },
+  {
+    id: "2",
+    date: "March 2",
+    startTime: "7:00 AM",
+    endTime: "10:00 AM",
+    responses: []
+  },
+  {
+    id: "3",
+    date: "March 3",
+    startTime: "9:00 AM",
+    endTime: "9:00 PM",
+    responses: []
+  }
+];
+
 const RespondToInvite = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -47,7 +72,28 @@ const RespondToInvite = () => {
         return;
       }
       
-      // Try to load meeting data from localStorage using inviteId
+      // Handle demo routes with consistent test data
+      if (inviteId.toLowerCase() === "demo_invite") {
+        setCreatorName("Abby");
+        setResponderName("Friend");
+        DEMO_TIME_SLOTS.forEach(slot => {
+          addTimeSlot(slot);
+        });
+        setIsLoading(false);
+        return;
+      } 
+      
+      if (inviteId.toLowerCase() === "burt_demo") {
+        setCreatorName("Abby");
+        setResponderName("Burt");
+        DEMO_TIME_SLOTS.forEach(slot => {
+          addTimeSlot(slot);
+        });
+        setIsLoading(false);
+        return;
+      }
+      
+      // Try to load meeting data from localStorage using inviteId for real invites
       const loadedMeeting = loadMeetingFromStorage(inviteId);
       
       if (loadedMeeting && loadedMeeting.timeSlots && loadedMeeting.timeSlots.length > 0) {
@@ -65,53 +111,8 @@ const RespondToInvite = () => {
         
         setIsLoading(false);
       } else {
-        // Handle demo scenarios for testing
-        const demoTimeSlots = [
-          {
-            id: "1",
-            date: "March 1",
-            startTime: "8:00 AM",
-            endTime: "1:30 PM",
-            responses: []
-          },
-          {
-            id: "2",
-            date: "March 2",
-            startTime: "7:00 AM",
-            endTime: "10:00 AM",
-            responses: []
-          },
-          {
-            id: "3",
-            date: "March 3",
-            startTime: "9:00 AM",
-            endTime: "9:00 PM",
-            responses: []
-          }
-        ];
-        
-        if (inviteId.toLowerCase() === "demo_invite") {
-          setCreatorName("Abby");
-          setResponderName("Friend");
-          demoTimeSlots.forEach(slot => {
-            addTimeSlot(slot);
-          });
-        } else if (inviteId.toLowerCase() === "burt_demo") {
-          setCreatorName("Abby");
-          setResponderName("Burt");
-          demoTimeSlots.forEach(slot => {
-            addTimeSlot(slot);
-          });
-        } else {
-          // For any other invite ID that wasn't found in localStorage
-          // This could be improved by showing a proper "not found" error
-          setCreatorName(`User-${inviteId.substring(0, 4)}`);
-          setResponderName("Friend");
-          demoTimeSlots.forEach(slot => {
-            addTimeSlot(slot);
-          });
-        }
-        
+        // For any other invite ID that wasn't found in localStorage
+        setInviteError('invalid');
         setIsLoading(false);
       }
       
