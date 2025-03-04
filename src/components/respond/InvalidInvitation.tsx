@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,8 @@ interface InvalidInvitationProps {
   reason?: 'expired' | 'invalid' | 'loading';
 }
 
-const InvalidInvitation: React.FC<InvalidInvitationProps> = ({ 
+// Memoize this component since it doesn't change often
+const InvalidInvitation: React.FC<InvalidInvitationProps> = memo(({ 
   reason = 'invalid' 
 }) => {
   const navigate = useNavigate();
@@ -42,6 +43,8 @@ const InvalidInvitation: React.FC<InvalidInvitationProps> = ({
       </div>
     </div>
   );
-};
+});
+
+InvalidInvitation.displayName = 'InvalidInvitation';
 
 export default InvalidInvitation;

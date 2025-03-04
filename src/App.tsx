@@ -1,21 +1,31 @@
 
-
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Welcome from "./pages/Welcome";
-import ProposeTime from "./pages/ProposeTime";
-import TimeConfirmation from "./pages/TimeConfirmation";
-import RespondToInvite from "./pages/RespondToInvite";
-import SelectLocation from "./pages/SelectLocation";
-import LocationConfirmation from "./pages/LocationConfirmation";
-import FinalConfirmation from "./pages/FinalConfirmation";
-import AddToCalendar from "./pages/AddToCalendar";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Lazy load page components to improve initial load time
+const Welcome = lazy(() => import("./pages/Welcome"));
+const ProposeTime = lazy(() => import("./pages/ProposeTime"));
+const TimeConfirmation = lazy(() => import("./pages/TimeConfirmation"));
+const RespondToInvite = lazy(() => import("./pages/RespondToInvite"));
+const SelectLocation = lazy(() => import("./pages/SelectLocation"));
+const LocationConfirmation = lazy(() => import("./pages/LocationConfirmation"));
+const FinalConfirmation = lazy(() => import("./pages/FinalConfirmation"));
+const AddToCalendar = lazy(() => import("./pages/AddToCalendar"));
+
+// Create QueryClient outside component to prevent recreation on render
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Improves performance by not refetching on window focus
+      retry: 1, // Limit retries to improve performance on failing requests
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -24,17 +34,19 @@ const App = () => (
       <Sonner position="top-center" />
       <BrowserRouter>
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
-          <Routes>
-            <Route path="/" element={<Welcome />} />
-            <Route path="/propose-time" element={<ProposeTime />} />
-            <Route path="/time-confirmation" element={<TimeConfirmation />} />
-            <Route path="/respond/:inviteId" element={<RespondToInvite />} />
-            <Route path="/select-location" element={<SelectLocation />} />
-            <Route path="/location-confirmation" element={<LocationConfirmation />} />
-            <Route path="/final-confirmation" element={<FinalConfirmation />} />
-            <Route path="/add-to-calendar" element={<AddToCalendar />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
+            <Routes>
+              <Route path="/" element={<Welcome />} />
+              <Route path="/propose-time" element={<ProposeTime />} />
+              <Route path="/time-confirmation" element={<TimeConfirmation />} />
+              <Route path="/respond/:inviteId" element={<RespondToInvite />} />
+              <Route path="/select-location" element={<SelectLocation />} />
+              <Route path="/location-confirmation" element={<LocationConfirmation />} />
+              <Route path="/final-confirmation" element={<FinalConfirmation />} />
+              <Route path="/add-to-calendar" element={<AddToCalendar />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </div>
       </BrowserRouter>
     </TooltipProvider>
