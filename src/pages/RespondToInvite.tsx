@@ -9,6 +9,8 @@ import InvalidInvitation from "@/components/respond/InvalidInvitation";
 const RespondToInvite = () => {
   const { inviteId } = useParams();
   
+  console.log("RespondToInvite - Received inviteId param:", inviteId);
+  
   const {
     isLoading,
     inviteError,
@@ -17,13 +19,21 @@ const RespondToInvite = () => {
     inviteTimeSlots
   } = useInviteData(inviteId);
 
-  console.log("RespondToInvite - timeSlots from hook:", inviteTimeSlots);
+  console.log("RespondToInvite - Data from hook:", {
+    isLoading,
+    inviteError,
+    creatorName,
+    responderName,
+    timeSlots: inviteTimeSlots
+  });
 
   if (isLoading) {
+    console.log("RespondToInvite - Still loading...");
     return <InvalidInvitation reason="loading" />;
   }
 
   if (inviteError) {
+    console.log("RespondToInvite - Error:", inviteError);
     return <InvalidInvitation reason={inviteError} />;
   }
 

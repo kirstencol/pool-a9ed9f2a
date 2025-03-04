@@ -36,10 +36,14 @@ const Welcome = () => {
   };
 
   const goToRespondAsFriend = () => {
+    // Explicitly log the route we're navigating to
+    console.log("Navigating to Friend Response Flow: /respond/demo_invite");
     navigate("/respond/demo_invite");
   };
 
   const goToRespondAsBurt = () => {
+    // Explicitly log the route we're navigating to
+    console.log("Navigating to Burt Response Flow: /respond/burt_demo");
     navigate("/respond/burt_demo");
   };
 

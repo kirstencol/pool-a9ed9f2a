@@ -50,7 +50,7 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
   const [inviteTimeSlots, setInviteTimeSlots] = useState<TimeSlot[]>([]);
 
   useEffect(() => {
-    console.log("Loading invite data for ID:", inviteId);
+    console.log("useInviteData - Loading invite data for ID:", inviteId);
     
     // Reset states
     setIsLoading(true);
@@ -62,13 +62,19 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
     
     const timer = setTimeout(() => {
       if (!inviteId) {
+        console.log("useInviteData - No inviteId provided");
         setInviteError('invalid');
         setIsLoading(false);
         return;
       }
       
+      // Add explicit normalization and logging to see what's being processed
+      const normalizedInviteId = inviteId.toLowerCase();
+      console.log("useInviteData - Normalized inviteId:", normalizedInviteId);
+      
       // Handle demo routes with consistent test data
-      if (inviteId.toLowerCase() === "demo_invite") {
+      if (normalizedInviteId === "demo_invite") {
+        console.log("useInviteData - Processing demo_invite case");
         setCreatorName("Abby");
         setResponderName("Friend");
         
@@ -82,10 +88,12 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
         });
         
         setIsLoading(false);
+        console.log("useInviteData - Finished loading demo_invite data");
         return;
       } 
       
-      if (inviteId.toLowerCase() === "burt_demo") {
+      if (normalizedInviteId === "burt_demo") {
+        console.log("useInviteData - Processing burt_demo case");
         setCreatorName("Abby");
         setResponderName("Burt");
         
@@ -99,6 +107,7 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
         });
         
         setIsLoading(false);
+        console.log("useInviteData - Finished loading burt_demo data");
         return;
       }
       
@@ -107,7 +116,7 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
       
       if (loadedMeeting && loadedMeeting.timeSlots && loadedMeeting.timeSlots.length > 0) {
         // Use data from localStorage
-        console.log("Loaded meeting data from storage:", loadedMeeting);
+        console.log("useInviteData - Loaded meeting data from storage:", loadedMeeting);
         
         if (loadedMeeting.creator && loadedMeeting.creator.name) {
           setCreatorName(loadedMeeting.creator.name);
@@ -124,13 +133,14 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
         setIsLoading(false);
       } else {
         // For any other invite ID that wasn't found in localStorage
+        console.log("useInviteData - Invalid or missing data for inviteId:", inviteId);
         setInviteError('invalid');
         setIsLoading(false);
       }
     }, 600);
     
     return () => clearTimeout(timer);
-  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]); // Removed timeSlots from dependency array
+  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]); // Dependency array without timeSlots
 
   return {
     isLoading,
