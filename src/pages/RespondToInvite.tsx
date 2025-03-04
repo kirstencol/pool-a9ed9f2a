@@ -2,15 +2,24 @@
 import { useParams } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
 import { useInviteData } from "@/hooks/useInviteData";
+import { useEffect } from "react";
 import InvitationHeader from "@/components/respond/InvitationHeader";
 import ResponseForm from "@/components/respond/ResponseForm";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
-import Loading from "@/components/Loading";
+import { initializeDemoData } from "@/context/meeting/storage";
+import Loading from "@/components/Loading"; // Import our new Loading component
 
 const RespondToInvite = () => {
   const { inviteId: rawInviteId } = useParams();
   const inviteId = rawInviteId || "demo_invite"; // Fallback to demo_invite if no ID provided
   const { timeSlots: contextTimeSlots } = useMeeting();
+  
+  // Initialize demo data on component mount
+  useEffect(() => {
+    // This ensures demo data is available immediately when component loads
+    initializeDemoData();
+    console.log("RespondToInvite - Initialized demo data on mount");
+  }, []);
   
   console.log("RespondToInvite - Received inviteId param:", rawInviteId);
   console.log("RespondToInvite - Using inviteId:", inviteId);
@@ -33,9 +42,10 @@ const RespondToInvite = () => {
     contextTimeSlots
   });
 
+  // Handle loading state with better feedback
   if (isLoading) {
     console.log("RespondToInvite - Still loading...");
-    return <Loading message="Loading invitation..." subtitle="Please wait while we retrieve the invitation details" />;
+    return <Loading message="Loading invitation..." subtitle="Please wait while we prepare your time options" />;
   }
 
   if (inviteError) {
