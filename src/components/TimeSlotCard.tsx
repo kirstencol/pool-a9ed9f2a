@@ -1,3 +1,4 @@
+
 import { TimeSlot } from "@/types";
 import { useState, useEffect, memo } from "react";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,7 @@ const TimeSlotCard = ({
   showTimeSelector = false,
   onSelectTime,
   onCannotMakeIt,
-  cannotMakeItText = "I can't make it",
+  cannotMakeItText,
   creatorAvailable = true,
   creatorName = "Alex",
   className,
@@ -55,6 +56,25 @@ const TimeSlotCard = ({
     };
     return date.toLocaleDateString('en-US', options);
   };
+
+  // Extract day of week for the "can't make it" text
+  const getDayOfWeek = (dateString: string) => {
+    const dateParts = dateString.split('-');
+    if (dateParts.length !== 3) return "this day";
+    
+    const year = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1;
+    const day = parseInt(dateParts[2]);
+    
+    const date = new Date(year, month, day, 12, 0, 0);
+    
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  };
+
+  // Set default cannotMakeItText if not provided
+  const dayOfWeek = getDayOfWeek(timeSlot.date);
+  const defaultCannotMakeItText = `I can't make it on ${dayOfWeek}`;
+  const finalCannotMakeItText = cannotMakeItText || defaultCannotMakeItText;
 
   const handleStartTimeChange = (newTime: string) => {
     setStartTime(newTime);
@@ -123,7 +143,7 @@ const TimeSlotCard = ({
           }}
           className="text-purple-500 text-sm hover:underline mt-2"
         >
-          {cannotMakeItText}
+          {finalCannotMakeItText}
         </button>
       )}
     </div>
