@@ -39,7 +39,7 @@ const RespondToInvite = () => {
     clearTimeSlots();
     
     const timer = setTimeout(() => {
-      // Always generate demo time slots regardless of inviteId
+      // Define demo time slots
       const demoTimeSlots = [
         {
           id: "1",
@@ -67,16 +67,17 @@ const RespondToInvite = () => {
       // Special handling for different invite types
       if (!inviteId) {
         setInviteError('invalid');
-      } else if (inviteId.toLowerCase() === "burt_demo") {
-        setCreatorName("Abby");
-        setResponderName("Burt");
-        demoTimeSlots.forEach(slot => {
-          addTimeSlot(slot);
-        });
       } else if (inviteId.toLowerCase() === "demo_invite") {
         // For the main demo invite ID from TimeConfirmation page
         setCreatorName("Abby");
         setResponderName("Friend");
+        // Add the time slots for demo_invite
+        demoTimeSlots.forEach(slot => {
+          addTimeSlot(slot);
+        });
+      } else if (inviteId.toLowerCase() === "burt_demo") {
+        setCreatorName("Abby");
+        setResponderName("Burt");
         demoTimeSlots.forEach(slot => {
           addTimeSlot(slot);
         });
@@ -91,17 +92,23 @@ const RespondToInvite = () => {
         });
       }
       
-      console.log("Added time slots:", demoTimeSlots);
+      console.log("Time slots loaded:", timeSlots);
       setIsLoading(false);
     }, 600);
     
     return () => clearTimeout(timer);
   }, [inviteId, clearTimeSlots, addTimeSlot]);
 
+  useEffect(() => {
+    // Debug logging to track when timeSlots changes
+    console.log("timeSlots updated:", timeSlots);
+  }, [timeSlots]);
+
   const handleSelectTimeSlot = (slot: TimeSlot, startTime: string, endTime: string) => {
     setCurrentSelectedSlot(slot);
     setCurrentStartTime(startTime);
     setCurrentEndTime(endTime);
+    console.log("Selected time slot:", slot, startTime, endTime);
   };
 
   const handleSubmit = () => {
@@ -145,8 +152,9 @@ const RespondToInvite = () => {
     return <InvalidInvitation reason={inviteError} />;
   }
 
-  // Add this check to ensure time slots are loaded
-  if (timeSlots.length === 0) {
+  // Make sure we have time slots loaded
+  if (!timeSlots || timeSlots.length === 0) {
+    console.log("No time slots found for invite:", inviteId);
     return <InvalidInvitation reason="invalid" />;
   }
 
