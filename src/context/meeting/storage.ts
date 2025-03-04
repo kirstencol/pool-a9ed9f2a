@@ -105,3 +105,39 @@ export const initializeDemoData = (): void => {
     console.log("Created new burt_demo data in localStorage");
   }
 };
+
+export const ensureDemoDataExists = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    console.log("Ensuring demo data exists...");
+    
+    // Check if demo data exists
+    const demoData = loadMeetingFromStorage("demo_invite");
+    const burtData = loadMeetingFromStorage("burt_demo");
+    
+    // If both demo data points exist and have time slots, we're good
+    if (demoData?.timeSlots?.length > 0 && burtData?.timeSlots?.length > 0) {
+      console.log("Demo data already exists and is valid", {demoData, burtData});
+      resolve(true);
+      return;
+    }
+    
+    // Initialize demo data
+    console.log("Demo data missing or invalid, initializing now");
+    initializeDemoData();
+    
+    // Verify after initialization
+    setTimeout(() => {
+      const verifyDemoData = loadMeetingFromStorage("demo_invite");
+      const verifyBurtData = loadMeetingFromStorage("burt_demo");
+      
+      console.log("Verification after initialization:", {
+        demoDataExists: !!verifyDemoData?.timeSlots?.length,
+        burtDataExists: !!verifyBurtData?.timeSlots?.length,
+        demoData: verifyDemoData,
+        burtData: verifyBurtData
+      });
+      
+      resolve(!!verifyDemoData?.timeSlots?.length || !!verifyBurtData?.timeSlots?.length);
+    }, 100);
+  });
+};
