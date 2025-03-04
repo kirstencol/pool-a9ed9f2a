@@ -25,17 +25,22 @@ const InvalidInvitation: React.FC<InvalidInvitationProps> = memo(({
         return "This invitation link appears to be invalid or has expired.";
     }
   };
+
+  const getTitle = () => {
+    return reason === 'loading' ? 'Loading Invitation' : 'Invalid Invitation';
+  };
   
   return (
     <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
       <div className="text-center">
         <h1 className="text-2xl font-semibold mb-4">
-          {reason === 'loading' ? 'Loading Invitation' : 'Invalid Invitation'}
+          {getTitle()}
         </h1>
         <p className="text-gray-600 mb-6">{getMessage()}</p>
         <Button 
           onClick={() => navigate("/")} 
           className="flex items-center"
+          variant={reason === 'loading' ? "secondary" : "default"}
         >
           <ArrowLeft className="mr-2" size={16} />
           Go to Homepage

@@ -3,7 +3,7 @@ import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NotFound from "./pages/NotFound";
 
@@ -40,6 +40,8 @@ const App = () => (
               <Route path="/propose-time" element={<ProposeTime />} />
               <Route path="/time-confirmation" element={<TimeConfirmation />} />
               <Route path="/respond/:inviteId" element={<RespondToInvite />} />
+              {/* Add a redirect for the broken "respond" route with no ID */}
+              <Route path="/respond" element={<Navigate to="/" replace />} />
               <Route path="/select-location" element={<SelectLocation />} />
               <Route path="/location-confirmation" element={<LocationConfirmation />} />
               <Route path="/final-confirmation" element={<FinalConfirmation />} />

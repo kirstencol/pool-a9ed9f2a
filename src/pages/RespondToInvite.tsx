@@ -23,7 +23,7 @@ const RespondToInvite = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [inviteError, setInviteError] = useState<'invalid' | 'expired' | null>(null);
   const [creatorName, setCreatorName] = useState("Abby");
-  const [responderName, setResponderName] = useState("Burt");
+  const [responderName, setResponderName] = useState("Friend");
   const [currentSelectedSlot, setCurrentSelectedSlot] = useState<TimeSlot | null>(null);
   const [currentStartTime, setCurrentStartTime] = useState("");
   const [currentEndTime, setCurrentEndTime] = useState("");
@@ -141,8 +141,13 @@ const RespondToInvite = () => {
     return <InvalidInvitation reason="loading" />;
   }
 
-  if (inviteError || timeSlots.length === 0) {
-    return <InvalidInvitation reason={inviteError || 'invalid'} />;
+  if (inviteError) {
+    return <InvalidInvitation reason={inviteError} />;
+  }
+
+  // Add this check to ensure time slots are loaded
+  if (timeSlots.length === 0) {
+    return <InvalidInvitation reason="invalid" />;
   }
 
   return (
