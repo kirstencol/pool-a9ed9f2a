@@ -1,7 +1,7 @@
 
 import { useNavigate } from "react-router-dom";
 import { CalendarPlus, Copy, Check } from "lucide-react";
-import { useMeeting } from "@/context/MeetingContext";
+import { useMeeting } from "@/context/meeting";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 
