@@ -9,7 +9,7 @@ interface TimeSlotCardProps {
   selectedByUser?: boolean;
   showTimeSelector?: boolean;
   onSelectTime?: (startTime: string, endTime: string) => void;
-  onCannotMakeIt?: () => void;
+  onCannotMakeIt?: (e?: React.MouseEvent) => void; // Updated to accept an optional event parameter
   cannotMakeItText?: string;
   creatorAvailable?: boolean;
   creatorName?: string;
@@ -112,7 +112,7 @@ const TimeSlotCard = ({
         <button 
           onClick={(e) => {
             e.stopPropagation();
-            onCannotMakeIt();
+            onCannotMakeIt(e); // Pass the event to the callback
           }}
           className="text-purple-500 text-sm hover:underline mt-2"
         >
