@@ -25,7 +25,8 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
     setSelectedTimeSlot, 
     addParticipant,
     loadMeetingFromStorage,
-    storeMeetingInStorage
+    storeMeetingInStorage,
+    addTimeSlot  // Added this missing import from useMeeting context
   } = useMeeting();
   
   const [localTimeSlots, setLocalTimeSlots] = useState<TimeSlot[]>([]);
