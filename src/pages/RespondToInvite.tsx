@@ -17,7 +17,9 @@ const RespondToInvite = () => {
     setSelectedTimeSlot, 
     addParticipant, 
     addTimeSlot, 
-    clearTimeSlots 
+    clearTimeSlots,
+    loadMeetingFromStorage,
+    storeMeetingInStorage
   } = useMeeting();
   
   const [isLoading, setIsLoading] = useState(true);
@@ -39,65 +41,85 @@ const RespondToInvite = () => {
     clearTimeSlots();
     
     const timer = setTimeout(() => {
-      // Define demo time slots
-      const demoTimeSlots = [
-        {
-          id: "1",
-          date: "March 1",
-          startTime: "8:00 AM",
-          endTime: "1:30 PM",
-          responses: []
-        },
-        {
-          id: "2",
-          date: "March 2",
-          startTime: "7:00 AM",
-          endTime: "10:00 AM",
-          responses: []
-        },
-        {
-          id: "3",
-          date: "March 3",
-          startTime: "9:00 AM",
-          endTime: "9:00 PM",
-          responses: []
-        }
-      ];
-      
-      // Special handling for different invite types
       if (!inviteId) {
         setInviteError('invalid');
-      } else if (inviteId.toLowerCase() === "demo_invite") {
-        // For the main demo invite ID from TimeConfirmation page
-        setCreatorName("Abby");
-        setResponderName("Friend");
-        // Add the time slots for demo_invite
-        demoTimeSlots.forEach(slot => {
-          addTimeSlot(slot);
-        });
-      } else if (inviteId.toLowerCase() === "burt_demo") {
-        setCreatorName("Abby");
-        setResponderName("Burt");
-        demoTimeSlots.forEach(slot => {
-          addTimeSlot(slot);
-        });
-      } else {
-        // For any other invite ID, use generic names based on the ID
-        setCreatorName(`User-${inviteId.substring(0, 4)}`);
-        setResponderName("Friend");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Try to load meeting data from localStorage using inviteId
+      const loadedMeeting = loadMeetingFromStorage(inviteId);
+      
+      if (loadedMeeting && loadedMeeting.timeSlots && loadedMeeting.timeSlots.length > 0) {
+        // Use data from localStorage
+        console.log("Loaded meeting data from storage:", loadedMeeting);
         
-        // Add time slots for all valid invites
-        demoTimeSlots.forEach(slot => {
+        if (loadedMeeting.creator && loadedMeeting.creator.name) {
+          setCreatorName(loadedMeeting.creator.name);
+        }
+        
+        // Extract time slots
+        loadedMeeting.timeSlots.forEach(slot => {
           addTimeSlot(slot);
         });
+        
+        setIsLoading(false);
+      } else {
+        // Handle demo scenarios for testing
+        const demoTimeSlots = [
+          {
+            id: "1",
+            date: "March 1",
+            startTime: "8:00 AM",
+            endTime: "1:30 PM",
+            responses: []
+          },
+          {
+            id: "2",
+            date: "March 2",
+            startTime: "7:00 AM",
+            endTime: "10:00 AM",
+            responses: []
+          },
+          {
+            id: "3",
+            date: "March 3",
+            startTime: "9:00 AM",
+            endTime: "9:00 PM",
+            responses: []
+          }
+        ];
+        
+        if (inviteId.toLowerCase() === "demo_invite") {
+          setCreatorName("Abby");
+          setResponderName("Friend");
+          demoTimeSlots.forEach(slot => {
+            addTimeSlot(slot);
+          });
+        } else if (inviteId.toLowerCase() === "burt_demo") {
+          setCreatorName("Abby");
+          setResponderName("Burt");
+          demoTimeSlots.forEach(slot => {
+            addTimeSlot(slot);
+          });
+        } else {
+          // For any other invite ID that wasn't found in localStorage
+          // This could be improved by showing a proper "not found" error
+          setCreatorName(`User-${inviteId.substring(0, 4)}`);
+          setResponderName("Friend");
+          demoTimeSlots.forEach(slot => {
+            addTimeSlot(slot);
+          });
+        }
+        
+        setIsLoading(false);
       }
       
       console.log("Time slots loaded:", timeSlots);
-      setIsLoading(false);
     }, 600);
     
     return () => clearTimeout(timer);
-  }, [inviteId, clearTimeSlots, addTimeSlot]);
+  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]);
 
   useEffect(() => {
     // Debug logging to track when timeSlots changes
@@ -113,12 +135,35 @@ const RespondToInvite = () => {
 
   const handleSubmit = () => {
     if (currentSelectedSlot) {
+      // Add the responder as a participant
       addParticipant(responderName);
+      
+      // Update the selected time slot
       setSelectedTimeSlot({
         ...currentSelectedSlot,
         startTime: currentStartTime,
         endTime: currentEndTime
       });
+      
+      // If we have a valid inviteId, record this response in localStorage
+      if (inviteId && inviteId !== "demo_invite" && inviteId !== "burt_demo") {
+        // Load existing meeting data first
+        const existingMeeting = loadMeetingFromStorage(inviteId);
+        if (existingMeeting) {
+          // Add this response to the meeting data
+          if (!existingMeeting.responses) existingMeeting.responses = [];
+          existingMeeting.responses.push({
+            name: responderName,
+            timeSlotId: currentSelectedSlot.id,
+            startTime: currentStartTime,
+            endTime: currentEndTime
+          });
+          
+          // Save the updated meeting data back to localStorage
+          storeMeetingInStorage(inviteId, existingMeeting);
+        }
+      }
+      
       toast({
         title: "Time confirmed!",
         description: "You're all set for the meetup.",

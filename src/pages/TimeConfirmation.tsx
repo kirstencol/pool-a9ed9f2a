@@ -9,13 +9,24 @@ import { useToast } from "@/hooks/use-toast";
 const TimeConfirmation = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentUser, participants, timeSlots, clearTimeSlots, addTimeSlot } = useMeeting();
+  const { 
+    currentUser, 
+    participants, 
+    timeSlots, 
+    clearTimeSlots, 
+    addTimeSlot,
+    generateShareableLink,
+    storeMeetingInStorage
+  } = useMeeting();
+  
   const [copied, setCopied] = useState(false);
+  const [shareableLink, setShareableLink] = useState("");
+  const [inviteId, setInviteId] = useState("");
+  const [burtDirectLink, setBurtDirectLink] = useState("");
 
-  // Set up Abby's data when the component loads if no current user exists
+  // Set up data when the component loads
   useEffect(() => {
     if (!currentUser) {
-      // For debugging purposes
       console.log("Setting up Abby's data");
       
       // Clear any existing time slots
@@ -60,19 +71,32 @@ const TimeConfirmation = () => {
     console.log("Current user:", currentUser);
     console.log("Current time slots:", timeSlots);
     console.log("Current participants:", participants);
-  }, [currentUser, timeSlots, navigate, participants, clearTimeSlots, addTimeSlot]);
+    
+    // Generate shareable link for this meeting
+    if (currentUser && timeSlots.length > 0) {
+      // Get the meeting data
+      const { id, url } = generateShareableLink();
+      setShareableLink(url);
+      setInviteId(id);
+      
+      // For demo/testing, maintain the burt_demo link
+      const baseUrl = window.location.origin;
+      setBurtDirectLink(`${baseUrl}/respond/burt_demo`);
+      
+      // For demo purposes, also store the demo_invite data
+      const demoMeetingData = {
+        creator: currentUser,
+        timeSlots: timeSlots,
+      };
+      
+      storeMeetingInStorage("demo_invite", demoMeetingData);
+      console.log("Stored demo_invite data with time slots:", timeSlots);
+    }
+  }, [currentUser, timeSlots, navigate, participants, clearTimeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage]);
 
   if (!currentUser) {
     return null;
   }
-
-  // Generate a real invite ID - in a real app, this would be stored in a database
-  // For demo purposes, we'll create a fixed ID to ensure demo works consistently
-  const inviteId = "demo_invite";
-  const shareableLink = `${window.location.origin}/respond/${inviteId}`;
-  
-  // Create a direct link to Burt's response flow with Abby's data already populated
-  const burtDirectLink = `${window.location.origin}/respond/burt_demo`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(shareableLink);
@@ -119,6 +143,13 @@ const TimeConfirmation = () => {
       </div>
 
       <div className="space-y-4">
+        <div className="p-4 bg-green-50 rounded-xl mb-4 text-center">
+          <p className="text-green-700 font-medium">Your meeting data is saved!</p>
+          <p className="text-green-600 text-sm">
+            Your unique link ID: <span className="font-mono bg-white px-2 py-1 rounded">{inviteId}</span>
+          </p>
+        </div>
+        
         <button
           onClick={copyLink}
           className="action-button w-full"
