@@ -1,11 +1,11 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useMeeting } from "@/context/meeting";
 import { TimeSlot } from "@/types";
 import TimeSlotSelection from "./TimeSlotSelection";
-import Loading from "@/components/Loading"; // Import our new Loading component
+import Loading from "@/components/Loading";
 
 interface ResponseFormProps {
   creatorName: string;
@@ -26,7 +26,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
     addParticipant,
     loadMeetingFromStorage,
     storeMeetingInStorage,
-    addTimeSlot  // Added this missing import from useMeeting context
+    addTimeSlot
   } = useMeeting();
   
   const [localTimeSlots, setLocalTimeSlots] = useState<TimeSlot[]>([]);
@@ -34,15 +34,32 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const [currentStartTime, setCurrentStartTime] = useState("");
   const [currentEndTime, setCurrentEndTime] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const loadStartTime = useRef(Date.now());
+  const minimumLoadingTime = 800; // Minimum time in ms to show loading screen
 
   // Get timeSlots from context to ensure we're using the most up-to-date data
   useEffect(() => {
-    setIsLoading(true);
+    // Start loading
+    loadStartTime.current = Date.now();
+    
+    const finishLoading = () => {
+      const elapsedTime = Date.now() - loadStartTime.current;
+      if (elapsedTime < minimumLoadingTime) {
+        // If we haven't shown the loading screen for at least the minimum time,
+        // wait until we have before hiding it
+        setTimeout(() => {
+          setIsLoading(false);
+        }, minimumLoadingTime - elapsedTime);
+      } else {
+        setIsLoading(false);
+      }
+    };
+
     console.log("ResponseForm - Using timeSlots from context:", timeSlots);
     
     if (timeSlots && timeSlots.length > 0) {
       setLocalTimeSlots(timeSlots);
-      setIsLoading(false);
+      finishLoading();
     } else if (inviteId) {
       // Fallback: try to get time slots directly from storage
       console.log("ResponseForm - Trying to load time slots directly from storage for:", inviteId);
@@ -59,10 +76,11 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
           }
         });
         
-        setIsLoading(false);
+        finishLoading();
       } else {
         console.error("ResponseForm - Failed to load time slots from storage");
-        setTimeout(() => setIsLoading(false), 1000); // Safety timeout
+        // Ensure we show the loading screen for at least the minimum time
+        finishLoading();
       }
     }
   }, [timeSlots, inviteId, loadMeetingFromStorage, addTimeSlot]);

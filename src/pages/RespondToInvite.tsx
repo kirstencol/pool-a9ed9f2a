@@ -2,23 +2,27 @@
 import { useParams } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
 import { useInviteData } from "@/hooks/useInviteData";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import InvitationHeader from "@/components/respond/InvitationHeader";
 import ResponseForm from "@/components/respond/ResponseForm";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
 import { initializeDemoData } from "@/context/meeting/storage";
-import Loading from "@/components/Loading"; // Import our new Loading component
+import Loading from "@/components/Loading";
 
 const RespondToInvite = () => {
   const { inviteId: rawInviteId } = useParams();
   const inviteId = rawInviteId || "demo_invite"; // Fallback to demo_invite if no ID provided
   const { timeSlots: contextTimeSlots } = useMeeting();
+  const initialLoadComplete = useRef(false);
   
   // Initialize demo data on component mount
   useEffect(() => {
-    // This ensures demo data is available immediately when component loads
-    initializeDemoData();
-    console.log("RespondToInvite - Initialized demo data on mount");
+    if (!initialLoadComplete.current) {
+      // This ensures demo data is available immediately when component loads
+      initializeDemoData();
+      console.log("RespondToInvite - Initialized demo data on mount");
+      initialLoadComplete.current = true;
+    }
   }, []);
   
   console.log("RespondToInvite - Received inviteId param:", rawInviteId);

@@ -24,17 +24,20 @@ export const useInviteData = (inviteId: string | undefined): {
   const [inviteTimeSlots, setInviteTimeSlots] = useState<TimeSlot[]>([]);
 
   useEffect(() => {
+    let isMounted = true;
     console.log("useInviteData - Loading invite data for ID:", inviteId);
     
     // IMPORTANT: Always initialize demo data first
     initializeDemoData();
     
-    // Reset states
-    setIsLoading(true);
+    // Reset states but don't call setIsLoading(true) if it's already true
+    // This helps prevent flickering
     setInviteError(null);
     
     const loadDataWithRetry = async (id: string, retries = 2) => {
       console.log(`useInviteData - Loading data for ${id}, attempts left: ${retries}`);
+      
+      if (!isMounted) return;
       
       // First attempt to load
       let normalizedId = id.toLowerCase();
@@ -46,19 +49,27 @@ export const useInviteData = (inviteId: string | undefined): {
         initializeDemoData();
         
         // Short delay before retry
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 300));
+        if (!isMounted) return;
         return loadDataWithRetry(id, retries - 1);
       }
+      
+      if (!isMounted) return;
       
       if (!meetingData || !meetingData.timeSlots || meetingData.timeSlots.length === 0) {
         console.log("useInviteData - Failed to load data after retries");
         setInviteError('invalid');
-        setIsLoading(false);
+        // Delay setting isLoading to false to prevent flickering
+        setTimeout(() => {
+          if (isMounted) setIsLoading(false);
+        }, 500);
         return;
       }
       
       // Successfully loaded data
       console.log("useInviteData - Successfully loaded data:", meetingData);
+      
+      if (!isMounted) return;
       
       // Set creator name
       if (meetingData.creator && meetingData.creator.name) {
@@ -79,16 +90,21 @@ export const useInviteData = (inviteId: string | undefined): {
         addTimeSlot(slot);
       });
       
-      setIsLoading(false);
+      // Delay setting isLoading to false to avoid flickering
+      setTimeout(() => {
+        if (isMounted) setIsLoading(false);
+      }, 500);
     };
     
-    // Start loading process with short delay
-    setTimeout(() => {
+    // Start loading process with short delay to ensure consistent timing
+    const timer = setTimeout(() => {
       const idToLoad = inviteId || "demo_invite";
       loadDataWithRetry(idToLoad);
-    }, 100);
+    }, 300);
     
     return () => {
+      isMounted = false;
+      clearTimeout(timer);
       console.log("useInviteData - Effect cleanup ran");
     };
   }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]);
