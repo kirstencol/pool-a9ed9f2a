@@ -26,14 +26,15 @@ export const useInviteData = (inviteId: string | undefined): {
   useEffect(() => {
     console.log("useInviteData - Loading invite data for ID:", inviteId);
     
+    // ADD THIS LINE - Ensure demo data is always initialized first
+    initializeDemoData();
+    
     // Reset states
     setIsLoading(true);
     setInviteError(null);
     setInviteTimeSlots([]);
     
     // Ensure demo data is initialized first
-    initializeDemoData();
-    
     const timer = setTimeout(() => {
       if (!inviteId) {
         console.log("useInviteData - No inviteId provided, using demo_invite");

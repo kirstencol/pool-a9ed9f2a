@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import { Button } from "@/components/ui/button";
+import { initializeDemoData } from '@/context/meeting/storage';
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -36,13 +37,15 @@ const Welcome = () => {
   };
 
   const goToRespondAsFriend = () => {
-    // Explicitly log the route we're navigating to
+    // Make sure demo data is initialized before navigating
+    initializeDemoData();
     console.log("Navigating to Friend Response Flow: /respond/demo_invite");
     navigate("/respond/demo_invite");
   };
 
   const goToRespondAsBurt = () => {
-    // Explicitly log the route we're navigating to
+    // Make sure demo data is initialized before navigating
+    initializeDemoData();
     console.log("Navigating to Burt Response Flow: /respond/burt_demo");
     navigate("/respond/burt_demo");
   };
