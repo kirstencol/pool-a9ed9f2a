@@ -1,10 +1,10 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import { Button } from "@/components/ui/button";
-import { ensureDemoDataExists } from "@/context/meeting/storage";
 
 const Welcome = () => {
   const navigate = useNavigate();
@@ -35,28 +35,16 @@ const Welcome = () => {
     setShowDevTools(!showDevTools);
   };
 
-  const goToRespondAsFriend = async () => {
-    try {
-      console.log("Preparing to navigate to Friend Response Flow");
-      
-      await ensureDemoDataExists();
-      
-      console.log("Demo data ready, navigating to Friend Response Flow: /respond/demo_invite");
-      navigate("/respond/demo_invite");
-    } catch (error) {
-      console.error("Error preparing demo data:", error);
-    }
+  const goToRespondAsFriend = () => {
+    // Explicitly log the route we're navigating to
+    console.log("Navigating to Friend Response Flow: /respond/demo_invite");
+    navigate("/respond/demo_invite");
   };
 
-  const goToRespondAsBurt = async () => {
-    try {
-      console.log("Preparing to navigate to Burt Response Flow");
-      await ensureDemoDataExists();
-      console.log("Demo data ready, navigating to Burt Response Flow: /respond/burt_demo");
-      navigate("/respond/burt_demo");
-    } catch (error) {
-      console.error("Error preparing Burt demo data:", error);
-    }
+  const goToRespondAsBurt = () => {
+    // Explicitly log the route we're navigating to
+    console.log("Navigating to Burt Response Flow: /respond/burt_demo");
+    navigate("/respond/burt_demo");
   };
 
   return (

@@ -1,7 +1,7 @@
 
 import React, { memo } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface InvalidInvitationProps {
@@ -19,7 +19,7 @@ const InvalidInvitation: React.FC<InvalidInvitationProps> = memo(({
       case 'expired':
         return "This invitation link has expired.";
       case 'loading':
-        return "Please wait while we load the invitation details...";
+        return "Loading invitation details...";
       case 'invalid':
       default:
         return "This invitation link appears to be invalid or has expired.";
@@ -36,24 +36,15 @@ const InvalidInvitation: React.FC<InvalidInvitationProps> = memo(({
         <h1 className="text-2xl font-semibold mb-4">
           {getTitle()}
         </h1>
-        
-        {reason === 'loading' && (
-          <div className="flex justify-center mb-4">
-            <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-          </div>
-        )}
-        
         <p className="text-gray-600 mb-6">{getMessage()}</p>
-        
-        {reason !== 'loading' && (
-          <Button 
-            onClick={() => navigate("/")} 
-            className="flex items-center"
-          >
-            <ArrowLeft className="mr-2" size={16} />
-            Go to Homepage
-          </Button>
-        )}
+        <Button 
+          onClick={() => navigate("/")} 
+          className="flex items-center"
+          variant={reason === 'loading' ? "secondary" : "default"}
+        >
+          <ArrowLeft className="mr-2" size={16} />
+          Go to Homepage
+        </Button>
       </div>
     </div>
   );
