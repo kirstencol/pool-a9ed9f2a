@@ -1,4 +1,3 @@
-
 import { TimeSlot } from "@/types";
 import { useState, useEffect, memo } from "react";
 import { cn } from "@/lib/utils";
@@ -9,7 +8,7 @@ interface TimeSlotCardProps {
   selectedByUser?: boolean;
   showTimeSelector?: boolean;
   onSelectTime?: (startTime: string, endTime: string) => void;
-  onCannotMakeIt?: (e?: React.MouseEvent) => void; // Updated to accept an optional event parameter
+  onCannotMakeIt?: (e?: React.MouseEvent) => void; 
   cannotMakeItText?: string;
   creatorAvailable?: boolean;
   creatorName?: string;
@@ -32,7 +31,6 @@ const TimeSlotCard = ({
   const [startTime, setStartTime] = useState(timeSlot.startTime);
   const [endTime, setEndTime] = useState(timeSlot.endTime);
 
-  // Set initial times when the card becomes selected
   useEffect(() => {
     if (selectedByUser && showTimeSelector) {
       setStartTime(timeSlot.startTime);
@@ -40,15 +38,12 @@ const TimeSlotCard = ({
     }
   }, [selectedByUser, showTimeSelector, timeSlot.startTime, timeSlot.endTime]);
 
-  // Format date for display (e.g., "Friday, October 25")
   const formatDate = (dateString: string) => {
-    // Ensure we're not affected by timezone when displaying the date
-    // Add a time component (noon) to avoid timezone shifts
     const dateParts = dateString.split('-');
     if (dateParts.length !== 3) return dateString;
     
     const year = parseInt(dateParts[0]);
-    const month = parseInt(dateParts[1]) - 1; // JS months are 0-indexed
+    const month = parseInt(dateParts[1]) - 1;
     const day = parseInt(dateParts[2]);
     
     const date = new Date(year, month, day, 12, 0, 0);
@@ -82,9 +77,14 @@ const TimeSlotCard = ({
     >
       <div className="mb-2">
         <div className="font-medium">{formatDate(timeSlot.date)}</div>
-        {creatorAvailable && (
+        {creatorAvailable && !selectedByUser && (
           <div className="text-sm text-gray-600">
             {`${creatorName} is free ${timeSlot.startTime} - ${timeSlot.endTime}`}
+          </div>
+        )}
+        {creatorAvailable && selectedByUser && !showTimeSelector && (
+          <div className="text-sm text-purple-700 font-medium">
+            You and {creatorName} are free {startTime} - {endTime}
           </div>
         )}
       </div>
@@ -119,7 +119,7 @@ const TimeSlotCard = ({
         <button 
           onClick={(e) => {
             e.stopPropagation();
-            onCannotMakeIt(e); // Pass the event to the callback
+            onCannotMakeIt(e);
           }}
           className="text-purple-500 text-sm hover:underline mt-2"
         >
@@ -130,5 +130,4 @@ const TimeSlotCard = ({
   );
 };
 
-// Memoize the component to prevent unnecessary re-renders
 export default memo(TimeSlotCard);

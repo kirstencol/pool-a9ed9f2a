@@ -1,4 +1,3 @@
-
 import React, { memo, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import TimeSlotCard from "@/components/TimeSlotCard";
@@ -11,7 +10,7 @@ interface TimeSlotSelectionProps {
   responderName: string;
   creatorName: string;
   onSelectTimeSlot: (slot: TimeSlot, startTime: string, endTime: string) => void;
-  onCannotMakeIt: (e?: React.MouseEvent) => void;  // Updated type to accept an optional event
+  onCannotMakeIt: (e?: React.MouseEvent) => void;
   onSubmit: () => void;
 }
 
@@ -33,13 +32,9 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
     onSelectTimeSlot
   });
 
-  // Store which time slots have been viewed/configured
   const [configuredSlots, setConfiguredSlots] = useState<Set<string>>(new Set());
-  
-  // Track which slot is currently expanded
   const [expandedSlotId, setExpandedSlotId] = useState<string | null>(null);
 
-  // Function to toggle slot expansion
   const toggleSlotExpansion = (slotId: string) => {
     if (expandedSlotId === slotId) {
       setExpandedSlotId(null);
@@ -47,7 +42,6 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
       setExpandedSlotId(slotId);
       handleSelectTimeSlot(slotId);
       
-      // Add this slot to configured slots
       setConfiguredSlots(prev => {
         const newSet = new Set(prev);
         newSet.add(slotId);
@@ -56,7 +50,6 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
     }
   };
 
-  // Check if any slot has been configured
   const hasConfiguredSlots = configuredSlots.size > 0;
 
   return (
@@ -88,7 +81,6 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
                 onSelectTime={(start, end) => {
                   handleTimeRangeSelect(start, end);
                   
-                  // Mark this slot as configured
                   setConfiguredSlots(prev => {
                     const newSet = new Set(prev);
                     newSet.add(timeSlot.id);
@@ -96,19 +88,12 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
                   });
                 }}
                 onCannotMakeIt={(e) => {
-                  // Prevent the card click event from firing
                   e?.stopPropagation?.();
-                  onCannotMakeIt(e);  // Pass the event to the parent handler
+                  onCannotMakeIt(e);
                 }}
                 creatorAvailable
                 creatorName={creatorName}
               />
-              
-              {isConfigured && !isExpanded && (
-                <div className="mt-2 text-sm text-purple-700 font-medium">
-                  ✓ You indicated availability for this time
-                </div>
-              )}
             </div>
           );
         })}
@@ -127,5 +112,4 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
   );
 };
 
-// Use memo to prevent unnecessary re-renders
 export default memo(TimeSlotSelection);
