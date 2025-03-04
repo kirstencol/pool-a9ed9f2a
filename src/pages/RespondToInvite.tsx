@@ -8,8 +8,10 @@ import InvalidInvitation from "@/components/respond/InvalidInvitation";
 
 const RespondToInvite = () => {
   const { inviteId } = useParams();
+  const { timeSlots: contextTimeSlots } = useMeeting();
   
   console.log("RespondToInvite - Received inviteId param:", inviteId);
+  console.log("RespondToInvite - Initial contextTimeSlots:", contextTimeSlots);
   
   const {
     isLoading,
@@ -24,7 +26,8 @@ const RespondToInvite = () => {
     inviteError,
     creatorName,
     responderName,
-    timeSlots: inviteTimeSlots
+    inviteTimeSlots,
+    contextTimeSlots
   });
 
   if (isLoading) {
@@ -37,9 +40,16 @@ const RespondToInvite = () => {
     return <InvalidInvitation reason={inviteError} />;
   }
 
-  // Make sure we have time slots loaded
+  // Make sure we have time slots loaded - checking both our local copy and context
+  console.log("RespondToInvite - Checking timeSlots:", { 
+    inviteTimeSlots, 
+    contextTimeSlots,
+    inviteTimeSlotsLength: inviteTimeSlots?.length || 0,
+    contextTimeSlotsLength: contextTimeSlots?.length || 0
+  });
+  
   if (!inviteTimeSlots || inviteTimeSlots.length === 0) {
-    console.log("No time slots found for invite:", inviteId);
+    console.log("RespondToInvite - No inviteTimeSlots found for invite:", inviteId);
     return <InvalidInvitation reason="invalid" />;
   }
 
