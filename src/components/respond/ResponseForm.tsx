@@ -5,7 +5,7 @@ import TimeSlotSelection from "./TimeSlotSelection";
 import Loading from "@/components/Loading";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import TimeSlotLoader from "./TimeSlotLoader";
-import ResponseSubmitter from "./ResponseSubmitter";
+import { useResponseSubmitter } from "./ResponseSubmitter";
 import NoTimeSlotsView from "./NoTimeSlotsView";
 import { initializeDemoData } from "@/context/meeting/storage";
 
@@ -33,8 +33,8 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
     console.log("ResponseForm - Initialized demo data on mount");
   }, []);
 
-  // Get response handlers from the submitter component
-  const responseSubmitter = ResponseSubmitter({
+  // Get response handlers from the submitter hook
+  const { handleSubmit, handleCantMakeIt } = useResponseSubmitter({
     currentSelectedSlot,
     currentStartTime,
     currentEndTime,
@@ -75,8 +75,8 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
         responderName={responderName}
         creatorName={creatorName}
         onSelectTimeSlot={handleSelectTimeSlot}
-        onCannotMakeIt={responseSubmitter.handleCantMakeIt}
-        onSubmit={responseSubmitter.handleSubmit}
+        onCannotMakeIt={handleCantMakeIt}
+        onSubmit={handleSubmit}
       />
     </div>
   );
