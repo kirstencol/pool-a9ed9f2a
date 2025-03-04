@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useMeeting } from "@/context/MeetingContext";
+import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import TimeSlotCard from "@/components/TimeSlotCard";
 import { useToast } from "@/hooks/use-toast";

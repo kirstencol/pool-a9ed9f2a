@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useMeeting } from "@/context/MeetingContext";
+import { useMeeting } from "@/context/meeting";
 import { useInviteData } from "@/hooks/useInviteData";
 import { TimeSlot } from "@/types";
 import TimeSlotSelection from "./TimeSlotSelection";

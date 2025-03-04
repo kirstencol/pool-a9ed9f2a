@@ -1,6 +1,6 @@
 
 import { useParams } from "react-router-dom";
-import { useMeeting } from "@/context/MeetingContext";
+import { useMeeting } from "@/context/meeting";
 import { useInviteData } from "@/hooks/useInviteData";
 import InvitationHeader from "@/components/respond/InvitationHeader";
 import ResponseForm from "@/components/respond/ResponseForm";

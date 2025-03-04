@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useMeeting } from "@/context/MeetingContext";
+import { useMeeting } from "@/context/meeting";
 import { TimeSlot } from "@/types";
 
 // Demo data for testing

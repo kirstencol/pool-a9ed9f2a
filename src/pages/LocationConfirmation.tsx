@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check, Copy, ArrowRight } from "lucide-react";
-import { useMeeting } from "@/context/MeetingContext";
+import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import { useToast } from "@/hooks/use-toast";
 import TimeSlotCard from "@/components/TimeSlotCard";

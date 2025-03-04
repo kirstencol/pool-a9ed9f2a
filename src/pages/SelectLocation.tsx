@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Plus } from "lucide-react";
-import { useMeeting } from "@/context/MeetingContext";
+import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import LocationCard from "@/components/LocationCard";
 import { Location } from "@/types";
