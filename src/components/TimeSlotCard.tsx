@@ -92,10 +92,15 @@ const TimeSlotCard = ({
       {showTimeSelector && selectedByUser && (
         <div className="bg-purple-100 rounded-lg p-4 my-3">
           <div className="text-center mb-3 font-medium">What time works for you?</div>
+          <div className="text-center mb-2 text-sm text-gray-600">
+            (Select times within {creatorName}'s availability)
+          </div>
           <div className="flex justify-center space-x-4 items-center">
             <TimeSelector 
               time={startTime} 
-              onTimeChange={handleStartTimeChange} 
+              onTimeChange={handleStartTimeChange}
+              minTime={timeSlot.startTime}
+              maxTime={timeSlot.endTime}
             />
             <span className="text-gray-500">to</span>
             <TimeSelector 
@@ -103,6 +108,8 @@ const TimeSlotCard = ({
               onTimeChange={handleEndTimeChange}
               isEndTime={true}
               startTime={startTime}
+              minTime={timeSlot.startTime}
+              maxTime={timeSlot.endTime}
             />
           </div>
         </div>

@@ -5,7 +5,7 @@ import TimeSlotSelection from "./TimeSlotSelection";
 import Loading from "@/components/Loading";
 import { useLoadingState } from "@/hooks/useLoadingState";
 import TimeSlotLoader from "./TimeSlotLoader";
-import { useResponseSubmitter } from "./ResponseSubmitter";
+import { useResponseSubmitter } from "@/hooks/useResponseSubmitter";
 import NoTimeSlotsView from "./NoTimeSlotsView";
 import { initializeDemoData } from "@/context/meeting/storage";
 
@@ -21,9 +21,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   inviteId
 }) => {
   const [localTimeSlots, setLocalTimeSlots] = useState<TimeSlot[]>([]);
-  const [currentSelectedSlot, setCurrentSelectedSlot] = useState<TimeSlot | null>(null);
-  const [currentStartTime, setCurrentStartTime] = useState("");
-  const [currentEndTime, setCurrentEndTime] = useState("");
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, {slot: TimeSlot, startTime: string, endTime: string}>>(new Map());
   
   // Use a longer minimum loading time to ensure all data is loaded
   const { isLoading, finishLoading } = useLoadingState({
@@ -39,17 +37,17 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
 
   // Get response handlers from the submitter hook
   const { handleSubmit, handleCantMakeIt } = useResponseSubmitter({
-    currentSelectedSlot,
-    currentStartTime,
-    currentEndTime,
+    selectedTimeSlots: Array.from(selectedTimeSlots.values()),
     responderName,
     inviteId
   });
 
   const handleSelectTimeSlot = (slot: TimeSlot, startTime: string, endTime: string) => {
-    setCurrentSelectedSlot(slot);
-    setCurrentStartTime(startTime);
-    setCurrentEndTime(endTime);
+    setSelectedTimeSlots(prev => {
+      const newMap = new Map(prev);
+      newMap.set(slot.id, { slot, startTime, endTime });
+      return newMap;
+    });
     console.log("Selected time slot:", slot, startTime, endTime);
   };
 
