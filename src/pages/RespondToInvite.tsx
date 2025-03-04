@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+
 import { useParams } from "react-router-dom";
 import { useMeeting } from "@/context/MeetingContext";
 import { useInviteData } from "@/hooks/useInviteData";
@@ -8,19 +8,16 @@ import InvalidInvitation from "@/components/respond/InvalidInvitation";
 
 const RespondToInvite = () => {
   const { inviteId } = useParams();
-  const { timeSlots } = useMeeting();
   
   const {
     isLoading,
     inviteError,
     creatorName,
-    responderName
+    responderName,
+    inviteTimeSlots
   } = useInviteData(inviteId);
 
-  useEffect(() => {
-    // Debug logging to track when timeSlots changes
-    console.log("timeSlots updated:", timeSlots);
-  }, [timeSlots]);
+  console.log("RespondToInvite - timeSlots from hook:", inviteTimeSlots);
 
   if (isLoading) {
     return <InvalidInvitation reason="loading" />;
@@ -31,7 +28,7 @@ const RespondToInvite = () => {
   }
 
   // Make sure we have time slots loaded
-  if (!timeSlots || timeSlots.length === 0) {
+  if (!inviteTimeSlots || inviteTimeSlots.length === 0) {
     console.log("No time slots found for invite:", inviteId);
     return <InvalidInvitation reason="invalid" />;
   }

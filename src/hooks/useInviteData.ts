@@ -33,11 +33,11 @@ interface UseInviteDataReturn {
   inviteError: 'invalid' | 'expired' | null;
   creatorName: string;
   responderName: string;
+  inviteTimeSlots: TimeSlot[];
 }
 
 export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn => {
   const { 
-    timeSlots,
     addTimeSlot, 
     clearTimeSlots,
     loadMeetingFromStorage
@@ -47,6 +47,7 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
   const [inviteError, setInviteError] = useState<'invalid' | 'expired' | null>(null);
   const [creatorName, setCreatorName] = useState("Abby");
   const [responderName, setResponderName] = useState("Friend");
+  const [inviteTimeSlots, setInviteTimeSlots] = useState<TimeSlot[]>([]);
 
   useEffect(() => {
     console.log("Loading invite data for ID:", inviteId);
@@ -54,6 +55,7 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
     // Reset states
     setIsLoading(true);
     setInviteError(null);
+    setInviteTimeSlots([]);
     
     // Clear existing time slots first
     clearTimeSlots();
@@ -69,9 +71,16 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
       if (inviteId.toLowerCase() === "demo_invite") {
         setCreatorName("Abby");
         setResponderName("Friend");
-        DEMO_TIME_SLOTS.forEach(slot => {
+        
+        // Instead of directly calling addTimeSlot, we'll set our local state first
+        const demoSlots = [...DEMO_TIME_SLOTS];
+        setInviteTimeSlots(demoSlots);
+        
+        // Also update the context
+        demoSlots.forEach(slot => {
           addTimeSlot(slot);
         });
+        
         setIsLoading(false);
         return;
       } 
@@ -79,9 +88,16 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
       if (inviteId.toLowerCase() === "burt_demo") {
         setCreatorName("Abby");
         setResponderName("Burt");
-        DEMO_TIME_SLOTS.forEach(slot => {
+        
+        // Instead of directly calling addTimeSlot, we'll set our local state first
+        const demoSlots = [...DEMO_TIME_SLOTS];
+        setInviteTimeSlots(demoSlots);
+        
+        // Also update the context
+        demoSlots.forEach(slot => {
           addTimeSlot(slot);
         });
+        
         setIsLoading(false);
         return;
       }
@@ -97,7 +113,10 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
           setCreatorName(loadedMeeting.creator.name);
         }
         
-        // Extract time slots
+        // Extract time slots and update local state
+        setInviteTimeSlots(loadedMeeting.timeSlots);
+        
+        // Also update the context
         loadedMeeting.timeSlots.forEach(slot => {
           addTimeSlot(slot);
         });
@@ -108,17 +127,16 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
         setInviteError('invalid');
         setIsLoading(false);
       }
-      
-      console.log("Time slots loaded:", timeSlots);
     }, 600);
     
     return () => clearTimeout(timer);
-  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage, timeSlots]);
+  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]); // Removed timeSlots from dependency array
 
   return {
     isLoading,
     inviteError,
     creatorName,
-    responderName
+    responderName,
+    inviteTimeSlots
   };
 };

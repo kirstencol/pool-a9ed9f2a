@@ -31,6 +31,9 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const [currentStartTime, setCurrentStartTime] = useState("");
   const [currentEndTime, setCurrentEndTime] = useState("");
 
+  // Log when the component renders with timeSlots
+  console.log("ResponseForm rendering with timeSlots:", timeSlots);
+
   const handleSelectTimeSlot = (slot: TimeSlot, startTime: string, endTime: string) => {
     setCurrentSelectedSlot(slot);
     setCurrentStartTime(startTime);
