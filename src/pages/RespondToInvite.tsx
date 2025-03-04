@@ -2,7 +2,7 @@
 import { useParams } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
 import { useInviteData } from "@/hooks/useInviteData";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import InvitationHeader from "@/components/respond/InvitationHeader";
 import ResponseForm from "@/components/respond/ResponseForm";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
@@ -14,6 +14,7 @@ const RespondToInvite = () => {
   const inviteId = rawInviteId || "demo_invite"; // Fallback to demo_invite if no ID provided
   const { timeSlots: contextTimeSlots } = useMeeting();
   const initialLoadComplete = useRef(false);
+  const [forcedError, setForcedError] = useState<'invalid' | null>(null);
   
   // Initialize demo data on component mount
   useEffect(() => {
@@ -23,6 +24,18 @@ const RespondToInvite = () => {
       console.log("RespondToInvite - Initialized demo data on mount");
       initialLoadComplete.current = true;
     }
+  }, []);
+  
+  // Add a safety timeout to prevent infinite loading
+  useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      console.log("RespondToInvite - Safety timeout reached, forcing error state");
+      setForcedError('invalid');
+    }, 8000); // 8 second maximum wait time
+    
+    return () => {
+      clearTimeout(safetyTimer);
+    };
   }, []);
   
   console.log("RespondToInvite - Received inviteId param:", rawInviteId);
@@ -47,14 +60,16 @@ const RespondToInvite = () => {
   });
 
   // Handle loading state with better feedback
-  if (isLoading) {
+  if (isLoading && !forcedError) {
     console.log("RespondToInvite - Still loading...");
     return <Loading message="Loading invitation..." subtitle="Please wait while we prepare your time options" />;
   }
 
-  if (inviteError) {
-    console.log("RespondToInvite - Error:", inviteError);
-    return <InvalidInvitation reason={inviteError} />;
+  // Check for any error condition
+  if (inviteError || forcedError) {
+    const errorReason = inviteError || forcedError;
+    console.log("RespondToInvite - Error:", errorReason);
+    return <InvalidInvitation reason={errorReason} />;
   }
 
   // Make sure we have time slots loaded - checking our local copy from the hook

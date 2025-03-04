@@ -34,6 +34,17 @@ export const useInviteData = (inviteId: string | undefined): {
     // This helps prevent flickering
     setInviteError(null);
     
+    // Add a global safety timeout to prevent infinite loading
+    const safetyTimer = setTimeout(() => {
+      if (isMounted && isLoading) {
+        console.log("useInviteData - Safety timeout reached, forcing load completion");
+        setIsLoading(false);
+        if (!inviteTimeSlots || inviteTimeSlots.length === 0) {
+          setInviteError('invalid');
+        }
+      }
+    }, 5000); // 5 second maximum wait time
+    
     const loadDataWithRetry = async (id: string, retries = 2) => {
       console.log(`useInviteData - Loading data for ${id}, attempts left: ${retries}`);
       
@@ -59,10 +70,8 @@ export const useInviteData = (inviteId: string | undefined): {
       if (!meetingData || !meetingData.timeSlots || meetingData.timeSlots.length === 0) {
         console.log("useInviteData - Failed to load data after retries");
         setInviteError('invalid');
-        // Delay setting isLoading to false to prevent flickering
-        setTimeout(() => {
-          if (isMounted) setIsLoading(false);
-        }, 500);
+        // Set loading to false to ensure we don't hang
+        setIsLoading(false);
         return;
       }
       
@@ -90,10 +99,8 @@ export const useInviteData = (inviteId: string | undefined): {
         addTimeSlot(slot);
       });
       
-      // Delay setting isLoading to false to avoid flickering
-      setTimeout(() => {
-        if (isMounted) setIsLoading(false);
-      }, 500);
+      // Set loading to false to show data
+      setIsLoading(false);
     };
     
     // Start loading process with short delay to ensure consistent timing
@@ -105,9 +112,10 @@ export const useInviteData = (inviteId: string | undefined): {
     return () => {
       isMounted = false;
       clearTimeout(timer);
+      clearTimeout(safetyTimer);
       console.log("useInviteData - Effect cleanup ran");
     };
-  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]);
+  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage, isLoading, inviteTimeSlots]);
 
   return {
     isLoading,

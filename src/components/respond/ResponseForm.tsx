@@ -35,7 +35,23 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const [currentEndTime, setCurrentEndTime] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const loadStartTime = useRef(Date.now());
+  const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const minimumLoadingTime = 800; // Minimum time in ms to show loading screen
+  
+  // Add a safety timeout to prevent infinite loading
+  useEffect(() => {
+    const safetyTimer = setTimeout(() => {
+      console.log("ResponseForm - Safety timeout reached, forcing load completion");
+      setIsLoading(false);
+    }, 3000); // 3 second maximum wait time
+    
+    return () => {
+      clearTimeout(safetyTimer);
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
+    };
+  }, []);
 
   // Get timeSlots from context to ensure we're using the most up-to-date data
   useEffect(() => {
@@ -47,8 +63,12 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
       if (elapsedTime < minimumLoadingTime) {
         // If we haven't shown the loading screen for at least the minimum time,
         // wait until we have before hiding it
-        setTimeout(() => {
+        if (loadingTimerRef.current) {
+          clearTimeout(loadingTimerRef.current);
+        }
+        loadingTimerRef.current = setTimeout(() => {
           setIsLoading(false);
+          loadingTimerRef.current = null;
         }, minimumLoadingTime - elapsedTime);
       } else {
         setIsLoading(false);
@@ -83,6 +103,12 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
         finishLoading();
       }
     }
+    
+    return () => {
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current);
+      }
+    };
   }, [timeSlots, inviteId, loadMeetingFromStorage, addTimeSlot]);
 
   // Log when the component renders with timeSlots
