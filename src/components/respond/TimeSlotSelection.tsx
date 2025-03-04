@@ -11,7 +11,7 @@ interface TimeSlotSelectionProps {
   responderName: string;
   creatorName: string;
   onSelectTimeSlot: (slot: TimeSlot, startTime: string, endTime: string) => void;
-  onCannotMakeIt: () => void;
+  onCannotMakeIt: (e?: React.MouseEvent) => void;  // Updated type to accept an optional event
   onSubmit: () => void;
 }
 
@@ -60,7 +60,7 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
                 onCannotMakeIt={(e) => {
                   // Prevent the card click event from firing
                   e?.stopPropagation?.();
-                  onCannotMakeIt();
+                  onCannotMakeIt(e);  // Pass the event to the parent handler
                 }}
                 creatorAvailable
                 creatorName={creatorName}
