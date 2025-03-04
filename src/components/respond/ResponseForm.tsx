@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMeeting } from "@/context/meeting";
 import { TimeSlot } from "@/types";
 import TimeSlotSelection from "./TimeSlotSelection";
+import Loading from "@/components/Loading"; // Import our new Loading component
 
 interface ResponseFormProps {
   creatorName: string;
@@ -31,12 +32,16 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const [currentSelectedSlot, setCurrentSelectedSlot] = useState<TimeSlot | null>(null);
   const [currentStartTime, setCurrentStartTime] = useState("");
   const [currentEndTime, setCurrentEndTime] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Get timeSlots from context to ensure we're using the most up-to-date data
   useEffect(() => {
+    setIsLoading(true);
     console.log("ResponseForm - Using timeSlots from context:", timeSlots);
+    
     if (timeSlots && timeSlots.length > 0) {
       setLocalTimeSlots(timeSlots);
+      setIsLoading(false);
     } else if (inviteId) {
       // Fallback: try to get time slots directly from storage
       console.log("ResponseForm - Trying to load time slots directly from storage for:", inviteId);
@@ -44,9 +49,22 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
       if (storedMeeting?.timeSlots && storedMeeting.timeSlots.length > 0) {
         console.log("ResponseForm - Loaded time slots from storage:", storedMeeting.timeSlots);
         setLocalTimeSlots(storedMeeting.timeSlots);
+        
+        // Add to context if not already there
+        storedMeeting.timeSlots.forEach(slot => {
+          // Only add if not already in context
+          if (!timeSlots.some(ts => ts.id === slot.id)) {
+            addTimeSlot(slot);
+          }
+        });
+        
+        setIsLoading(false);
+      } else {
+        console.error("ResponseForm - Failed to load time slots from storage");
+        setTimeout(() => setIsLoading(false), 1000); // Safety timeout
       }
     }
-  }, [timeSlots, inviteId, loadMeetingFromStorage]);
+  }, [timeSlots, inviteId, loadMeetingFromStorage, addTimeSlot]);
 
   // Log when the component renders with timeSlots
   console.log("ResponseForm rendering with localTimeSlots:", localTimeSlots);
@@ -113,6 +131,25 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
     }
     navigate("/");
   };
+
+  if (isLoading) {
+    return <Loading message="Preparing time slots..." subtitle="Just a moment while we get your options ready" />;
+  }
+
+  if (!localTimeSlots || localTimeSlots.length === 0) {
+    return (
+      <div className="mb-6 text-center">
+        <h3 className="text-lg font-medium text-red-600 mb-2">No time slots available</h3>
+        <p className="text-gray-600 mb-4">There are no time slots available for this invitation.</p>
+        <button 
+          onClick={() => navigate('/')}
+          className="text-purple-500 hover:underline font-medium"
+        >
+          Return to home
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="mb-6">
