@@ -1,8 +1,12 @@
-
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, TimeSlot, Location, Meeting } from '@/types';
 import { MeetingContextType, StoredMeeting } from './types';
-import { storeMeetingInStorage, loadMeetingFromStorage, generateUniqueId } from './storage';
+import { 
+  storeMeetingInStorage, 
+  loadMeetingFromStorage, 
+  generateUniqueId,
+  initializeDemoData 
+} from './storage';
 
 const MeetingContext = createContext<MeetingContextType | undefined>(undefined);
 
@@ -15,6 +19,10 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [meetingNotes, setMeetingNotes] = useState<string>('');
   const [currentMeetingId, setCurrentMeetingId] = useState<string>('');
+
+  useEffect(() => {
+    initializeDemoData();
+  }, []);
 
   const generateShareableLink = () => {
     const meetingId = currentMeetingId || generateUniqueId();

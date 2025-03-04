@@ -3,30 +3,7 @@ import { useState, useEffect } from "react";
 import { useMeeting } from "@/context/meeting";
 import { TimeSlot } from "@/types";
 
-// Demo data for testing
-const DEMO_TIME_SLOTS = [
-  {
-    id: "1",
-    date: "March 1",
-    startTime: "8:00 AM",
-    endTime: "1:30 PM",
-    responses: []
-  },
-  {
-    id: "2",
-    date: "March 2",
-    startTime: "7:00 AM",
-    endTime: "10:00 AM",
-    responses: []
-  },
-  {
-    id: "3",
-    date: "March 3",
-    startTime: "9:00 AM",
-    endTime: "9:00 PM",
-    responses: []
-  }
-];
+// Demo time slots moved to storage.ts, we can reuse directly from there
 
 interface UseInviteDataReturn {
   isLoading: boolean;
@@ -73,58 +50,23 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
       const normalizedInviteId = inviteId.toLowerCase();
       console.log("useInviteData - Normalized inviteId:", normalizedInviteId);
       
-      // Handle demo routes with consistent test data
-      if (normalizedInviteId === "demo_invite") {
-        console.log("useInviteData - Processing demo_invite case");
-        setCreatorName("Abby");
-        setResponderName("Friend");
-        
-        // Create a copy of the demo slots
-        const demoSlots = [...DEMO_TIME_SLOTS];
-        console.log("useInviteData - Demo slots to be added:", demoSlots);
-        
-        // Set our local state first
-        setInviteTimeSlots(demoSlots);
-        
-        // Then update the context (one by one)
-        demoSlots.forEach(slot => {
-          console.log("useInviteData - Adding slot to context:", slot);
-          addTimeSlot(slot);
-        });
-        
-        setIsLoading(false);
-        console.log("useInviteData - Finished loading demo_invite data");
-        return;
-      } 
-      
-      if (normalizedInviteId === "burt_demo") {
-        console.log("useInviteData - Processing burt_demo case");
-        setCreatorName("Abby");
-        setResponderName("Burt");
-        
-        // Instead of directly calling addTimeSlot, we'll set our local state first
-        const demoSlots = [...DEMO_TIME_SLOTS];
-        setInviteTimeSlots(demoSlots);
-        
-        // Also update the context
-        demoSlots.forEach(slot => {
-          addTimeSlot(slot);
-        });
-        
-        setIsLoading(false);
-        console.log("useInviteData - Finished loading burt_demo data");
-        return;
-      }
-      
-      // Try to load meeting data from localStorage using inviteId for real invites
-      const loadedMeeting = loadMeetingFromStorage(inviteId);
+      // Try to load meeting data from localStorage for ALL invite IDs
+      const loadedMeeting = loadMeetingFromStorage(normalizedInviteId);
+      console.log("useInviteData - Loaded meeting data:", loadedMeeting);
       
       if (loadedMeeting && loadedMeeting.timeSlots && loadedMeeting.timeSlots.length > 0) {
         // Use data from localStorage
-        console.log("useInviteData - Loaded meeting data from storage:", loadedMeeting);
+        console.log("useInviteData - Using data from localStorage:", loadedMeeting);
         
         if (loadedMeeting.creator && loadedMeeting.creator.name) {
           setCreatorName(loadedMeeting.creator.name);
+        }
+        
+        // Set responder name based on the invite ID (for demo cases)
+        if (normalizedInviteId === "burt_demo") {
+          setResponderName("Burt");
+        } else {
+          setResponderName("Friend");
         }
         
         // Extract time slots and update local state
@@ -137,7 +79,7 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
         
         setIsLoading(false);
       } else {
-        // For any other invite ID that wasn't found in localStorage
+        // For any invite ID that wasn't found in localStorage (even after initialization)
         console.log("useInviteData - Invalid or missing data for inviteId:", inviteId);
         setInviteError('invalid');
         setIsLoading(false);
@@ -148,7 +90,7 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
       clearTimeout(timer);
       console.log("useInviteData - Effect cleanup ran");
     };
-  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]); // Removed timeSlots from dependencies
+  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]);
 
   return {
     isLoading,
