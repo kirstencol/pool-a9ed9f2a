@@ -64,44 +64,49 @@ const DEMO_TIME_SLOTS = [
 ];
 
 // Initialize demo meeting data in localStorage
-export const initializeDemoData = (): void => {
-  console.log("Initializing demo data...");
-  
-  // Create the default demo creator
-  const demoCreator = {
-    id: "demo-creator",
-    name: "Abby",
-    initial: "A"
-  };
-  
-  // Always create fresh demo data to ensure it exists and is valid
-  const demoMeetingData: StoredMeeting = {
-    creator: demoCreator,
-    timeSlots: DEMO_TIME_SLOTS,
-  };
-  
-  // Check if demo data already exists
-  const existingDemoData = loadMeetingFromStorage("demo_invite");
-  const existingBurtData = loadMeetingFromStorage("burt_demo");
-  
-  // Store demo_invite data (always refresh it to ensure it's valid)
-  storeMeetingInStorage("demo_invite", demoMeetingData);
-  console.log("Demo meeting data initialized/refreshed in localStorage");
-  
-  // Also initialize/refresh burt_demo data
-  storeMeetingInStorage("burt_demo", demoMeetingData);
-  console.log("Burt demo meeting data initialized/refreshed in localStorage");
-  
-  // Log whether we updated existing data or created new data
-  if (existingDemoData) {
-    console.log("Updated existing demo_invite data in localStorage");
-  } else {
-    console.log("Created new demo_invite data in localStorage");
-  }
-  
-  if (existingBurtData) {
-    console.log("Updated existing burt_demo data in localStorage");
-  } else {
-    console.log("Created new burt_demo data in localStorage");
+export const initializeDemoData = (): boolean => {
+  try {
+    console.log("Initializing demo data...");
+    
+    // Create the default demo creator
+    const demoCreator = {
+      id: "demo-creator",
+      name: "Abby",
+      initial: "A"
+    };
+    
+    // Always create fresh demo data to ensure it exists and is valid
+    const demoMeetingData: StoredMeeting = {
+      creator: demoCreator,
+      timeSlots: DEMO_TIME_SLOTS,
+    };
+    
+    // Force store both sets of demo data
+    const demoStored = storeMeetingInStorage("demo_invite", demoMeetingData);
+    const burtStored = storeMeetingInStorage("burt_demo", demoMeetingData);
+    
+    console.log("Demo data initialization complete. Success:", demoStored && burtStored);
+    
+    // Verify data was stored properly
+    const demoVerify = loadMeetingFromStorage("demo_invite");
+    const burtVerify = loadMeetingFromStorage("burt_demo");
+    
+    // Log verification results
+    if (demoVerify && demoVerify.timeSlots && demoVerify.timeSlots.length > 0) {
+      console.log("Demo data verified with", demoVerify.timeSlots.length, "time slots");
+    } else {
+      console.error("Failed to verify demo data");
+    }
+    
+    if (burtVerify && burtVerify.timeSlots && burtVerify.timeSlots.length > 0) {
+      console.log("Burt data verified with", burtVerify.timeSlots.length, "time slots");
+    } else {
+      console.error("Failed to verify Burt demo data");
+    }
+    
+    return demoStored && burtStored;
+  } catch (error) {
+    console.error("Error in initializeDemoData:", error);
+    return false;
   }
 };
