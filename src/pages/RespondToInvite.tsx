@@ -7,10 +7,12 @@ import ResponseForm from "@/components/respond/ResponseForm";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
 
 const RespondToInvite = () => {
-  const { inviteId } = useParams();
+  const { inviteId: rawInviteId } = useParams();
+  const inviteId = rawInviteId || "demo_invite"; // Fallback to demo_invite if no ID provided
   const { timeSlots: contextTimeSlots } = useMeeting();
   
-  console.log("RespondToInvite - Received inviteId param:", inviteId);
+  console.log("RespondToInvite - Received inviteId param:", rawInviteId);
+  console.log("RespondToInvite - Using inviteId:", inviteId);
   console.log("RespondToInvite - Initial contextTimeSlots:", contextTimeSlots);
   
   const {

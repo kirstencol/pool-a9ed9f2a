@@ -1,9 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useMeeting } from "@/context/meeting";
-import { useInviteData } from "@/hooks/useInviteData";
 import { TimeSlot } from "@/types";
 import TimeSlotSelection from "./TimeSlotSelection";
 
@@ -21,21 +20,36 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { 
+    timeSlots,
     setSelectedTimeSlot, 
     addParticipant,
     loadMeetingFromStorage,
     storeMeetingInStorage
   } = useMeeting();
   
-  // Get inviteTimeSlots directly from the hook
-  const { inviteTimeSlots } = useInviteData(inviteId);
-
+  const [localTimeSlots, setLocalTimeSlots] = useState<TimeSlot[]>([]);
   const [currentSelectedSlot, setCurrentSelectedSlot] = useState<TimeSlot | null>(null);
   const [currentStartTime, setCurrentStartTime] = useState("");
   const [currentEndTime, setCurrentEndTime] = useState("");
 
+  // Get timeSlots from context to ensure we're using the most up-to-date data
+  useEffect(() => {
+    console.log("ResponseForm - Using timeSlots from context:", timeSlots);
+    if (timeSlots && timeSlots.length > 0) {
+      setLocalTimeSlots(timeSlots);
+    } else if (inviteId) {
+      // Fallback: try to get time slots directly from storage
+      console.log("ResponseForm - Trying to load time slots directly from storage for:", inviteId);
+      const storedMeeting = loadMeetingFromStorage(inviteId);
+      if (storedMeeting?.timeSlots && storedMeeting.timeSlots.length > 0) {
+        console.log("ResponseForm - Loaded time slots from storage:", storedMeeting.timeSlots);
+        setLocalTimeSlots(storedMeeting.timeSlots);
+      }
+    }
+  }, [timeSlots, inviteId, loadMeetingFromStorage]);
+
   // Log when the component renders with timeSlots
-  console.log("ResponseForm rendering with inviteTimeSlots:", inviteTimeSlots);
+  console.log("ResponseForm rendering with localTimeSlots:", localTimeSlots);
 
   const handleSelectTimeSlot = (slot: TimeSlot, startTime: string, endTime: string) => {
     setCurrentSelectedSlot(slot);
@@ -57,7 +71,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
       });
       
       // If we have a valid inviteId, record this response in localStorage
-      if (inviteId && inviteId !== "demo_invite" && inviteId !== "burt_demo") {
+      if (inviteId) {
         // Load existing meeting data first
         const existingMeeting = loadMeetingFromStorage(inviteId);
         if (existingMeeting) {
@@ -103,7 +117,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   return (
     <div className="mb-6">
       <TimeSlotSelection
-        timeSlots={inviteTimeSlots}
+        timeSlots={localTimeSlots}
         responderName={responderName}
         creatorName={creatorName}
         onSelectTimeSlot={handleSelectTimeSlot}

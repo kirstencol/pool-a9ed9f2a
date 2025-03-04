@@ -20,9 +20,14 @@ export const loadMeetingFromStorage = (id: string): StoredMeeting | null => {
     const storageKey = `${STORAGE_KEY_PREFIX}${id}`;
     const storedData = localStorage.getItem(storageKey);
     
-    if (!storedData) return null;
+    if (!storedData) {
+      console.log(`No data found for key: ${storageKey}`);
+      return null;
+    }
     
-    return JSON.parse(storedData) as StoredMeeting;
+    const parsedData = JSON.parse(storedData) as StoredMeeting;
+    console.log(`Successfully loaded data for key: ${storageKey}`, parsedData);
+    return parsedData;
   } catch (error) {
     console.error('Error loading meeting data:', error);
     return null;
@@ -60,27 +65,43 @@ const DEMO_TIME_SLOTS = [
 
 // Initialize demo meeting data in localStorage
 export const initializeDemoData = (): void => {
+  console.log("Initializing demo data...");
+  
+  // Create the default demo creator
+  const demoCreator = {
+    id: "demo-creator",
+    name: "Abby",
+    initial: "A"
+  };
+  
+  // Always create fresh demo data to ensure it exists and is valid
+  const demoMeetingData: StoredMeeting = {
+    creator: demoCreator,
+    timeSlots: DEMO_TIME_SLOTS,
+  };
+  
   // Check if demo data already exists
   const existingDemoData = loadMeetingFromStorage("demo_invite");
+  const existingBurtData = loadMeetingFromStorage("burt_demo");
   
-  // Only create the demo data if it doesn't exist yet
-  if (!existingDemoData) {
-    const demoMeetingData: StoredMeeting = {
-      creator: {
-        id: "demo-creator",
-        name: "Abby",
-        initial: "A"
-      },
-      timeSlots: DEMO_TIME_SLOTS,
-    };
-    
-    storeMeetingInStorage("demo_invite", demoMeetingData);
-    console.log("Demo meeting data initialized in localStorage");
-    
-    // Also initialize burt_demo data
-    storeMeetingInStorage("burt_demo", demoMeetingData);
-    console.log("Burt demo meeting data initialized in localStorage");
+  // Store demo_invite data (always refresh it to ensure it's valid)
+  storeMeetingInStorage("demo_invite", demoMeetingData);
+  console.log("Demo meeting data initialized/refreshed in localStorage");
+  
+  // Also initialize/refresh burt_demo data
+  storeMeetingInStorage("burt_demo", demoMeetingData);
+  console.log("Burt demo meeting data initialized/refreshed in localStorage");
+  
+  // Log whether we updated existing data or created new data
+  if (existingDemoData) {
+    console.log("Updated existing demo_invite data in localStorage");
   } else {
-    console.log("Demo data already exists in localStorage");
+    console.log("Created new demo_invite data in localStorage");
+  }
+  
+  if (existingBurtData) {
+    console.log("Updated existing burt_demo data in localStorage");
+  } else {
+    console.log("Created new burt_demo data in localStorage");
   }
 };
