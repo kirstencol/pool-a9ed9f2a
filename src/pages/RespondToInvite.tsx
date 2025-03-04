@@ -5,6 +5,7 @@ import { useInviteData } from "@/hooks/useInviteData";
 import InvitationHeader from "@/components/respond/InvitationHeader";
 import ResponseForm from "@/components/respond/ResponseForm";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
+import Loading from "@/components/Loading";
 
 const RespondToInvite = () => {
   const { inviteId: rawInviteId } = useParams();
@@ -34,7 +35,7 @@ const RespondToInvite = () => {
 
   if (isLoading) {
     console.log("RespondToInvite - Still loading...");
-    return <InvalidInvitation reason="loading" />;
+    return <Loading message="Loading invitation..." subtitle="Please wait while we retrieve the invitation details" />;
   }
 
   if (inviteError) {
