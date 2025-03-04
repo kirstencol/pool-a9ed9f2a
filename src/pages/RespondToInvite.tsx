@@ -40,12 +40,10 @@ const RespondToInvite = () => {
     return <InvalidInvitation reason={inviteError} />;
   }
 
-  // Make sure we have time slots loaded - checking both our local copy and context
-  console.log("RespondToInvite - Checking timeSlots:", { 
+  // Make sure we have time slots loaded - checking our local copy from the hook
+  console.log("RespondToInvite - Checking inviteTimeSlots:", { 
     inviteTimeSlots, 
-    contextTimeSlots,
-    inviteTimeSlotsLength: inviteTimeSlots?.length || 0,
-    contextTimeSlotsLength: contextTimeSlots?.length || 0
+    inviteTimeSlotsLength: inviteTimeSlots?.length || 0
   });
   
   if (!inviteTimeSlots || inviteTimeSlots.length === 0) {

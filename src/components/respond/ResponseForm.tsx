@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useMeeting } from "@/context/MeetingContext";
+import { useInviteData } from "@/hooks/useInviteData";
 import { TimeSlot } from "@/types";
 import TimeSlotSelection from "./TimeSlotSelection";
 
@@ -20,19 +21,21 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const navigate = useNavigate();
   const { toast } = useToast();
   const { 
-    timeSlots, 
     setSelectedTimeSlot, 
     addParticipant,
     loadMeetingFromStorage,
     storeMeetingInStorage
   } = useMeeting();
+  
+  // Get inviteTimeSlots directly from the hook
+  const { inviteTimeSlots } = useInviteData(inviteId);
 
   const [currentSelectedSlot, setCurrentSelectedSlot] = useState<TimeSlot | null>(null);
   const [currentStartTime, setCurrentStartTime] = useState("");
   const [currentEndTime, setCurrentEndTime] = useState("");
 
   // Log when the component renders with timeSlots
-  console.log("ResponseForm rendering with timeSlots:", timeSlots);
+  console.log("ResponseForm rendering with inviteTimeSlots:", inviteTimeSlots);
 
   const handleSelectTimeSlot = (slot: TimeSlot, startTime: string, endTime: string) => {
     setCurrentSelectedSlot(slot);
@@ -100,7 +103,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   return (
     <div className="mb-6">
       <TimeSlotSelection
-        timeSlots={timeSlots}
+        timeSlots={inviteTimeSlots}
         responderName={responderName}
         creatorName={creatorName}
         onSelectTimeSlot={handleSelectTimeSlot}

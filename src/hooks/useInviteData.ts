@@ -41,7 +41,6 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
     addTimeSlot, 
     clearTimeSlots,
     loadMeetingFromStorage,
-    timeSlots
   } = useMeeting();
   
   const [isLoading, setIsLoading] = useState(true);
@@ -52,7 +51,6 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
 
   useEffect(() => {
     console.log("useInviteData - Loading invite data for ID:", inviteId);
-    console.log("useInviteData - Initial timeSlots state:", timeSlots);
     
     // Reset states
     setIsLoading(true);
@@ -62,7 +60,6 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
     // Clear existing time slots first
     console.log("useInviteData - About to clear time slots");
     clearTimeSlots();
-    console.log("useInviteData - Time slots after clearing:", timeSlots);
     
     const timer = setTimeout(() => {
       if (!inviteId) {
@@ -95,7 +92,6 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
           addTimeSlot(slot);
         });
         
-        console.log("useInviteData - Time slots after adding demo slots:", timeSlots);
         setIsLoading(false);
         console.log("useInviteData - Finished loading demo_invite data");
         return;
@@ -115,7 +111,6 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
           addTimeSlot(slot);
         });
         
-        console.log("useInviteData - Time slots after adding Burt demo slots:", timeSlots);
         setIsLoading(false);
         console.log("useInviteData - Finished loading burt_demo data");
         return;
@@ -140,7 +135,6 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
           addTimeSlot(slot);
         });
         
-        console.log("useInviteData - Time slots after adding from storage:", timeSlots);
         setIsLoading(false);
       } else {
         // For any other invite ID that wasn't found in localStorage
@@ -154,12 +148,7 @@ export const useInviteData = (inviteId: string | undefined): UseInviteDataReturn
       clearTimeout(timer);
       console.log("useInviteData - Effect cleanup ran");
     };
-  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage, timeSlots]); // Added timeSlots to watch it update
-
-  // Add a separate effect to log when timeSlots change
-  useEffect(() => {
-    console.log("useInviteData - timeSlots changed:", timeSlots);
-  }, [timeSlots]);
+  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]); // Removed timeSlots from dependencies
 
   return {
     isLoading,
