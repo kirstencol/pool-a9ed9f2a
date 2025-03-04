@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { TimeSlot } from "@/types";
 
@@ -17,16 +16,28 @@ export function useTimeSlotSelection({
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
 
-  // Clear selection when timeSlots change
+  // Only reset selections when timeSlots array reference changes AND is not empty
   useEffect(() => {
-    console.log("useTimeSlotSelection - timeSlots changed, resetting selection", timeSlots);
-    setSelectedSlotId(null);
-    setSelectedStartTime("");
-    setSelectedEndTime("");
-  }, [timeSlots]);
+    if (timeSlots && timeSlots.length > 0) {
+      console.log("useTimeSlotSelection - timeSlots changed, resetting selection", timeSlots);
+      // Don't reset the selection if timeSlots are the same
+      if (selectedSlotId && !timeSlots.some(slot => slot.id === selectedSlotId)) {
+        setSelectedSlotId(null);
+        setSelectedStartTime("");
+        setSelectedEndTime("");
+      }
+    }
+  }, [timeSlots, selectedSlotId]);
 
   const handleSelectTimeSlot = (id: string) => {
     console.log("useTimeSlotSelection - Selected slot id:", id);
+    
+    // If clicking the same slot again, keep the selection
+    if (id === selectedSlotId) {
+      console.log("useTimeSlotSelection - Same slot selected, maintaining selection");
+      return;
+    }
+    
     setSelectedSlotId(id);
     const selectedSlot = timeSlots.find(slot => slot.id === id);
     

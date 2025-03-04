@@ -33,33 +33,40 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
     onSelectTimeSlot
   });
 
+  // Store if we've had a selection to ensure we render time selectors
+  const hasSelection = selectedSlotId !== null;
+
   return (
-    <div>
+    <div className="space-y-4">
       <div className="space-y-3">
-        {timeSlots.map((timeSlot) => (
-          <div 
-            key={timeSlot.id}
-            className={`border rounded-lg p-4 cursor-pointer transition-all ${
-              selectedSlotId === timeSlot.id 
-                ? "border-purple-500 bg-purple-50" 
-                : "border-gray-200 hover:border-purple-300"
-            }`}
-            onClick={() => handleSelectTimeSlot(timeSlot.id)}
-          >
-            <TimeSlotCard 
-              timeSlot={timeSlot}
-              selectedByUser={selectedSlotId === timeSlot.id}
-              showTimeSelector={selectedSlotId === timeSlot.id}
-              onSelectTime={handleTimeRangeSelect}
-              onCannotMakeIt={onCannotMakeIt}
-              creatorAvailable
-              creatorName={creatorName}
-            />
-          </div>
-        ))}
+        {timeSlots.map((timeSlot) => {
+          const isSelected = selectedSlotId === timeSlot.id;
+          
+          return (
+            <div 
+              key={timeSlot.id}
+              className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                isSelected 
+                  ? "border-purple-500 bg-purple-50 shadow-sm" 
+                  : "border-gray-200 hover:border-purple-300"
+              }`}
+              onClick={() => handleSelectTimeSlot(timeSlot.id)}
+            >
+              <TimeSlotCard 
+                timeSlot={timeSlot}
+                selectedByUser={isSelected}
+                showTimeSelector={isSelected}
+                onSelectTime={handleTimeRangeSelect}
+                onCannotMakeIt={onCannotMakeIt}
+                creatorAvailable
+                creatorName={creatorName}
+              />
+            </div>
+          );
+        })}
       </div>
       
-      {selectedSlotId && (
+      {hasSelection && (
         <Button 
           onClick={onSubmit} 
           className="w-full mt-4 flex items-center justify-center"
