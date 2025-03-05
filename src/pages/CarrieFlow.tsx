@@ -8,6 +8,7 @@ import TimeSlotCard from "@/components/TimeSlotCard";
 import { useMeeting } from "@/context/meeting";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Avatar from "@/components/Avatar";
 
 const CarrieFlow = () => {
   const navigate = useNavigate();
@@ -75,10 +76,6 @@ const CarrieFlow = () => {
     return <div className="p-6">Error: Invalid or expired invitation</div>;
   }
 
-  // Force "Abby and Burt" as the creators' names for this specific flow
-  const combinedCreatorName = "Abby and Burt";
-  const availabilityText = `Showing availability when both Abby and Burt are free`;
-
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
       <button 
@@ -89,11 +86,12 @@ const CarrieFlow = () => {
         Back
       </button>
 
-      <h1 className="text-2xl font-semibold mb-2">Hi {responderName}!</h1>
-      <p className="text-gray-600 mb-6">{availabilityText}</p>
+      <div className="flex items-center mb-6">
+        <Avatar initial="C" position="third" className="mr-3" />
+        <h2 className="font-medium text-lg">When are you free, Carrie?</h2>
+      </div>
 
       <div className="mb-6">
-        <h2 className="font-medium mb-3">Select a time when everyone is available:</h2>
         <div className="space-y-3">
           {inviteTimeSlots.map((slot) => (
             <TimeSlotCard
@@ -101,14 +99,14 @@ const CarrieFlow = () => {
               timeSlot={{
                 ...slot,
                 // Override the creator display name explicitly
-                creatorDisplayName: combinedCreatorName
+                creatorDisplayName: "Abby and Burt"
               }}
               selectedByUser={selectedTimeSlot?.id === slot.id}
               showTimeSelector={selectedTimeSlot?.id === slot.id}
               onSelectTime={handleTimeChange}
               creatorAvailable={true}
               // Set this explicitly to ensure it's used if creatorDisplayName is not processed
-              creatorName={combinedCreatorName}
+              creatorName="Abby and Burt"
               onClick={() => handleSelectTimeSlot(slot)}
             />
           ))}
