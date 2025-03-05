@@ -43,6 +43,11 @@ const SelectUser = () => {
   const inviteId = searchParams.get('id');
   const flowType = searchParams.get('flow');
   
+  // Determine the header text based on the flow type
+  const headerText = flowType === 'abby-location-response' 
+    ? "Hi!\n\nLet's nail down a spot to meet."
+    : "Hi! Let's find a time to get together.";
+  
   const handleContinue = () => {
     if (!selectedUser) {
       toast({
@@ -88,7 +93,7 @@ const SelectUser = () => {
 
   return (
     <div className="max-w-md mx-auto px-4 py-8">
-      <h1 className="text-2xl font-semibold mb-8">Hi! Let's find a time to get together.</h1>
+      <h1 className="text-2xl font-semibold mb-8 whitespace-pre-line">{headerText}</h1>
       
       <h2 className="text-xl font-medium mb-4">You are:</h2>
       
