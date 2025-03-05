@@ -19,7 +19,8 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
   const { 
     timeSlots,
     addTimeSlot,
-    loadMeetingFromStorage
+    loadMeetingFromStorage,
+    clearTimeSlots
   } = useMeeting();
 
   // Get timeSlots from context to ensure we're using the most up-to-date data
@@ -28,23 +29,29 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     setTimeout(() => {
       console.log("TimeSlotLoader - Using timeSlots from context:", timeSlots);
       
-      if (timeSlots && timeSlots.length > 0) {
-        setLocalTimeSlots(timeSlots);
+      // Remove duplicate time slots by using a Map with slot IDs as keys
+      const uniqueTimeSlots = Array.from(
+        new Map(timeSlots.map(slot => [slot.id, slot])).values()
+      );
+      
+      if (uniqueTimeSlots.length > 0) {
+        console.log("TimeSlotLoader - Using deduplicated time slots:", uniqueTimeSlots);
+        setLocalTimeSlots(uniqueTimeSlots);
         onTimeSlotsLoaded();
       } else if (inviteId) {
         // Fallback: try to get time slots directly from storage
         console.log("TimeSlotLoader - Trying to load time slots directly from storage for:", inviteId);
         const storedMeeting = loadMeetingFromStorage(inviteId);
         if (storedMeeting?.timeSlots && storedMeeting.timeSlots.length > 0) {
+          // Clear existing time slots to prevent duplicates
+          clearTimeSlots();
+          
           console.log("TimeSlotLoader - Loaded time slots from storage:", storedMeeting.timeSlots);
           setLocalTimeSlots(storedMeeting.timeSlots);
           
           // Add to context if not already there
           storedMeeting.timeSlots.forEach(slot => {
-            // Only add if not already in context
-            if (!timeSlots.some(ts => ts.id === slot.id)) {
-              addTimeSlot(slot);
-            }
+            addTimeSlot(slot);
           });
           
           onTimeSlotsLoaded();
@@ -55,7 +62,7 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
         }
       }
     }, 500); // Short delay to ensure storage is ready
-  }, [timeSlots, inviteId, loadMeetingFromStorage, addTimeSlot, setLocalTimeSlots, onTimeSlotsLoaded]);
+  }, [timeSlots, inviteId, loadMeetingFromStorage, addTimeSlot, setLocalTimeSlots, onTimeSlotsLoaded, clearTimeSlots]);
 
   return null; // This is a logic-only component, no UI
 };

@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, TimeSlot, Location, Meeting } from '@/types';
 import { MeetingContextType, StoredMeeting } from './types';
@@ -56,7 +57,12 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
 
   const addTimeSlot = (timeSlot: TimeSlot) => {
     console.log("Adding time slot:", timeSlot);
-    setTimeSlots(prev => [...prev, { ...timeSlot, id: timeSlot.id || crypto.randomUUID() }]);
+    // Check if this slot ID already exists to prevent duplicates
+    if (!timeSlots.some(ts => ts.id === timeSlot.id)) {
+      setTimeSlots(prev => [...prev, { ...timeSlot, id: timeSlot.id || crypto.randomUUID() }]);
+    } else {
+      console.log("Time slot with ID", timeSlot.id, "already exists, skipping");
+    }
   };
 
   const removeTimeSlot = (id: string) => {
@@ -64,6 +70,7 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const clearTimeSlots = () => {
+    console.log("Clearing all time slots");
     setTimeSlots([]);
   };
 

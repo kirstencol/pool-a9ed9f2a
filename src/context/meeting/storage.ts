@@ -68,6 +68,10 @@ export const initializeDemoData = (): boolean => {
   try {
     console.log("Initializing demo data...");
     
+    // Check if demo data already exists to prevent repeated initializations
+    const existingDemoData = loadMeetingFromStorage("demo_invite");
+    const existingBurtData = loadMeetingFromStorage("burt_demo");
+    
     // Create the default demo creator
     const demoCreator = {
       id: "demo-creator",

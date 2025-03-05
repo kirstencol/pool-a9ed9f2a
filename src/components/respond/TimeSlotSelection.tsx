@@ -69,17 +69,22 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
 
   const hasConfiguredSlots = configuredSlots.size > 0;
 
+  // Ensure we have unique time slots (no duplicates by ID)
+  const uniqueTimeSlots = Array.from(
+    new Map(timeSlots.map(slot => [slot.id, slot])).values()
+  );
+
   return (
     <div className="space-y-4">
       <div className="space-y-3">
-        {timeSlots.map((timeSlot) => {
+        {uniqueTimeSlots.map((timeSlot) => {
           const isSelected = selectedSlotId === timeSlot.id;
           const isExpanded = expandedSlotId === timeSlot.id;
           const isConfigured = configuredSlots.has(timeSlot.id);
           
           return (
             <div 
-              key={timeSlot.id}
+              key={`timeslot-${timeSlot.id}`}
               onClick={() => toggleSlotExpansion(timeSlot.id)}
             >
               <TimeSlotCard 
