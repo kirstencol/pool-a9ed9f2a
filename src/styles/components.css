@@ -45,6 +45,6 @@
   }
 
   .celebration-animation {
-    @apply w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto my-6 animate-celebration;
+    @apply w-16 h-16 rounded-full bg-purple/20 flex items-center justify-center mx-auto my-6;
   }
 }

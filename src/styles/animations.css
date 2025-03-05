@@ -10,10 +10,25 @@
   100% { opacity: 1; }
 }
 
+@keyframes confetti-animation {
+  0% { transform: scale(0.8) rotate(0deg); opacity: 0.8; }
+  25% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+  50% { transform: scale(1) rotate(-5deg); opacity: 0.9; }
+  75% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+}
+
 .animate-celebration {
   animation: celebration 1s ease-in-out;
 }
 
 .animate-fade-in {
   animation: fade-in 0.5s ease-in-out;
+}
+
+.confetti-animation {
+  animation: confetti-animation 1.5s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

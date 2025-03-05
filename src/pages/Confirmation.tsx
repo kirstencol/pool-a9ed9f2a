@@ -87,7 +87,7 @@ const Confirmation = () => {
   
   const labeledNames = [
     getFriendLabel(meetingData.creator?.name || "Abby"), 
-    ...responderNames.map(name => getFriendLabel(name))
+    ...responderNames.map(name => getFriendLabel(name as string))
   ].filter(Boolean);
   
   const displayNames = labeledNames.join(" and ");
@@ -105,8 +105,10 @@ const Confirmation = () => {
         </div>
       )}
       
-      <div className="celebration-animation bg-purple/20">
-        <Check className="text-purple" size={32} />
+      <div className="celebration-animation">
+        <div className="confetti-animation">
+          <Sparkles className="text-purple" size={32} />
+        </div>
       </div>
       
       <h1 className="text-2xl font-semibold text-center mb-6">
