@@ -67,22 +67,11 @@ const Confirmation = () => {
     slot.responses?.map((r: any) => r.responderName as string) || []
   ))];
   
-  // Add friend labels to names
-  const getFriendLabel = (name: string) => {
-    switch(name) {
-      case "Abby": return "Abby (Friend A)";
-      case "Burt": return "Burt (Friend B)";
-      case "Carrie": return "Carrie (Friend C)";
-      default: return name;
-    }
-  };
-  
-  const labeledNames = [
-    getFriendLabel(meetingData.creator?.name || "Abby"), 
-    ...responderNames.map(name => getFriendLabel(name as string))
-  ].filter(Boolean);
-  
-  const displayNames = labeledNames.join(" and ");
+  // Display names without the friend labels
+  const displayNames = [
+    meetingData.creator?.name || "Abby", 
+    ...responderNames
+  ].filter(Boolean).join(" and ");
 
   return (
     <div className="max-w-md mx-auto px-4 py-8">
@@ -113,8 +102,8 @@ const Confirmation = () => {
             {responderNames.length === 0 
               ? "Does anyone need a nudge?" 
               : responderNames[0] === "Burt" 
-                ? "Does Carrie (Friend C) need a nudge?" 
-                : "Does Burt (Friend B) need a nudge?"}
+                ? "Does Carrie need a nudge?" 
+                : "Does Burt need a nudge?"}
           </h2>
         </div>
       )}
