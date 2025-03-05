@@ -1,4 +1,3 @@
-
 // src/context/meeting/operations/meetingOperations.ts
 import { Meeting } from '@/types';
 import { MeetingContextState } from '../types';
@@ -92,7 +91,7 @@ export const useMeetingOperations = (
       locations: state.locations,
       selectedLocation: state.selectedLocation,
       notes: state.meetingNotes,
-      status: state.selectedLocation ? 'confirmed' : state.selectedTimeSlot ? 'pending' : 'draft'
+      status: state.selectedLocation ? 'confirmed' as const : state.selectedTimeSlot ? 'pending' as const : 'draft' as const
     };
   };
 
