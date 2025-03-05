@@ -5,6 +5,8 @@ import { Check, Sparkles, Copy, Link } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { TimeSlot } from "@/types";
+import { convertTimeToMinutes } from "@/utils/timeUtils";
 
 const Confirmation = () => {
   const navigate = useNavigate();
@@ -57,13 +59,53 @@ const Confirmation = () => {
     );
   }
 
-  // Find the matching times between creator and responder
-  const matchingTimes = meetingData.timeSlots?.filter((slot: any) => 
+  // Find time slots with responses
+  const timeSlotsWithResponses = meetingData.timeSlots?.filter((slot: TimeSlot) => 
     slot.responses && slot.responses.length > 0
   ) || [];
 
+  // Calculate overlapping availability for each time slot
+  const overlappingTimeSlots = timeSlotsWithResponses.map((slot: TimeSlot) => {
+    // Start with creator's full availability
+    let overlapStartMinutes = convertTimeToMinutes(slot.startTime);
+    let overlapEndMinutes = convertTimeToMinutes(slot.endTime);
+    
+    // Adjust based on each response
+    slot.responses.forEach(response => {
+      const responseStartMinutes = convertTimeToMinutes(response.startTime || "");
+      const responseEndMinutes = convertTimeToMinutes(response.endTime || "");
+      
+      if (responseStartMinutes && responseEndMinutes) {
+        // Update overlap to be the later start time
+        overlapStartMinutes = Math.max(overlapStartMinutes, responseStartMinutes);
+        
+        // Update overlap to be the earlier end time
+        overlapEndMinutes = Math.min(overlapEndMinutes, responseEndMinutes);
+      }
+    });
+    
+    // Only include slots where there's still a valid overlap
+    if (overlapStartMinutes < overlapEndMinutes) {
+      return {
+        ...slot,
+        overlapStartTime: formatMinutesToTime(overlapStartMinutes),
+        overlapEndTime: formatMinutesToTime(overlapEndMinutes)
+      };
+    }
+    return null;
+  }).filter(Boolean);
+
+  // Format minutes back to time string (e.g., "9:30 AM")
+  function formatMinutesToTime(minutes: number): string {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    const period = hours >= 12 ? "PM" : "AM";
+    const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+    return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
+  }
+
   // Format names for display
-  const responderNames = [...new Set(matchingTimes.flatMap((slot: any) => 
+  const responderNames = [...new Set(timeSlotsWithResponses.flatMap((slot: TimeSlot) => 
     slot.responses?.map((r: any) => r.responderName as string) || []
   ))];
   
@@ -84,14 +126,22 @@ const Confirmation = () => {
       </h1>
       
       <div className="space-y-6 mb-10">
-        {matchingTimes.map((timeSlot: any) => (
+        {overlappingTimeSlots.map((timeSlot: any) => (
           <div key={timeSlot.id} className="space-y-1 bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
             <h2 className="text-xl font-medium">
               {timeSlot.date}
             </h2>
             <p className="text-lg">
-              {timeSlot.startTime} - {timeSlot.endTime}
+              {timeSlot.overlapStartTime} - {timeSlot.overlapEndTime}
             </p>
+            <p className="text-sm text-gray-500">
+              {creatorName}'s availability: {timeSlot.startTime} - {timeSlot.endTime}
+            </p>
+            {timeSlot.responses?.map((response: any, index: number) => (
+              <p key={index} className="text-sm text-gray-500">
+                {response.responderName}'s availability: {response.startTime} - {response.endTime}
+              </p>
+            ))}
           </div>
         ))}
       </div>
