@@ -135,7 +135,8 @@ const TimeSlotCard = ({
         </div>
       )}
 
-      {onCannotMakeIt && (
+      {/* Only show the "can't make it" button if the slot is selected by the user */}
+      {onCannotMakeIt && selectedByUser && (
         <button 
           onClick={(e) => {
             e.stopPropagation();
