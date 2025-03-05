@@ -15,7 +15,6 @@ const Confirmation = () => {
   const [meetingData, setMeetingData] = useState<any>(null);
   const [creatorName, setCreatorName] = useState<string>("");
   const [copied, setCopied] = useState(false);
-  const [showCelebration, setShowCelebration] = useState(true);
   
   useEffect(() => {
     // Try to get the inviteId from location state
@@ -29,13 +28,6 @@ const Confirmation = () => {
         setCreatorName(data.creator?.name || "Abby");
       }
     }
-
-    // Hide celebration after 3 seconds
-    const timeout = setTimeout(() => {
-      setShowCelebration(false);
-    }, 3000);
-
-    return () => clearTimeout(timeout);
   }, [location, loadMeetingFromStorage]);
 
   const copyLink = () => {
@@ -55,7 +47,7 @@ const Confirmation = () => {
   // If no meeting data is available, show a fallback
   if (!meetingData) {
     return (
-      <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
+      <div className="max-w-md mx-auto px-4 py-8">
         <div className="celebration-animation">
           <Check className="text-white" size={32} />
         </div>
@@ -93,22 +85,9 @@ const Confirmation = () => {
   const displayNames = labeledNames.join(" and ");
 
   return (
-    <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
-      {showCelebration && (
-        <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
-          <div className="animate-celebration" style={{ 
-            transform: "scale(2.5)",
-            animation: "celebration 1.5s ease-out forwards"
-          }}>
-            <Sparkles className="text-purple h-16 w-16" />
-          </div>
-        </div>
-      )}
-      
+    <div className="max-w-md mx-auto px-4 py-8">
       <div className="celebration-animation">
-        <div className="confetti-animation">
-          <Sparkles className="text-purple" size={32} />
-        </div>
+        <Sparkles className="text-purple" size={32} />
       </div>
       
       <h1 className="text-2xl font-semibold text-center mb-6">
