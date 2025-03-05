@@ -117,6 +117,7 @@ const CarrieFlow = () => {
               // Set this explicitly to ensure it's used if creatorDisplayName is not processed
               creatorName="Abby and Burt"
               onClick={() => handleSelectTimeSlot(slot)}
+              customTimeSelectorText="You get to pick the final time!"
             />
           ))}
         </div>

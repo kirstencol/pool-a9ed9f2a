@@ -16,6 +16,7 @@ interface TimeSlotCardProps {
   creatorName?: string;
   className?: string;
   onClick?: () => void;
+  customTimeSelectorText?: string;
 }
 
 const TimeSlotCard = ({
@@ -28,7 +29,8 @@ const TimeSlotCard = ({
   creatorAvailable = true,
   creatorName = "Alex",
   className,
-  onClick
+  onClick,
+  customTimeSelectorText
 }: TimeSlotCardProps) => {
   const [startTime, setStartTime] = useState(timeSlot.startTime);
   const [endTime, setEndTime] = useState(timeSlot.endTime);
@@ -137,7 +139,9 @@ const TimeSlotCard = ({
 
       {showTimeSelector && selectedByUser && (
         <div className="bg-purple-100 rounded-lg p-4 my-3">
-          <div className="text-center mb-3 font-medium">What time works for you?</div>
+          <div className="text-center mb-3 font-medium">
+            {customTimeSelectorText || "What time works for you?"}
+          </div>
           <div className="flex justify-center space-x-4 items-center">
             <TimeSelector 
               time={startTime} 
