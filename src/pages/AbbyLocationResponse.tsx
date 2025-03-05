@@ -1,8 +1,8 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
 
@@ -13,11 +13,9 @@ type LocationWithNote = {
 
 const AbbyLocationResponse = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
-  const searchParams = new URLSearchParams(location.search);
   
-  // Demo data for Carrie's location suggestions
+  // Demo data for Sam's location suggestions
   const [locations] = useState<LocationWithNote[]>([
     { 
       name: "Central Cafe", 
@@ -29,10 +27,9 @@ const AbbyLocationResponse = () => {
     }
   ]);
   
-  // Display date and time from URL params or use demo values
-  const date = searchParams.get("date") || "Friday October 25";
-  const startTime = searchParams.get("startTime") || "2";
-  const endTime = searchParams.get("endTime") || "3 pm";
+  // Display date and time hardcoded for the demo
+  const date = "Friday October 25";
+  const timeRange = "2 to 3 pm";
   
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasDifferentIdea, setHasDifferentIdea] = useState(false);
@@ -73,22 +70,14 @@ const AbbyLocationResponse = () => {
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
-      <button 
-        onClick={() => navigate(-1)}
-        className="flex items-center text-gray-500 mb-6"
-      >
-        <ArrowLeft size={16} className="mr-1" />
-        Back
-      </button>
-
-      <div className="flex items-center mb-6">
+      <div className="flex items-start mb-4">
         <Avatar initial="A" size="lg" position="first" className="mr-3" />
         <h1 className="text-xl font-semibold">Almost done!</h1>
       </div>
       
       <div className="mb-6">
-        <p className="text-gray-700 font-medium mb-1">Getting together</p>
-        <p className="text-gray-700">{date} from {startTime} to {endTime}</p>
+        <p className="text-gray-700 font-medium">Getting together</p>
+        <p className="text-gray-700">{date} from {timeRange}</p>
       </div>
       
       <p className="mb-4 text-gray-700">Sam suggests these spots. Which work for you?</p>
@@ -97,10 +86,10 @@ const AbbyLocationResponse = () => {
         {locations.map((loc, index) => (
           <div 
             key={index} 
-            className={`bg-white rounded-lg border ${selectedOption === loc.name ? 'border-purple-500' : 'border-gray-200'} p-4 cursor-pointer transition-all`}
+            className={`bg-white rounded-lg border ${selectedOption === loc.name ? 'border-purple' : 'border-gray-200'} p-4 cursor-pointer transition-all`}
             onClick={() => handleSelectOption(loc.name)}
           >
-            <p className="font-medium text-gray-800 mb-1">{loc.name}</p>
+            <p className="font-medium text-gray-800">{loc.name}</p>
             <p className="text-sm text-gray-600">{loc.note}</p>
           </div>
         ))}
@@ -112,7 +101,7 @@ const AbbyLocationResponse = () => {
             value={differentIdeaText}
             onChange={(e) => setDifferentIdeaText(e.target.value)}
             placeholder="Suggest a different location..."
-            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500"
+            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple"
             rows={3}
           />
         </div>
@@ -127,10 +116,9 @@ const AbbyLocationResponse = () => {
       
       <Button
         onClick={handleSubmit}
-        variant="secondary"
-        className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 mb-4"
+        className="w-full bg-purple-light hover:bg-purple-light/90 text-purple-700 flex justify-center items-center"
       >
-        These work for me! <ArrowRight size={16} className="ml-2" />
+        These work for me! <ArrowRight size={16} className="ml-1" />
       </Button>
     </div>
   );

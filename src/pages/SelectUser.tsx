@@ -63,7 +63,16 @@ const SelectUser = () => {
     
     // Special case for the Abby location response flow
     if (flowType === 'abby-location-response') {
-      navigate('/abby-location-response');
+      // Only allow Abby to proceed to the location response page
+      if (selectedUser === "Abby") {
+        navigate('/abby-location-response');
+      } else {
+        toast({
+          title: "This flow is for Abby",
+          description: "Please select Abby to continue with this demo flow",
+          variant: "destructive"
+        });
+      }
       return;
     }
     
