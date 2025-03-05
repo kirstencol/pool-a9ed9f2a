@@ -1,17 +1,103 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CalendarPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
 import { Button } from "@/components/ui/button";
+import { useMeeting } from "@/context/meeting";
+import { TimeSlot } from "@/types";
 
 const BurtConfirmed = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { loadMeetingFromStorage } = useMeeting();
+  
+  const [meetingData, setMeetingData] = useState<any>(null);
+  const [timeSlot, setTimeSlot] = useState<TimeSlot | null>(null);
+  const [selectedTimeRange, setSelectedTimeRange] = useState<string>("8:00 a.m. to 9:00 a.m.");
+  const [selectedDate, setSelectedDate] = useState<string>("Saturday, March 2nd");
   
   const { selectedLocations } = location.state || { selectedLocations: [] };
+  
+  useEffect(() => {
+    // Fetch the actual meeting data to get Burt's selected times
+    const meetingData = loadMeetingFromStorage("burt_demo");
+    if (meetingData) {
+      setMeetingData(meetingData);
+      
+      // Find the first slot with a response from Burt
+      const burtSlot = meetingData.timeSlots?.find((slot: any) => 
+        slot.responses?.some((resp: any) => resp.responderName === "Burt")
+      );
+      
+      if (burtSlot) {
+        setTimeSlot(burtSlot);
+        
+        // Get Burt's response for this slot
+        const burtResponse = burtSlot.responses?.find((resp: any) => resp.responderName === "Burt");
+        
+        if (burtResponse) {
+          // Format the time range
+          setSelectedTimeRange(`${burtResponse.startTime} to ${burtResponse.endTime}`);
+        }
+        
+        // Format the date
+        const formattedDate = formatDate(burtSlot.date);
+        if (formattedDate) {
+          setSelectedDate(formattedDate);
+        }
+      }
+    }
+  }, [loadMeetingFromStorage]);
+  
+  // Format date string to display format
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "Saturday, March 2nd";
+    
+    try {
+      // Handle different date formats
+      if (dateString.includes("-")) {
+        // Parse YYYY-MM-DD format
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return date.toLocaleDateString('en-US', { 
+          weekday: 'long', 
+          month: 'long', 
+          day: 'numeric',
+          year: undefined
+        }) + (day === 1 || day === 21 || day === 31 ? "st" : 
+               day === 2 || day === 22 ? "nd" : 
+               day === 3 || day === 23 ? "rd" : "th");
+      } else if (dateString.includes(" ")) {
+        // If already in a readable format like "March 2"
+        // Make it more formal by adding the day of week and ordinal
+        const parts = dateString.split(" ");
+        const month = parts[0];
+        const day = parseInt(parts[1]);
+        
+        const monthIndex = ["January", "February", "March", "April", "May", "June", 
+                           "July", "August", "September", "October", "November", "December"]
+                           .findIndex(m => m.toLowerCase() === month.toLowerCase());
+        
+        if (monthIndex >= 0) {
+          const dateObj = new Date(2024, monthIndex, day);
+          const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+          const ordinal = day === 1 || day === 21 || day === 31 ? "st" : 
+                          day === 2 || day === 22 ? "nd" : 
+                          day === 3 || day === 23 ? "rd" : "th";
+          
+          return `${weekday}, ${month} ${day}${ordinal}`;
+        }
+      }
+      
+      return dateString;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Saturday, March 2nd";
+    }
+  };
   
   if (!selectedLocations || selectedLocations.length === 0) {
     navigate("/");
@@ -20,10 +106,6 @@ const BurtConfirmed = () => {
   
   // Just use the first selected location for the demo
   const finalLocation = selectedLocations[0];
-  
-  // Demo date and time
-  const date = "Saturday, March 2nd";
-  const timeRange = "8:00 a.m. to 9:00 a.m.";
   
   const handleAddToCalendar = () => {
     navigate("/add-to-calendar");
@@ -41,7 +123,7 @@ const BurtConfirmed = () => {
       
       <div className="my-6 p-6 bg-white rounded-xl border border-gray-200">
         <h2 className="font-semibold mb-2">Getting together</h2>
-        <p className="text-gray-700 mb-4">{date} from {timeRange}</p>
+        <p className="text-gray-700 mb-4">{selectedDate} from {selectedTimeRange}</p>
         
         <h2 className="font-semibold mb-2">Location</h2>
         <p className="text-gray-700">{finalLocation.name}</p>
