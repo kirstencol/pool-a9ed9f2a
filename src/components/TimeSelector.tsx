@@ -81,6 +81,7 @@ const TimeSelector = ({
       </button>
       
       <TimeDisplay
+        key={`${hour}-${minute}-${period}-${timeKey}`}
         hour={hour}
         minute={minute}
         period={period}
