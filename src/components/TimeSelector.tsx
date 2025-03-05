@@ -1,9 +1,13 @@
 
-import React, { memo, useCallback } from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useTimeSelectorState } from "@/hooks/useTimeSelectorState";
-import TimeDisplay from "./TimeDisplay";
+import { memo } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useTimeSelector } from "@/hooks/useTimeSelector";
 
 interface TimeSelectorProps {
   time: string;
@@ -22,18 +26,17 @@ const TimeSelector = ({
   minTime = "",
   maxTime = ""
 }: TimeSelectorProps) => {
-  console.log("TimeSelector rendering with props:", { time, isEndTime, startTime, minTime, maxTime });
-  
   const {
     hour,
     minute,
     period,
-    timeKey,
-    isAtMinTime,
-    isAtMaxTime,
-    handleIncrement,
-    handleDecrement
-  } = useTimeSelectorState({
+    validHourOptions,
+    validMinuteOptions,
+    periods,
+    handleHourChange,
+    handleMinuteChange,
+    handlePeriodChange
+  } = useTimeSelector({
     time,
     onTimeChange,
     isEndTime,
@@ -42,68 +45,71 @@ const TimeSelector = ({
     maxTime
   });
 
-  console.log("TimeSelector render state:", { hour, minute, period, timeKey, isAtMinTime, isAtMaxTime });
-
-  // Use direct function calls instead of useCallback to ensure events trigger correctly
-  const handleIncrementClick = () => {
-    console.log("⬆️ Increment button clicked");
-    if (!isAtMaxTime) {
-      console.log("Calling handleIncrement() from click handler");
-      handleIncrement();
-    } else {
-      console.log("Not calling handleIncrement() because isAtMaxTime:", isAtMaxTime);
-    }
-  };
-
-  const handleDecrementClick = () => {
-    console.log("⬇️ Decrement button clicked");
-    if (!isAtMinTime) {
-      console.log("Calling handleDecrement() from click handler");
-      handleDecrement();
-    } else {
-      console.log("Not calling handleDecrement() because isAtMinTime:", isAtMinTime);
-    }
-  };
-
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40 relative" key={timeKey}>
-      <button 
-        className={cn(
-          "flex items-center justify-center py-3 w-full rounded-t-lg z-10",
-          isAtMaxTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-        )}
-        onClick={handleIncrementClick}
-        disabled={isAtMaxTime}
-        aria-label="Increase time"
-        type="button"
+    <div className="time-selector-container flex space-x-1">
+      <Select 
+        value={hour} 
+        onValueChange={handleHourChange}
       >
-        <ChevronUp size={24} />
-      </button>
-      
-      <TimeDisplay
-        key={`${hour}-${minute}-${period}-${timeKey}`}
-        hour={hour}
-        minute={minute}
-        period={period}
-      />
-      
-      <button 
-        className={cn(
-          "flex items-center justify-center py-3 w-full rounded-b-lg z-10",
-          isAtMinTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-        )}
-        onClick={handleDecrementClick}
-        disabled={isAtMinTime}
-        aria-label="Decrease time"
-        type="button"
+        <SelectTrigger className="w-12 px-2 bg-white">
+          <SelectValue placeholder="--" />
+        </SelectTrigger>
+        <SelectContent className="bg-white z-50 min-w-[4rem] shadow-md">
+          {validHourOptions.map((h) => (
+            <SelectItem 
+              key={h} 
+              value={h}
+              className="cursor-pointer hover:bg-gray-100"
+            >
+              {h}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select 
+        value={minute} 
+        onValueChange={handleMinuteChange}
+        disabled={hour === "--"}
       >
-        <ChevronDown size={24} />
-      </button>
+        <SelectTrigger className="w-14 px-2 bg-white">
+          <SelectValue placeholder="00" />
+        </SelectTrigger>
+        <SelectContent className="bg-white z-50 min-w-[4rem] shadow-md">
+          {validMinuteOptions.map((m) => (
+            <SelectItem 
+              key={m} 
+              value={m}
+              className="cursor-pointer hover:bg-gray-100"
+            >
+              {m}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select 
+        value={period} 
+        onValueChange={handlePeriodChange}
+        disabled={hour === "--"}
+      >
+        <SelectTrigger className="w-14 px-2 bg-white">
+          <SelectValue placeholder="--" />
+        </SelectTrigger>
+        <SelectContent className="bg-white z-50 min-w-[4rem] shadow-md">
+          {periods.map((p) => (
+            <SelectItem 
+              key={p} 
+              value={p} 
+              className="cursor-pointer hover:bg-gray-100"
+            >
+              {p}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 };
 
-// Remove memo to ensure component always re-renders when props change
-TimeSelector.displayName = "TimeSelector";
-
-export default TimeSelector;
+export default memo(TimeSelector);
