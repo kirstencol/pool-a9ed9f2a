@@ -1,11 +1,10 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Check, Copy } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import TimeSlotCard from "@/components/TimeSlotCard";
 
 const Confirmation = () => {
   const navigate = useNavigate();
@@ -16,6 +15,7 @@ const Confirmation = () => {
   const [meetingData, setMeetingData] = useState<any>(null);
   const [creatorName, setCreatorName] = useState<string>("");
   const [copied, setCopied] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(true);
   
   useEffect(() => {
     // Try to get the inviteId from location state
@@ -26,9 +26,16 @@ const Confirmation = () => {
       const data = loadMeetingFromStorage(inviteId);
       if (data) {
         setMeetingData(data);
-        setCreatorName(data.creator?.name || "Friend A");
+        setCreatorName(data.creator?.name || "Abby");
       }
     }
+
+    // Hide celebration after 3 seconds
+    const timeout = setTimeout(() => {
+      setShowCelebration(false);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
   }, [location, loadMeetingFromStorage]);
 
   const copyLink = () => {
@@ -65,17 +72,28 @@ const Confirmation = () => {
 
   // Format names for display
   const responderNames = [...new Set(matchingTimes.flatMap((slot: any) => 
-    slot.responses?.map((r: any) => r.name) || []
+    slot.responses?.map((r: any) => r.responderName) || []
   ))];
   
-  const displayNames = [meetingData.creator?.name || "Friend A", ...responderNames]
+  const displayNames = [meetingData.creator?.name || "Abby", ...responderNames]
     .filter(Boolean)
     .join(" and ");
 
   return (
     <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
-      <div className="celebration-animation">
-        <Check className="text-white" size={32} />
+      {showCelebration && (
+        <div className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center">
+          <div className="animate-celebration" style={{ 
+            transform: "scale(2.5)",
+            animation: "celebration 1.5s ease-out forwards"
+          }}>
+            <Sparkles className="text-purple h-16 w-16" />
+          </div>
+        </div>
+      )}
+      
+      <div className="celebration-animation bg-purple/20">
+        <Check className="text-purple" size={32} />
       </div>
       
       <h1 className="text-2xl font-semibold text-center mb-6">
@@ -84,7 +102,7 @@ const Confirmation = () => {
       
       <div className="space-y-6 mb-10">
         {matchingTimes.map((timeSlot: any) => (
-          <div key={timeSlot.id} className="space-y-1">
+          <div key={timeSlot.id} className="space-y-1 bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
             <h2 className="text-xl font-medium">
               {timeSlot.date}
             </h2>
@@ -96,20 +114,24 @@ const Confirmation = () => {
       </div>
       
       {responderNames.length < 2 && (
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <h2 className="text-lg font-medium mb-2">
-            Does {responderNames.length === 0 ? "anyone" : "Sam"} need a nudge?
+            {responderNames.length === 0 
+              ? "Does anyone need a nudge?" 
+              : responderNames[0] === "Burt" 
+                ? "Does Carrie need a nudge?" 
+                : "Does Burt need a nudge?"}
           </h2>
         </div>
       )}
       
       <Button 
         onClick={copyLink}
-        className="w-full py-8 text-lg gap-3"
+        className="w-full py-6 text-lg gap-3"
         variant="secondary"
       >
         Copy link
-        <Copy className="w-5 h-5" />
+        {copied ? <Check className="w-5 h-5" /> : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>}
       </Button>
     </div>
   );

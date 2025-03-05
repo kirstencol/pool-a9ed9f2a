@@ -64,7 +64,7 @@ export const useResponseSubmitter = ({
     // Add responses for each selected time slot
     selectedTimeSlots.forEach(selection => {
       responses.push({
-        name: responderName,
+        responderName: responderName, // Changed from 'name' to 'responderName'
         timeSlotId: selection.slot.id,
         startTime: selection.startTime,
         endTime: selection.endTime
@@ -75,7 +75,7 @@ export const useResponseSubmitter = ({
       if (timeSlot) {
         timeSlot.responses = timeSlot.responses || [];
         timeSlot.responses.push({
-          name: responderName,
+          responderName: responderName, // Changed from 'name' to 'responderName'
           startTime: selection.startTime,
           endTime: selection.endTime
         });
