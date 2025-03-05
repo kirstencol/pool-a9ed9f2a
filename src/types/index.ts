@@ -36,11 +36,12 @@ export interface LocationWithNote {
   name: string;
   note: string;
   selected: boolean;
-  userNote: string;
+  userNote?: string;
+  abbyComment?: string; // Make abbyComment optional
 }
 
 export interface LocationWithComments extends LocationWithNote {
-  abbyComment: string;
+  abbyComment: string; // But required in LocationWithComments
 }
 
 export interface LocationResponse {

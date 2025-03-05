@@ -7,13 +7,14 @@ import Avatar from "@/components/Avatar";
 import LocationSuggestionsList from "@/components/LocationSuggestionsWithComments";
 import CustomLocationInput from "@/components/CustomLocationInput";
 import { useLocationSelection } from "@/hooks/useLocationSelection";
+import { LocationWithComments } from "@/types";
 
 const BurtLocationConfirmation = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
   // Demo data for Carrie's location suggestions with Abby's comments
-  const initialLocations = [
+  const initialLocations: LocationWithComments[] = [
     { 
       name: "Central Cafe", 
       note: "Great coffee and shouldn't be too hard to get a table.",

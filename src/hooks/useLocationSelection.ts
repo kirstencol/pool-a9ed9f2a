@@ -21,6 +21,25 @@ export function useLocationSelection({
 
   const handleSelectLocation = (index: number) => {
     const updatedLocations = [...locations];
+    
+    // If maxSelections is 1, we want to deselect all other locations first
+    if (maxSelections === 1) {
+      // First deselect all locations
+      updatedLocations.forEach(loc => loc.selected = false);
+      
+      // Then select the clicked one
+      updatedLocations[index].selected = true;
+      
+      // If a custom idea was selected, deselect it
+      if (differentIdeaSelected) {
+        setDifferentIdeaSelected(false);
+      }
+      
+      setLocations(updatedLocations);
+      return;
+    }
+    
+    // Original logic for multiple selections
     updatedLocations[index].selected = !updatedLocations[index].selected;
     
     // Count total selected options including user's custom idea
@@ -51,10 +70,31 @@ export function useLocationSelection({
   
   const handleDifferentIdea = () => {
     setHasDifferentIdea(true);
+    
+    // If maxSelections is 1, deselect all other locations
+    if (maxSelections === 1) {
+      const updatedLocations = [...locations];
+      updatedLocations.forEach(loc => loc.selected = false);
+      setLocations(updatedLocations);
+      setDifferentIdeaSelected(true);
+      return;
+    }
+    
     setDifferentIdeaSelected(true);
   };
   
   const toggleDifferentIdeaSelection = () => {
+    // If maxSelections is 1 and we're selecting the custom idea
+    if (maxSelections === 1 && !differentIdeaSelected) {
+      // Deselect all locations first
+      const updatedLocations = [...locations];
+      updatedLocations.forEach(loc => loc.selected = false);
+      setLocations(updatedLocations);
+      setDifferentIdeaSelected(true);
+      return;
+    }
+    
+    // Original logic for multiple selections
     // Count total selected options from regular locations
     const totalSelected = locations.filter(loc => loc.selected).length;
     
