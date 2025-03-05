@@ -26,7 +26,7 @@ export const useResponseSubmitter = ({
   const { toast } = useToast();
   const { storeMeetingInStorage, loadMeetingFromStorage } = useMeeting();
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback(async () => {
     console.log("Submitting response with selected time slots:", selectedTimeSlots);
 
     if (!selectedTimeSlots || selectedTimeSlots.length === 0) {
@@ -47,56 +47,81 @@ export const useResponseSubmitter = ({
       return;
     }
     
-    // Load the existing meeting
-    const meetingData = loadMeetingFromStorage(inviteId);
-    if (!meetingData) {
-      toast({
-        title: "Error",
-        description: "Could not find the meeting data.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Add the response to the meeting data
-    const responses = meetingData.responses || [];
-    
-    // Add responses for each selected time slot
-    selectedTimeSlots.forEach(selection => {
-      responses.push({
-        responderName: responderName, // Using responderName consistently
-        timeSlotId: selection.slot.id,
-        startTime: selection.startTime,
-        endTime: selection.endTime
-      });
+    try {
+      // Load the existing meeting
+      const meetingData = await loadMeetingFromStorage(inviteId);
+      if (!meetingData) {
+        toast({
+          title: "Error",
+          description: "Could not find the meeting data.",
+          variant: "destructive"
+        });
+        return;
+      }
       
-      // Also add the response to the specific time slot
-      const timeSlot = meetingData.timeSlots?.find((ts: any) => ts.id === selection.slot.id);
-      if (timeSlot) {
-        timeSlot.responses = timeSlot.responses || [];
-        timeSlot.responses.push({
-          responderName: responderName, // Using responderName consistently
+      // Prepare the stored meeting data with the added responses
+      const storedMeeting = {
+        id: meetingData.id,
+        creator: meetingData.creator,
+        timeSlots: meetingData.timeSlots,
+        selectedTimeSlot: meetingData.selectedTimeSlot,
+        locations: meetingData.locations,
+        selectedLocation: meetingData.selectedLocation,
+        notes: meetingData.notes,
+        responses: []
+      };
+      
+      // Add responses for each selected time slot
+      selectedTimeSlots.forEach(selection => {
+        // Add to stored responses
+        if (!storedMeeting.responses) {
+          storedMeeting.responses = [];
+        }
+        
+        storedMeeting.responses.push({
+          responderName: responderName,
+          timeSlotId: selection.slot.id,
           startTime: selection.startTime,
           endTime: selection.endTime
         });
+        
+        // Also add the response to the specific time slot
+        const timeSlot = meetingData.timeSlots?.find((ts: any) => ts.id === selection.slot.id);
+        if (timeSlot) {
+          if (!timeSlot.responses) {
+            timeSlot.responses = [];
+          }
+          
+          timeSlot.responses.push({
+            responderName: responderName,
+            startTime: selection.startTime,
+            endTime: selection.endTime
+          });
+        }
+      });
+      
+      // Save the updated meeting data
+      if (storeMeetingInStorage) {
+        storeMeetingInStorage(inviteId, storedMeeting);
       }
-    });
-    
-    // Update the meeting data with the new responses
-    meetingData.responses = responses;
-    
-    // Save the updated meeting data
-    storeMeetingInStorage(inviteId, meetingData);
-    
-    // Show success toast
-    toast({
-      title: "Response submitted!",
-      description: `Thanks ${responderName}, your availability has been saved.`,
-      variant: "default"
-    });
-    
-    // Navigate to confirmation page with the invite ID
-    navigate(`/confirmation?id=${inviteId}`);
+      
+      // Show success toast
+      toast({
+        title: "Response submitted!",
+        description: `Thanks ${responderName}, your availability has been saved.`,
+        variant: "default"
+      });
+      
+      // Navigate to confirmation page with the invite ID
+      navigate(`/confirmation?id=${inviteId}`);
+    } catch (error) {
+      console.error("Error submitting response:", error);
+      toast({
+        title: "Error",
+        description: "There was a problem submitting your response.",
+        variant: "destructive"
+      });
+    }
   }, [selectedTimeSlots, responderName, inviteId, navigate, toast, storeMeetingInStorage, loadMeetingFromStorage]);
 
   const handleCantMakeIt = useCallback((e?: React.MouseEvent) => {

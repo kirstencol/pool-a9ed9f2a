@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
@@ -73,25 +72,35 @@ const TimeConfirmation = () => {
     console.log("Current participants:", participants);
     
     // Generate shareable link for this meeting
-    if (currentUser && timeSlots.length > 0) {
-      // Get the meeting data
-      const { id, url } = generateShareableLink();
-      setShareableLink(url);
-      setInviteId(id);
-      
-      // For demo/testing, maintain the burt_demo link
-      const baseUrl = window.location.origin;
-      setBurtDirectLink(`${baseUrl}/respond/burt_demo`);
-      
-      // For demo purposes, also store the demo_invite data
-      const demoMeetingData = {
-        creator: currentUser,
-        timeSlots: timeSlots,
-      };
-      
-      storeMeetingInStorage("demo_invite", demoMeetingData);
-      console.log("Stored demo_invite data with time slots:", timeSlots);
-    }
+    const generateLink = async () => {
+      if (currentUser && timeSlots.length > 0) {
+        try {
+          // Get the meeting data
+          const result = await generateShareableLink();
+          setShareableLink(result.url);
+          setInviteId(result.id);
+          
+          // For demo/testing, maintain the burt_demo link
+          const baseUrl = window.location.origin;
+          setBurtDirectLink(`${baseUrl}/respond/burt_demo`);
+          
+          // For demo purposes, also store the demo_invite data
+          if (storeMeetingInStorage) {
+            const demoMeetingData = {
+              creator: currentUser,
+              timeSlots: timeSlots,
+            };
+            
+            storeMeetingInStorage("demo_invite", demoMeetingData);
+            console.log("Stored demo_invite data with time slots:", timeSlots);
+          }
+        } catch (error) {
+          console.error("Error generating shareable link:", error);
+        }
+      }
+    };
+    
+    generateLink();
   }, [currentUser, timeSlots, navigate, participants, clearTimeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage]);
 
   if (!currentUser) {
