@@ -35,6 +35,9 @@ const TimeSlotCard = ({
 
   // Use either the custom display name from the timeSlot or the provided creatorName
   const displayCreatorName = timeSlot.creatorDisplayName || creatorName;
+  
+  // Determine verb form based on whether the name includes "and"
+  const verbForm = displayCreatorName.includes(" and ") ? "are" : "is";
 
   useEffect(() => {
     if (selectedByUser && showTimeSelector) {
@@ -121,7 +124,7 @@ const TimeSlotCard = ({
           )}>
             {selectedByUser && !showTimeSelector ? 
               `You and ${displayCreatorName} are free ${startTime} - ${endTime}` :
-              `${displayCreatorName} ${displayCreatorName.includes(' and ') ? 'are' : 'is'} free ${timeSlot.startTime} - ${timeSlot.endTime}`}
+              `${displayCreatorName} ${verbForm} free ${timeSlot.startTime} - ${timeSlot.endTime}`}
           </div>
         )}
       </div>
