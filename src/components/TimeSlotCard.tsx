@@ -1,4 +1,3 @@
-
 import { TimeSlot } from "@/types";
 import { useState, useEffect, memo } from "react";
 import { cn } from "@/lib/utils";
@@ -112,19 +111,16 @@ const TimeSlotCard = ({
       <div className="mb-2">
         <div className="font-medium">{formatDate(timeSlot.date)}</div>
         {creatorAvailable && (
-          <div className="text-sm text-gray-600">
+          <div className={cn(
+            "text-sm",
+            selectedByUser && !showTimeSelector ? "text-purple-700" : "text-gray-600"
+          )}>
             {selectedByUser && !showTimeSelector ? 
               `You and ${creatorName} are free ${startTime} - ${endTime}` :
               `${creatorName} is free ${timeSlot.startTime} - ${timeSlot.endTime}`}
           </div>
         )}
       </div>
-
-      {selectedByUser && !showTimeSelector && (
-        <div className="text-sm text-purple-700 font-medium mt-1">
-          You selected {startTime} - {endTime}
-        </div>
-      )}
 
       {showTimeSelector && selectedByUser && (
         <div className="bg-purple-100 rounded-lg p-4 my-3">
