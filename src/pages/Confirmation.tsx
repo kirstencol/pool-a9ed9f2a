@@ -6,7 +6,6 @@ import { useMeeting } from "@/context/meeting";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { TimeSlot, LocationWithNote } from "@/types";
-import { convertTimeToMinutes } from "@/utils/timeUtils";
 import Avatar from "@/components/Avatar";
 
 const Confirmation = () => {
@@ -18,6 +17,7 @@ const Confirmation = () => {
   const [meetingData, setMeetingData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [timeConfirmation, setTimeConfirmation] = useState(false);
   const [locationResponses, setLocationResponses] = useState<LocationWithNote[]>([]);
   
   useEffect(() => {
@@ -29,26 +29,31 @@ const Confirmation = () => {
       if (data) {
         setMeetingData(data);
         
-        // Get location data from state if available (when coming from AbbyLocationResponse)
-        const stateLocations = location.state?.selectedLocations;
-        if (stateLocations && Array.isArray(stateLocations)) {
-          setLocationResponses(stateLocations);
+        // Check if this is a time response flow (like burt_demo)
+        if (inviteId === 'burt_demo') {
+          setTimeConfirmation(true);
         } else {
-          // Fallback to demo data if no state was passed
-          setLocationResponses([
-            { 
-              name: "Central Cafe", 
-              note: "Great coffee and shouldn't be too hard to get a table.",
-              selected: true,
-              userNote: "I like this place."
-            },
-            { 
-              name: "Starbucks on 5th", 
-              note: "Not the best vibes, but central to all three of us. Plus, PSLs.",
-              selected: true,
-              userNote: "Okay, if we must."
-            }
-          ]);
+          // Get location data from state if available (when coming from AbbyLocationResponse)
+          const stateLocations = location.state?.selectedLocations;
+          if (stateLocations && Array.isArray(stateLocations)) {
+            setLocationResponses(stateLocations);
+          } else {
+            // Fallback to demo data if no state was passed
+            setLocationResponses([
+              { 
+                name: "Central Cafe", 
+                note: "Great coffee and shouldn't be too hard to get a table.",
+                selected: true,
+                userNote: "I like this place."
+              },
+              { 
+                name: "Starbucks on 5th", 
+                note: "Not the best vibes, but central to all three of us. Plus, PSLs.",
+                selected: true,
+                userNote: "Okay, if we must."
+              }
+            ]);
+          }
         }
         
         // Simulate loading state
@@ -117,27 +122,55 @@ const Confirmation = () => {
         <p className="body-text">{getFormattedDate()} from {getFormattedTime()}</p>
       </div>
       
-      <p className="mb-6 body-text-bold">You and Carrie like these spots</p>
-      
-      <div className="space-y-6 mb-10">
-        {locationResponses.map((location, index) => (
-          <div key={index} className="bg-purple-light rounded-xl p-4">
-            <h3 className="heading-3 mb-2">{location.name}</h3>
-            {!isAbbySuggestion(location) && (
-              <div className="flex items-start mb-3">
-                <Avatar initial="C" size="sm" position="third" className="mr-2 flex-shrink-0" />
-                <p className="small-text">{location.note}</p>
-              </div>
-            )}
-            <div className="flex items-start">
-              <Avatar initial="A" size="sm" position="first" className="mr-2 flex-shrink-0" />
-              <p className="small-text">{location.userNote}</p>
-            </div>
+      {timeConfirmation ? (
+        <>
+          <p className="mb-6 body-text-bold">You selected these times</p>
+          <div className="space-y-6 mb-10">
+            {meetingData?.timeSlots?.map((slot: TimeSlot, index: number) => {
+              // Only show time slots that have responses from Burt
+              const hasBurtResponse = slot.responses?.some(
+                (response: any) => response.responderName === "Burt"
+              );
+              
+              if (hasBurtResponse) {
+                return (
+                  <div key={index} className="bg-purple-light rounded-xl p-4">
+                    <h3 className="heading-3 mb-2">{slot.date}</h3>
+                    <p className="body-text">{slot.startTime} to {slot.endTime}</p>
+                  </div>
+                );
+              }
+              return null;
+            })}
           </div>
-        ))}
-      </div>
-      
-      <p className="mb-4 text-center body-text-bold">Does Burt need a nudge?</p>
+          
+          <p className="mb-4 text-center body-text-bold">Does Carrie need a nudge?</p>
+        </>
+      ) : (
+        <>
+          <p className="mb-6 body-text-bold">You and Carrie like these spots</p>
+          
+          <div className="space-y-6 mb-10">
+            {locationResponses.map((location, index) => (
+              <div key={index} className="bg-purple-light rounded-xl p-4">
+                <h3 className="heading-3 mb-2">{location.name}</h3>
+                {!isAbbySuggestion(location) && (
+                  <div className="flex items-start mb-3">
+                    <Avatar initial="C" size="sm" position="third" className="mr-2 flex-shrink-0" />
+                    <p className="small-text">{location.note}</p>
+                  </div>
+                )}
+                <div className="flex items-start">
+                  <Avatar initial="A" size="sm" position="first" className="mr-2 flex-shrink-0" />
+                  <p className="small-text">{location.userNote}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <p className="mb-4 text-center body-text-bold">Does Burt need a nudge?</p>
+        </>
+      )}
       
       <button
         onClick={copyLink}
