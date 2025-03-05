@@ -2,9 +2,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MapPin, ArrowRight, Plus } from "lucide-react";
+import { MapPin, ArrowRight, Plus, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
+import CustomLocationInput from "@/components/CustomLocationInput";
 
 type LocationOption = {
   id: string;
@@ -65,6 +66,15 @@ const CarrieSelectLocation = () => {
     }
   };
 
+  const handleRemoveLocation = (id: string) => {
+    if (locationOptions.length > 1) {
+      setLocationOptions(prev => prev.filter(loc => loc.id !== id));
+    } else {
+      // If this is the last location, just clear it
+      setLocationOptions([{ id: "1", name: "", note: "" }]);
+    }
+  };
+
   const handleSendSuggestions = () => {
     // Filter out empty locations
     const validLocations = locationOptions.filter(loc => loc.name.trim() !== "");
@@ -94,6 +104,14 @@ const CarrieSelectLocation = () => {
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
+      <button 
+        onClick={() => navigate(-1)}
+        className="flex items-center text-gray-500 mb-6"
+      >
+        <ArrowLeft size={16} className="mr-1" />
+        Back
+      </button>
+
       <div className="flex justify-center mb-4">
         <Avatar initial="C" size="lg" position="third" />
       </div>
@@ -108,26 +126,20 @@ const CarrieSelectLocation = () => {
       </div>
 
       <div className="space-y-4 mb-6">
-        {locationOptions.map((loc, index) => (
-          <div key={loc.id} className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin size={18} className="text-gray-400" />
-              <input
-                type="text"
-                value={loc.name}
-                onChange={(e) => handleLocationChange(loc.id, 'name', e.target.value)}
-                placeholder="Enter place name"
-                className="w-full border-none focus:outline-none focus:ring-0 p-0"
-              />
-            </div>
-            <textarea
-              value={loc.note}
-              onChange={(e) => handleLocationChange(loc.id, 'note', e.target.value)}
-              placeholder="Add a note (optional)"
-              className="w-full text-sm text-gray-500 border-none focus:outline-none focus:ring-0 resize-none p-0"
-              rows={2}
-            />
-          </div>
+        {locationOptions.map((loc) => (
+          <CustomLocationInput
+            key={loc.id}
+            isSelected={true}
+            locationName={loc.name}
+            setLocationName={(value) => handleLocationChange(loc.id, 'name', value)}
+            noteText={loc.note || ""}
+            setNoteText={(value) => handleLocationChange(loc.id, 'note', value)}
+            onToggleSelection={() => {}}
+            onClear={(e) => {
+              e.stopPropagation();
+              handleRemoveLocation(loc.id);
+            }}
+          />
         ))}
 
         {locationOptions.length < MAX_LOCATIONS && (
@@ -142,10 +154,9 @@ const CarrieSelectLocation = () => {
 
       <Button 
         onClick={handleSendSuggestions}
-        className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center gap-2"
-        variant="secondary"
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center gap-2"
       >
-        <ArrowRight size={16} />
+        Next <ArrowRight size={16} />
       </Button>
     </div>
   );
