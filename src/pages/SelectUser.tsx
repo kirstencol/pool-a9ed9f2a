@@ -52,7 +52,14 @@ const SelectUser = () => {
       return;
     }
     
-    // Navigate to the response page with both the inviteId and the selected username
+    // For Carrie, navigate directly to CarrieFlow
+    if (selectedUser === "Carrie") {
+      localStorage.setItem('currentUser', 'Carrie');
+      navigate(`/carrie-flow?id=${inviteId || 'carrie_demo'}`);
+      return;
+    }
+    
+    // For other users, navigate to the response page
     if (inviteId) {
       navigate(`/respond/${inviteId}?name=${selectedUser}`);
     } else {

@@ -11,7 +11,7 @@ const CarrieTimeConfirmation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { currentUser } = useMeeting();
+  const { currentUser, setCurrentUser } = useMeeting();
   
   const searchParams = new URLSearchParams(location.search);
   
@@ -33,9 +33,19 @@ const CarrieTimeConfirmation = () => {
     setAdjustedStartTime(startTime);
     setAdjustedEndTime(endTime);
     
-    // Force set Carrie as the current user in localStorage
+    // Force set Carrie as the current user in localStorage and context
     localStorage.setItem('currentUser', 'Carrie');
-  }, [startTime, endTime]);
+    if (!currentUser || currentUser.name !== 'Carrie') {
+      setCurrentUser({
+        id: "carrie-id",
+        name: "Carrie",
+        initial: "C"
+      });
+    }
+    
+    console.log("CarrieTimeConfirmation - Current path:", location.pathname);
+    console.log("CarrieTimeConfirmation - Params:", { inviteId, date, startTime, endTime });
+  }, [startTime, endTime, currentUser, setCurrentUser, location.pathname]);
 
   const handleTimeChange = (start: string, end: string) => {
     setAdjustedStartTime(start);

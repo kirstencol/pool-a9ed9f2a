@@ -7,10 +7,12 @@ import { Button } from "@/components/ui/button";
 import TimeSlotCard from "@/components/TimeSlotCard";
 import { useMeeting } from "@/context/meeting";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const CarrieFlow = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const searchParams = new URLSearchParams(location.search);
   const inviteId = searchParams.get("id") || "carrie_demo";
   
@@ -31,6 +33,7 @@ const CarrieFlow = () => {
     
     // Store that we're in Carrie's flow
     localStorage.setItem('currentUser', 'Carrie');
+    console.log("CarrieFlow - Set current user to Carrie");
   }, [setCurrentUser]);
 
   const handleSelectTimeSlot = (slot: TimeSlot) => {
@@ -46,8 +49,21 @@ const CarrieFlow = () => {
 
   const handleContinue = () => {
     if (selectedTimeSlot && selectedStartTime && selectedEndTime) {
-      // Navigate directly to the CarrieTimeConfirmation page with clear parameters
-      navigate(`/carrie-time-confirmation?id=${inviteId}&startTime=${selectedStartTime}&endTime=${selectedEndTime}&date=${selectedTimeSlot.date}`);
+      // Add a toast to confirm the selection
+      toast({
+        title: "Time selected!",
+        description: "Moving to time confirmation"
+      });
+      
+      console.log("CarrieFlow - Navigating to confirmation with params:", {
+        id: inviteId,
+        date: selectedTimeSlot.date,
+        startTime: selectedStartTime,
+        endTime: selectedEndTime
+      });
+      
+      // Navigate directly to CarrieTimeConfirmation
+      navigate(`/carrie-time-confirmation?id=${inviteId}&date=${selectedTimeSlot.date}&startTime=${selectedStartTime}&endTime=${selectedEndTime}`);
     }
   };
 

@@ -1,5 +1,5 @@
 
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
 import { useInviteData } from "@/hooks/useInviteData";
 import { useEffect, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import { initializeDemoData } from "@/context/meeting/storage";
 import Loading from "@/components/Loading";
 
 const RespondToInvite = () => {
+  const navigate = useNavigate();
   const { inviteId: rawInviteId } = useParams();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -27,8 +28,14 @@ const RespondToInvite = () => {
       initializeDemoData();
       console.log("RespondToInvite - Initialized demo data on mount");
       initialLoadComplete.current = true;
+      
+      // Redirect Carrie to CarrieFlow
+      if (userName === "Carrie" || localStorage.getItem('currentUser') === 'Carrie') {
+        console.log("RespondToInvite - Redirecting Carrie to CarrieFlow");
+        navigate(`/carrie-flow?id=${inviteId}`, { replace: true });
+      }
     }
-  }, []);
+  }, [navigate, inviteId, userName]);
   
   // Add a safety timeout to prevent infinite loading
   useEffect(() => {
@@ -55,14 +62,13 @@ const RespondToInvite = () => {
     inviteTimeSlots
   } = useInviteData(inviteId, userName); // Pass the userName to the hook
 
-  console.log("RespondToInvite - Data from hook:", {
-    isLoading,
-    inviteError,
-    creatorName,
-    responderName,
-    inviteTimeSlots,
-    contextTimeSlots
-  });
+  // If this is Carrie, redirect to CarrieFlow
+  useEffect(() => {
+    if ((userName === "Carrie" || localStorage.getItem('currentUser') === 'Carrie') && !isLoading) {
+      console.log("RespondToInvite - Redirecting Carrie to CarrieFlow after loading");
+      navigate(`/carrie-flow?id=${inviteId}`, { replace: true });
+    }
+  }, [isLoading, userName, navigate, inviteId]);
 
   // Handle loading state with better feedback
   if (isLoading && !forcedError) {
