@@ -15,6 +15,7 @@ import {
   setMeetingNotes as dbSetMeetingNotes,
   updateMeetingStatus
 } from '@/integrations/supabase/api';
+import { storeMeetingInStorage as storeMeetingToStorage } from './storage';
 
 const MeetingContext = createContext<MeetingContextType | undefined>(undefined);
 
@@ -31,7 +32,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
 
   const generateShareableLink = async () => {
-    // If we already have a meeting ID, return it
     if (currentMeetingId) {
       const baseUrl = window.location.origin;
       const shareableUrl = `${baseUrl}/respond/${currentMeetingId}`;
@@ -47,7 +47,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
 
     try {
-      // Step 1: Create the meeting
       const meetingId = await createMeeting({
         creator_name: currentUser.name,
         creator_initial: currentUser.initial,
@@ -58,10 +57,8 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Failed to create meeting');
       }
 
-      // Store the meeting ID
       setCurrentMeetingId(meetingId);
 
-      // Step 2: Add all participants (including creator)
       const allParticipants = [currentUser, ...participants];
       const participantsInsert = allParticipants.map(p => ({
         meeting_id: meetingId,
@@ -74,7 +71,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Failed to add participants');
       }
 
-      // Step 3: Add time slots if we have any
       if (timeSlots.length > 0) {
         const timeSlotsInsert = timeSlots.map(slot => ({
           meeting_id: meetingId,
@@ -88,7 +84,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
           throw new Error('Failed to add time slots');
         }
 
-        // Update time slots with new IDs
         const updatedTimeSlots = timeSlots.map((slot, index) => ({
           ...slot,
           id: timeSlotIds[index]
@@ -96,7 +91,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
         setTimeSlots(updatedTimeSlots);
       }
 
-      // Generate the shareable URL
       const baseUrl = window.location.origin;
       const shareableUrl = `${baseUrl}/respond/${meetingId}`;
 
@@ -124,13 +118,11 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addTimeSlot = async (timeSlot: TimeSlot) => {
-    // If we don't have a meeting ID yet, just add to local state
     if (!currentMeetingId) {
       setTimeSlots(prev => [...prev, { ...timeSlot, id: timeSlot.id || crypto.randomUUID() }]);
       return;
     }
 
-    // Otherwise, add to database
     try {
       const timeSlotId = await addTimeSlots([{
         meeting_id: currentMeetingId,
@@ -143,7 +135,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Failed to add time slot');
       }
 
-      // Add to local state with the DB ID
       setTimeSlots(prev => [...prev, { ...timeSlot, id: timeSlotId[0] }]);
     } catch (err) {
       console.error('Error adding time slot:', err);
@@ -166,13 +157,11 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addLocationToMeeting = async (location: Location) => {
-    // If we don't have a meeting ID yet, just add to local state
     if (!currentMeetingId) {
       setLocations([...locations, { ...location, id: crypto.randomUUID() }]);
       return;
     }
 
-    // Otherwise, add to database
     try {
       const locationId = await addLocation({
         meeting_id: currentMeetingId,
@@ -185,7 +174,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Failed to add location');
       }
 
-      // Add to local state with the DB ID
       setLocations(prev => [...prev, { ...location, id: locationId }]);
     } catch (err) {
       console.error('Error adding location:', err);
@@ -234,7 +222,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Meeting not found');
       }
 
-      // Update local state with the loaded meeting data
       if (meeting.creator) {
         setCurrentUser(meeting.creator);
       }
@@ -257,7 +244,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Handle responses to a time slot
   const respondToTimeSlot = async (timeSlotId: string, responderName: string, startTime: string, endTime: string): Promise<boolean> => {
     try {
       const success = await addTimeResponse({
@@ -271,7 +257,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Failed to add time response');
       }
 
-      // Update local state
       setTimeSlots(prev => prev.map(slot => {
         if (slot.id === timeSlotId) {
           const responses = slot.responses || [];
@@ -298,7 +283,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Handle responses to a location
   const respondToLocation = async (locationId: string, responderName: string, note: string = ''): Promise<boolean> => {
     try {
       const success = await addLocationResponse({
@@ -311,7 +295,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
         throw new Error('Failed to add location response');
       }
 
-      // Update local state
       setLocations(prev => prev.map(loc => {
         if (loc.id === locationId) {
           const responses = loc.responses || [];
@@ -320,7 +303,7 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
             responses: [
               ...responses,
               {
-                responderName,
+                userId: responderName,
                 note
               }
             ]
@@ -337,7 +320,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Updated function to set selected time slot
   const setSelectedTimeSlotWithDB = async (timeSlot: TimeSlot | null) => {
     setSelectedTimeSlot(timeSlot);
     
@@ -351,7 +333,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Updated function to set selected location
   const setSelectedLocationWithDB = async (location: Location | null) => {
     setSelectedLocation(location);
     
@@ -365,7 +346,6 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Updated function to set meeting notes
   const setMeetingNotesWithDB = async (notes: string) => {
     setMeetingNotes(notes);
     
@@ -375,6 +355,16 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
       } catch (err) {
         console.error('Error setting meeting notes:', err);
       }
+    }
+  };
+
+  const storeMeetingInStorage = async (id: string, meetingData: Partial<StoredMeeting>): Promise<boolean> => {
+    try {
+      return await storeMeetingToStorage(id, meetingData);
+    } catch (error) {
+      console.error('Error storing meeting data:', error);
+      setError(error instanceof Error ? error.message : 'Unknown error storing meeting data');
+      return false;
     }
   };
 
@@ -405,6 +395,7 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
       loadMeetingFromStorage: loadMeetingFromDatabase,
       respondToTimeSlot,
       respondToLocation,
+      storeMeetingInStorage,
       isLoading,
       error
     }}>

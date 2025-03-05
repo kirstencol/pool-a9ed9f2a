@@ -1,5 +1,19 @@
+
 // src/context/meeting/types.ts
 import { User, TimeSlot, Location, Meeting } from '@/types';
+
+export interface StoredMeeting {
+  id?: string;
+  creator?: User;
+  participants?: User[];
+  timeSlots?: TimeSlot[];
+  selectedTimeSlot?: TimeSlot | null;
+  locations?: Location[];
+  selectedLocation?: Location | null;
+  notes?: string;
+  status?: 'draft' | 'pending' | 'confirmed';
+  responses?: any[];
+}
 
 export interface MeetingContextType {
   currentUser: User | null;
@@ -27,6 +41,7 @@ export interface MeetingContextType {
   loadMeetingFromStorage: (id: string) => Promise<Meeting | null>;
   respondToTimeSlot: (timeSlotId: string, responderName: string, startTime: string, endTime: string) => Promise<boolean>;
   respondToLocation: (locationId: string, responderName: string, note?: string) => Promise<boolean>;
+  storeMeetingInStorage: (id: string, meeting: Partial<StoredMeeting>) => Promise<boolean>;
   isLoading: boolean;
   error: string | null;
 }

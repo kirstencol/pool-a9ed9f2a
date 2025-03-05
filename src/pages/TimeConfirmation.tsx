@@ -5,6 +5,7 @@ import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import TimeSlotCard from "@/components/TimeSlotCard";
 import { useToast } from "@/hooks/use-toast";
+import { Check, Copy } from "lucide-react";
 
 const TimeConfirmation = () => {
   const navigate = useNavigate();
@@ -23,76 +24,95 @@ const TimeConfirmation = () => {
   const [shareableLink, setShareableLink] = useState("");
   const [inviteId, setInviteId] = useState("");
   const [burtDirectLink, setBurtDirectLink] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   // Set up data when the component loads
   useEffect(() => {
-    if (!currentUser) {
-      console.log("Setting up Abby's data");
-      
-      // Clear any existing time slots
-      clearTimeSlots();
-      
-      // Add Abby's availability time slots
-      const abbyTimeSlots = [
-        {
-          id: "1",
-          date: "March 1",
-          startTime: "8:00 AM",
-          endTime: "1:30 PM",
-          responses: []
-        },
-        {
-          id: "2",
-          date: "March 2",
-          startTime: "7:00 AM",
-          endTime: "10:00 AM",
-          responses: []
-        },
-        {
-          id: "3",
-          date: "March 3",
-          startTime: "9:00 AM",
-          endTime: "9:00 PM",
-          responses: []
-        }
-      ];
-      
-      abbyTimeSlots.forEach(slot => {
-        addTimeSlot(slot);
-      });
-      
-      // Setup Abby as current user if not set
+    const setupMeetingData = async () => {
       if (!currentUser) {
-        navigate("/");
+        console.log("Setting up Abby's data");
+        
+        // Clear any existing time slots
+        clearTimeSlots();
+        
+        // Add Abby's availability time slots
+        const abbyTimeSlots = [
+          {
+            id: "1",
+            date: "March 1",
+            startTime: "8:00 AM",
+            endTime: "1:30 PM",
+            responses: []
+          },
+          {
+            id: "2",
+            date: "March 2",
+            startTime: "7:00 AM",
+            endTime: "10:00 AM",
+            responses: []
+          },
+          {
+            id: "3",
+            date: "March 3",
+            startTime: "9:00 AM",
+            endTime: "9:00 PM",
+            responses: []
+          }
+        ];
+        
+        abbyTimeSlots.forEach(slot => {
+          addTimeSlot(slot);
+        });
+        
+        // Setup Abby as current user if not set
+        if (!currentUser) {
+          navigate("/");
+        }
       }
-    }
-    
-    // For debugging
-    console.log("Current user:", currentUser);
-    console.log("Current time slots:", timeSlots);
-    console.log("Current participants:", participants);
-    
-    // Generate shareable link for this meeting
-    if (currentUser && timeSlots.length > 0) {
-      // Get the meeting data
-      const { id, url } = generateShareableLink();
-      setShareableLink(url);
-      setInviteId(id);
       
-      // For demo/testing, maintain the burt_demo link
-      const baseUrl = window.location.origin;
-      setBurtDirectLink(`${baseUrl}/respond/burt_demo`);
+      // For debugging
+      console.log("Current user:", currentUser);
+      console.log("Current time slots:", timeSlots);
+      console.log("Current participants:", participants);
       
-      // For demo purposes, also store the demo_invite data
-      const demoMeetingData = {
-        creator: currentUser,
-        timeSlots: timeSlots,
-      };
-      
-      storeMeetingInStorage("demo_invite", demoMeetingData);
-      console.log("Stored demo_invite data with time slots:", timeSlots);
-    }
-  }, [currentUser, timeSlots, navigate, participants, clearTimeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage]);
+      // Generate shareable link for this meeting
+      if (currentUser && timeSlots.length > 0) {
+        try {
+          setIsLoading(true);
+          
+          // Get the meeting data
+          const shareableData = await generateShareableLink();
+          setShareableLink(shareableData.url);
+          setInviteId(shareableData.id);
+          
+          // For demo/testing, maintain the burt_demo link
+          const baseUrl = window.location.origin;
+          setBurtDirectLink(`${baseUrl}/respond/burt_demo`);
+          
+          // For demo purposes, also store the demo_invite data
+          const demoMeetingData = {
+            creator: currentUser,
+            timeSlots: timeSlots,
+          };
+          
+          await storeMeetingInStorage("demo_invite", demoMeetingData);
+          console.log("Stored demo_invite data with time slots:", timeSlots);
+          
+        } catch (error) {
+          console.error("Error generating link:", error);
+          toast({ 
+            title: "Error",
+            description: "Could not generate meeting link",
+            variant: "destructive"
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    setupMeetingData();
+  }, [currentUser, timeSlots, navigate, participants, clearTimeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage, toast]);
 
   if (!currentUser) {
     return null;
@@ -117,6 +137,16 @@ const TimeConfirmation = () => {
     });
     setTimeout(() => setCopied(false), 3000);
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-md mx-auto px-6 py-12">
+        <div className="flex justify-center items-center h-40">
+          <p className="text-gray-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
@@ -152,9 +182,10 @@ const TimeConfirmation = () => {
         
         <button
           onClick={copyLink}
-          className="action-button w-full"
+          className="action-button w-full bg-purple-600 text-white py-3 px-4 rounded-xl flex items-center justify-center font-medium"
         >
           Copy link to send to friends
+          {copied ? <Check className="w-5 h-5 ml-2" /> : <Copy className="w-5 h-5 ml-2" />}
         </button>
         
         <button

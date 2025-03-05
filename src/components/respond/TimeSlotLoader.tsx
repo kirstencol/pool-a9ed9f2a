@@ -1,3 +1,4 @@
+
 // src/components/respond/TimeSlotLoader.tsx
 import { useEffect } from "react";
 import { TimeSlot } from "@/types";
@@ -36,13 +37,13 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
         setLocalTimeSlots(uniqueTimeSlots);
         onTimeSlotsLoaded();
       } else if (inviteId) {
-        // Fallback: try to get time slots directly from Supabase
-        console.log("TimeSlotLoader - Trying to load time slots directly from Supabase for:", inviteId);
+        // Fallback: try to get time slots directly from storage
+        console.log("TimeSlotLoader - Trying to load time slots directly for:", inviteId);
         try {
           const meeting = await loadMeetingFromStorage(inviteId);
           
           if (meeting?.timeSlots && meeting.timeSlots.length > 0) {
-            console.log("TimeSlotLoader - Loaded time slots from Supabase:", meeting.timeSlots);
+            console.log("TimeSlotLoader - Loaded time slots from storage:", meeting.timeSlots);
             setLocalTimeSlots(meeting.timeSlots);
             onTimeSlotsLoaded();
           } else {

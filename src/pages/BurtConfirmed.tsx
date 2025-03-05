@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CalendarPlus } from "lucide-react";
@@ -18,41 +17,43 @@ const BurtConfirmed = () => {
   const [timeSlot, setTimeSlot] = useState<TimeSlot | null>(null);
   const [selectedTimeRange, setSelectedTimeRange] = useState<string>("8:00 a.m. to 9:00 a.m.");
   const [selectedDate, setSelectedDate] = useState<string>("Saturday, March 2nd");
+  const [isLoading, setIsLoading] = useState(false);
   
   const { selectedLocations } = location.state || { selectedLocations: [] };
   
   useEffect(() => {
-    // Fetch the actual meeting data to get Burt's selected times
-    const meetingData = loadMeetingFromStorage("burt_demo");
-    if (meetingData) {
-      setMeetingData(meetingData);
+    const fetchMeetingData = async () => {
+      setIsLoading(true);
       
-      // Find the first slot with a response from Burt
-      const burtSlot = meetingData.timeSlots?.find((slot: any) => 
-        slot.responses?.some((resp: any) => resp.responderName === "Burt")
-      );
+      const inviteId = searchParams.get('id') || 'burt_demo';
       
-      if (burtSlot) {
-        setTimeSlot(burtSlot);
-        
-        // Get Burt's response for this slot
-        const burtResponse = burtSlot.responses?.find((resp: any) => resp.responderName === "Burt");
-        
-        if (burtResponse) {
-          // Format the time range
-          setSelectedTimeRange(`${burtResponse.startTime} to ${burtResponse.endTime}`);
+      try {
+        const meetingData = await loadMeetingFromStorage(inviteId);
+        if (meetingData && meetingData.timeSlots) {
+          const slots = meetingData.timeSlots;
+          
+          // If we have specific time data in URL params, use that instead
+          if (date && startTime && endTime) {
+            setMeetingDate(date);
+            setMeetingStartTime(startTime);
+            setMeetingEndTime(endTime);
+          } else if (slots && slots.length > 0) {
+            const firstSlot = slots[0];
+            setMeetingDate(firstSlot.date);
+            setMeetingStartTime(firstSlot.startTime);
+            setMeetingEndTime(firstSlot.endTime);
+          }
         }
-        
-        // Format the date
-        const formattedDate = formatDate(burtSlot.date);
-        if (formattedDate) {
-          setSelectedDate(formattedDate);
-        }
+      } catch (error) {
+        console.error("Error loading meeting data:", error);
+      } finally {
+        setIsLoading(false);
       }
-    }
-  }, [loadMeetingFromStorage]);
+    };
+    
+    fetchMeetingData();
+  }, [date, startTime, endTime, loadMeetingFromStorage, searchParams]);
   
-  // Format date string to display format
   const formatDate = (dateString: string) => {
     if (!dateString) return "Saturday, March 2nd";
     

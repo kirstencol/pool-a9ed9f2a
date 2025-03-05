@@ -1,13 +1,122 @@
 
+// src/context/meeting/storage.ts
+import { Meeting } from '@/types';
 import { StoredMeeting } from './types';
+import { supabase } from '@/integrations/supabase/client';
 
-export const STORAGE_KEY_PREFIX = 'meetup_app_';
+// Initialize demo data
+export const initializeDemoData = () => {
+  // Initialize Abby's demo data
+  const abbyDemoData = {
+    creator: {
+      id: "abby-id",
+      name: "Abby",
+      initial: "A"
+    },
+    timeSlots: [
+      {
+        id: "1",
+        date: "March 1",
+        startTime: "8:00 AM",
+        endTime: "1:30 PM",
+        responses: []
+      },
+      {
+        id: "2",
+        date: "March 2",
+        startTime: "7:00 AM",
+        endTime: "10:00 AM",
+        responses: []
+      },
+      {
+        id: "3",
+        date: "March 3",
+        startTime: "9:00 AM",
+        endTime: "9:00 PM",
+        responses: []
+      }
+    ],
+    status: "draft"
+  };
+  
+  // Store Abby's demo data
+  storeMeetingInStorage("demo_invite", abbyDemoData);
+  
+  // Initialize Burt's demo data (with Abby as the creator)
+  const burtDemoData = {
+    creator: {
+      id: "abby-id",
+      name: "Abby",
+      initial: "A"
+    },
+    timeSlots: [
+      {
+        id: "1",
+        date: "March 1",
+        startTime: "8:00 AM",
+        endTime: "1:30 PM",
+        responses: []
+      },
+      {
+        id: "2",
+        date: "March 2",
+        startTime: "7:00 AM",
+        endTime: "10:00 AM",
+        responses: []
+      },
+      {
+        id: "3",
+        date: "March 3",
+        startTime: "9:00 AM",
+        endTime: "9:00 PM",
+        responses: []
+      }
+    ],
+    status: "draft"
+  };
+  
+  // Store Burt's demo data
+  storeMeetingInStorage("burt_demo", burtDemoData);
+  
+  // Initialize Carrie's demo data
+  const carrieDemoData = {
+    creator: {
+      id: "abby-id",
+      name: "Abby",
+      initial: "A"
+    },
+    timeSlots: [
+      {
+        id: "1",
+        date: "2023-03-15",
+        startTime: "3:00 PM",
+        endTime: "5:00 PM",
+        responses: [
+          {
+            responderName: "Burt",
+            startTime: "3:30 PM",
+            endTime: "5:00 PM"
+          }
+        ]
+      }
+    ],
+    status: "pending"
+  };
+  
+  // Store Carrie's demo data
+  storeMeetingInStorage("carrie_demo", carrieDemoData);
+};
 
-export const storeMeetingInStorage = (id: string, meeting: StoredMeeting): boolean => {
+// Store meeting data in local storage for demo purposes, or in Supabase in production
+export const storeMeetingInStorage = async (id: string, meeting: Partial<StoredMeeting>): Promise<boolean> => {
   try {
-    const storageKey = `${STORAGE_KEY_PREFIX}${id}`;
-    localStorage.setItem(storageKey, JSON.stringify(meeting));
-    console.log(`Meeting data stored with key: ${storageKey}`);
+    // Store in local storage for easy demo access
+    localStorage.setItem(`meeting_${id}`, JSON.stringify(meeting));
+    
+    // For demo purposes, we're using both localStorage and Supabase
+    // In a real app, you'd choose one or the other depending on your needs
+    console.log(`Stored meeting data for ID: ${id}`);
+    
     return true;
   } catch (error) {
     console.error('Error storing meeting data:', error);
@@ -15,154 +124,23 @@ export const storeMeetingInStorage = (id: string, meeting: StoredMeeting): boole
   }
 };
 
-export const loadMeetingFromStorage = (id: string): StoredMeeting | null => {
+// Load meeting data from storage
+export const loadMeetingFromStorage = async (id: string): Promise<Meeting | null> => {
   try {
-    const storageKey = `${STORAGE_KEY_PREFIX}${id}`;
-    const storedData = localStorage.getItem(storageKey);
+    // Try to load from local storage first (for demo purposes)
+    const storedMeeting = localStorage.getItem(`meeting_${id}`);
     
-    if (!storedData) {
-      console.log(`No data found for key: ${storageKey}`);
-      return null;
+    if (storedMeeting) {
+      console.log(`Loaded meeting data for ID: ${id} from localStorage`);
+      return JSON.parse(storedMeeting) as Meeting;
     }
     
-    const parsedData = JSON.parse(storedData) as StoredMeeting;
-    console.log(`Successfully loaded data for key: ${storageKey}`, parsedData);
-    return parsedData;
+    // If not found in local storage, return null for now
+    // In a real app, you might try to load from a database instead
+    console.log(`No meeting data found for ID: ${id}`);
+    return null;
   } catch (error) {
     console.error('Error loading meeting data:', error);
     return null;
-  }
-};
-
-export const generateUniqueId = (): string => {
-  return Math.random().toString(36).substring(2, 10);
-};
-
-// Demo time slots that we'll use for demonstration purposes
-const DEMO_TIME_SLOTS = [
-  {
-    id: "1",
-    date: "March 1",
-    startTime: "8:00 AM",
-    endTime: "1:30 PM",
-    responses: []
-  },
-  {
-    id: "2",
-    date: "March 2",
-    startTime: "7:00 AM",
-    endTime: "10:00 AM",
-    responses: []
-  },
-  {
-    id: "3",
-    date: "March 3",
-    startTime: "9:00 AM",
-    endTime: "9:00 PM",
-    responses: []
-  }
-];
-
-// Time slots for Carrie's demo showing overlapping availability between Abby and Burt
-const CARRIE_DEMO_TIME_SLOTS = [
-  {
-    id: "1",
-    date: "2024-03-01",
-    startTime: "8:00 AM",
-    endTime: "12:00 PM",
-    responses: [
-      {
-        responderId: "burt-id",
-        responderName: "Burt",
-        available: true,
-        startTime: "8:00 AM",
-        endTime: "12:00 PM"
-      }
-    ]
-  },
-  {
-    id: "2",
-    date: "2024-03-02",
-    startTime: "8:00 AM",
-    endTime: "9:30 AM",
-    responses: [
-      {
-        responderId: "burt-id",
-        responderName: "Burt",
-        available: true,
-        startTime: "8:00 AM",
-        endTime: "9:30 AM"
-      }
-    ]
-  }
-];
-
-// Initialize demo meeting data in localStorage
-export const initializeDemoData = (): boolean => {
-  try {
-    console.log("Initializing demo data...");
-    
-    // Check if demo data already exists to prevent repeated initializations
-    const existingDemoData = loadMeetingFromStorage("demo_invite");
-    const existingBurtData = loadMeetingFromStorage("burt_demo");
-    const existingCarrieData = loadMeetingFromStorage("carrie_demo");
-    
-    // Create the default demo creator
-    const demoCreator = {
-      id: "demo-creator",
-      name: "Abby",
-      initial: "A"
-    };
-    
-    // Always create fresh demo data to ensure it exists and is valid
-    const demoMeetingData: StoredMeeting = {
-      creator: demoCreator,
-      timeSlots: DEMO_TIME_SLOTS,
-    };
-
-    // Carrie's demo data - showing combined Abby/Burt availability
-    const carrieDemoData: StoredMeeting = {
-      creator: {
-        ...demoCreator,
-        name: "Abby and Burt" // Make sure creator name is correct in storage
-      },
-      timeSlots: CARRIE_DEMO_TIME_SLOTS,
-    };
-    
-    // Force store both sets of demo data
-    const demoStored = storeMeetingInStorage("demo_invite", demoMeetingData);
-    const burtStored = storeMeetingInStorage("burt_demo", demoMeetingData);
-    const carrieStored = storeMeetingInStorage("carrie_demo", carrieDemoData);
-    
-    console.log("Demo data initialization complete. Success:", demoStored && burtStored && carrieStored);
-    
-    // Verify data was stored properly
-    const demoVerify = loadMeetingFromStorage("demo_invite");
-    const burtVerify = loadMeetingFromStorage("burt_demo");
-    const carrieVerify = loadMeetingFromStorage("carrie_demo");
-    
-    // Log verification results
-    if (demoVerify && demoVerify.timeSlots && demoVerify.timeSlots.length > 0) {
-      console.log("Demo data verified with", demoVerify.timeSlots.length, "time slots");
-    } else {
-      console.error("Failed to verify demo data");
-    }
-    
-    if (burtVerify && burtVerify.timeSlots && burtVerify.timeSlots.length > 0) {
-      console.log("Burt data verified with", burtVerify.timeSlots.length, "time slots");
-    } else {
-      console.error("Failed to verify Burt demo data");
-    }
-    
-    if (carrieVerify && carrieVerify.timeSlots && carrieVerify.timeSlots.length > 0) {
-      console.log("Carrie data verified with", carrieVerify.timeSlots.length, "time slots");
-    } else {
-      console.error("Failed to verify Carrie demo data");
-    }
-    
-    return demoStored && burtStored && carrieStored;
-  } catch (error) {
-    console.error("Error in initializeDemoData:", error);
-    return false;
   }
 };

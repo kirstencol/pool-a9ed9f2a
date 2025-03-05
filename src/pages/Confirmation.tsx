@@ -27,10 +27,14 @@ const Confirmation = () => {
     if (inviteId) {
       const fetchMeetingData = async () => {
         try {
+          setIsLoading(true);
           const data = await loadMeetingFromStorage(inviteId);
+          
           if (data) {
             setMeetingData(data);
-            setCreatorName(data.creator?.name || "Abby");
+            if (data.creator?.name) {
+              setCreatorName(data.creator.name || "Abby");
+            }
           }
           
           setTimeout(() => {
