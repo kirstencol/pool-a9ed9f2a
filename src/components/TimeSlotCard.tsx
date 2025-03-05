@@ -97,24 +97,27 @@ const TimeSlotCard = ({
       )}
       onClick={onClick}
     >
+      {/* Card Header - Always visible */}
       <div className="mb-2">
+        {/* Date is always shown */}
         <div className="font-medium">{formatDate(timeSlot.date)}</div>
         
-        {/* Always show creator's availability regardless of selection state */}
+        {/* Creator availability is always shown */}
         {creatorAvailable && (
           <div className="text-sm text-gray-600">
             {`${creatorName} is free ${timeSlot.startTime} - ${timeSlot.endTime}`}
           </div>
         )}
-        
-        {/* Show user's selection only when they've made one */}
-        {selectedByUser && !showTimeSelector && (
-          <div className="text-sm text-purple-700 font-medium mt-1">
-            You selected {startTime} - {endTime}
-          </div>
-        )}
       </div>
 
+      {/* User's selection is shown if they've made one */}
+      {selectedByUser && !showTimeSelector && (
+        <div className="text-sm text-purple-700 font-medium mt-1">
+          You selected {startTime} - {endTime}
+        </div>
+      )}
+
+      {/* Time selector appears below when expanded */}
       {showTimeSelector && selectedByUser && (
         <div className="bg-purple-100 rounded-lg p-4 my-3">
           <div className="text-center mb-3 font-medium">What time works for you?</div>
@@ -141,7 +144,7 @@ const TimeSlotCard = ({
         </div>
       )}
 
-      {/* Only show the "can't make it" button if the slot is selected by the user */}
+      {/* "Can't make it" button appears only if the slot is selected */}
       {onCannotMakeIt && selectedByUser && (
         <button 
           onClick={(e) => {
