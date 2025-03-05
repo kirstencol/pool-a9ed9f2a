@@ -51,7 +51,12 @@ export const parseTimeString = (time: string): { hour: string; minute: string; p
 // Build time string from components
 export const buildTimeString = (hour: string, minute: string, period: string): string => {
   const formattedMinute = minute.padStart(2, '0');
-  return `${hour}:${formattedMinute} ${period}`;
+  const formattedHour = hour.trim();
+  const formattedPeriod = period.trim().toLowerCase();
+  
+  const result = `${formattedHour}:${formattedMinute} ${formattedPeriod}`;
+  console.log(`buildTimeString: Created "${result}"`);
+  return result;
 };
 
 // Time increment logic
@@ -61,12 +66,12 @@ export const incrementTime = (
   period: string, 
   maxTime?: string
 ): { hour: string; minute: string; period: string; timeString: string } | null => {
-  console.log("🔼 Increment time logic called");
+  console.log(`incrementTime called with: ${hour}:${minute} ${period}, maxTime: ${maxTime || 'none'}`);
   
   // Convert current time to minutes
   let hours = parseInt(hour);
   let minutes = parseInt(minute);
-  const currentPeriod = period;
+  const currentPeriod = period.toLowerCase();
   
   // Convert to 24-hour format
   let hours24 = hours;
@@ -112,12 +117,12 @@ export const decrementTime = (
   isEndTime = false, 
   startTime?: string
 ): { hour: string; minute: string; period: string; timeString: string } | null => {
-  console.log("🔽 Decrement time logic called");
+  console.log(`decrementTime called with: ${hour}:${minute} ${period}, minTime: ${minTime || 'none'}, isEndTime: ${isEndTime}, startTime: ${startTime || 'none'}`);
   
   // Convert current time to minutes
   let hours = parseInt(hour);
   let minutes = parseInt(minute);
-  const currentPeriod = period;
+  const currentPeriod = period.toLowerCase();
   
   // Convert to 24-hour format
   let hours24 = hours;
@@ -132,11 +137,13 @@ export const decrementTime = (
   
   // Check if below min time
   const minMinutes = minTime ? timeToMinutes(minTime) : 0;
+  const startTimeMinutes = startTime ? timeToMinutes(startTime) : 0;
+  
   const effectiveMinMinutes = isEndTime && startTime ? 
-    Math.max(timeToMinutes(startTime), minMinutes) : minMinutes;
+    Math.max(startTimeMinutes, minMinutes) : minMinutes;
   
   if (totalMinutes < effectiveMinMinutes) {
-    console.log(`Cannot decrement: ${totalMinutes} < ${effectiveMinMinutes}`);
+    console.log(`Cannot decrement: ${totalMinutes} < ${effectiveMinMinutes} (min: ${minMinutes}, start: ${startTimeMinutes})`);
     return null;
   }
   
@@ -166,13 +173,17 @@ export const isAtMinTime = (
   isEndTime = false, 
   startTime?: string
 ): boolean => {
-  const currentMinutes = timeToMinutes(buildTimeString(hour, minute, period));
+  const currentTime = buildTimeString(hour, minute, period);
+  const currentMinutes = timeToMinutes(currentTime);
+  
   const minMinutes = minTime ? timeToMinutes(minTime) : 0;
+  const startTimeMinutes = startTime ? timeToMinutes(startTime) : 0;
+  
   const effectiveMinMinutes = isEndTime && startTime ? 
-    Math.max(timeToMinutes(startTime), minMinutes) : minMinutes;
+    Math.max(startTimeMinutes, minMinutes) : minMinutes;
   
   const result = currentMinutes <= effectiveMinMinutes;
-  console.log(`isAtMinTime: ${buildTimeString(hour, minute, period)} <= ${timeToMinutes(startTime || "")} or ${minMinutes} = ${result}`);
+  console.log(`isAtMinTime: ${currentTime} (${currentMinutes} mins) <= ${minTime || "00:00 am"} (${minMinutes} mins) or ${startTime || "N/A"} (${startTimeMinutes} mins) = ${result}`);
   return result;
 };
 
@@ -183,10 +194,12 @@ export const isAtMaxTime = (
   period: string, 
   maxTime?: string
 ): boolean => {
-  const currentMinutes = timeToMinutes(buildTimeString(hour, minute, period));
+  const currentTime = buildTimeString(hour, minute, period);
+  const currentMinutes = timeToMinutes(currentTime);
+  
   const maxMinutes = maxTime ? timeToMinutes(maxTime) : 24 * 60 - 1;
   
   const result = currentMinutes >= maxMinutes;
-  console.log(`isAtMaxTime: ${buildTimeString(hour, minute, period)} >= ${maxTime} (${maxMinutes} mins) = ${result}`);
+  console.log(`isAtMaxTime: ${currentTime} (${currentMinutes} mins) >= ${maxTime || "11:59 pm"} (${maxMinutes} mins) = ${result}`);
   return result;
 };

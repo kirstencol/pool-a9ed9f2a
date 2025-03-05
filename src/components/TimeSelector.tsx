@@ -40,6 +40,8 @@ const TimeSelector = ({
     maxTime
   });
 
+  console.log("TimeSelector render state:", { hour, minute, period, isAtMinTime, isAtMaxTime });
+
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40">
       <div className="flex justify-center">
