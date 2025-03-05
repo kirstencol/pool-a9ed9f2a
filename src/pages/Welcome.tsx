@@ -56,6 +56,13 @@ const Welcome = () => {
     console.log("Navigating to Carrie Selection Screen: /select-user?id=carrie_demo");
     navigate("/select-user?id=carrie_demo");
   };
+  
+  const goToAbbyLocationResponse = () => {
+    // Make sure demo data is initialized before navigating
+    initializeDemoData();
+    console.log("Navigating to Abby Location Response: /select-user?flow=abby-location-response");
+    navigate("/select-user?flow=abby-location-response");
+  };
 
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
@@ -142,6 +149,13 @@ const Welcome = () => {
                 className="w-full justify-start"
               >
                 Test Carrie's Response Flow
+              </Button>
+              <Button 
+                onClick={goToAbbyLocationResponse}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                Test Abby's Location Response Flow
               </Button>
             </div>
           </div>
