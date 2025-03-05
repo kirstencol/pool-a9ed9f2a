@@ -1,12 +1,10 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Check, Copy, Link, ChevronLeft } from "lucide-react";
+import { Copy, ChevronLeft, Sparkles } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { TimeSlot, LocationWithNote } from "@/types";
-import Avatar from "@/components/Avatar";
+import { TimeSlot } from "@/types";
 
 const Confirmation = () => {
   const navigate = useNavigate();
@@ -17,8 +15,6 @@ const Confirmation = () => {
   const [meetingData, setMeetingData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [timeConfirmation, setTimeConfirmation] = useState(false);
-  const [locationResponses, setLocationResponses] = useState<LocationWithNote[]>([]);
   
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -29,56 +25,44 @@ const Confirmation = () => {
       if (data) {
         setMeetingData(data);
         
-        // Check if this is a time response flow (like burt_demo)
-        if (inviteId === 'burt_demo') {
-          setTimeConfirmation(true);
-        } else {
-          // Get location data from state if available (when coming from AbbyLocationResponse)
-          const stateLocations = location.state?.selectedLocations;
-          if (stateLocations && Array.isArray(stateLocations)) {
-            setLocationResponses(stateLocations);
-          } else {
-            // Fallback to demo data if no state was passed
-            setLocationResponses([
-              { 
-                name: "Central Cafe", 
-                note: "Great coffee and shouldn't be too hard to get a table.",
-                selected: true,
-                userNote: "I like this place."
-              },
-              { 
-                name: "Starbucks on 5th", 
-                note: "Not the best vibes, but central to all three of us. Plus, PSLs.",
-                selected: true,
-                userNote: "Okay, if we must."
-              }
-            ]);
-          }
-        }
-        
         // Simulate loading state
         setTimeout(() => {
           setIsLoading(false);
-        }, 1000);
+        }, 500);
       } else {
         setIsLoading(false);
       }
     }
   }, [location, loadMeetingFromStorage]);
 
-  const getFormattedDate = () => {
-    if (meetingData?.timeSlots?.[0]?.date) {
-      return meetingData.timeSlots[0].date;
+  const getSelectedTimeSlots = () => {
+    if (meetingData?.timeSlots) {
+      return meetingData.timeSlots.filter((slot: TimeSlot) => 
+        slot.responses?.some((response: any) => response.responderName === "Burt")
+      );
     }
-    return "Saturday, March 2nd";
+    return [];
   };
 
-  const getFormattedTime = () => {
-    if (meetingData?.timeSlots?.[0]) {
-      const slot = meetingData.timeSlots[0];
-      return `${slot.startTime} to ${slot.endTime}`;
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "March 1";
+    
+    try {
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      return date.toLocaleDateString('en-US', { 
+        month: 'long', 
+        day: 'numeric' 
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
     }
-    return "8:00 a.m. to 9:00 a.m.";
+  };
+
+  const formatTimeRange = (startTime: string, endTime: string) => {
+    if (!startTime || !endTime) return "8:00 AM - 1:30 PM";
+    return `${startTime} - ${endTime}`;
   };
 
   const copyLink = () => {
@@ -103,74 +87,53 @@ const Confirmation = () => {
       <div className="max-w-md mx-auto px-4 py-8">
         <div className="flex flex-col items-center justify-center">
           <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-6 animate-pulse">
-            <span className="text-gray-500">waiting animation</span>
+            <span className="text-gray-500">Loading...</span>
           </div>
         </div>
       </div>
     );
   }
 
-  // Helper function to determine if a location was suggested by Abby
-  const isAbbySuggestion = (location: LocationWithNote) => {
-    return location.note === "Your suggestion";
-  };
+  const selectedTimeSlots = getSelectedTimeSlots();
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
-      <div className="mb-10">
-        <h2 className="heading-2 mb-1">Getting together</h2>
-        <p className="body-text">{getFormattedDate()} from {getFormattedTime()}</p>
+      <div className="flex justify-center mb-6">
+        <div className="w-24 h-24 rounded-full bg-purple-light flex items-center justify-center">
+          <Sparkles className="text-purple-700 w-10 h-10" />
+        </div>
       </div>
       
-      {timeConfirmation ? (
-        <>
-          <p className="mb-6 body-text-bold">You selected these times</p>
-          <div className="space-y-6 mb-10">
-            {meetingData?.timeSlots?.map((slot: TimeSlot, index: number) => {
-              // Only show time slots that have responses from Burt
-              const hasBurtResponse = slot.responses?.some(
-                (response: any) => response.responderName === "Burt"
-              );
-              
-              if (hasBurtResponse) {
-                return (
-                  <div key={index} className="bg-purple-light rounded-xl p-4">
-                    <h3 className="heading-3 mb-2">{slot.date}</h3>
-                    <p className="body-text">{slot.startTime} to {slot.endTime}</p>
-                  </div>
-                );
-              }
-              return null;
-            })}
-          </div>
-          
-          <p className="mb-4 text-center body-text-bold">Does Carrie need a nudge?</p>
-        </>
-      ) : (
-        <>
-          <p className="mb-6 body-text-bold">You and Carrie like these spots</p>
-          
-          <div className="space-y-6 mb-10">
-            {locationResponses.map((location, index) => (
-              <div key={index} className="bg-purple-light rounded-xl p-4">
-                <h3 className="heading-3 mb-2">{location.name}</h3>
-                {!isAbbySuggestion(location) && (
-                  <div className="flex items-start mb-3">
-                    <Avatar initial="C" size="sm" position="third" className="mr-2 flex-shrink-0" />
-                    <p className="small-text">{location.note}</p>
-                  </div>
-                )}
-                <div className="flex items-start">
-                  <Avatar initial="A" size="sm" position="first" className="mr-2 flex-shrink-0" />
-                  <p className="small-text">{location.userNote}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <p className="mb-4 text-center body-text-bold">Does Burt need a nudge?</p>
-        </>
-      )}
+      <h1 className="text-center text-2xl font-semibold mb-12">
+        Abby and Burt are both free...
+      </h1>
+      
+      <div className="space-y-6 mb-16">
+        {selectedTimeSlots.length > 0 ? (
+          selectedTimeSlots.map((slot: TimeSlot, index: number) => (
+            <div key={index} className="bg-gray-50 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-xl font-medium mb-2">{formatDate(slot.date)}</h3>
+              <p className="text-lg">{formatTimeRange(slot.startTime, slot.endTime)}</p>
+            </div>
+          ))
+        ) : (
+          // Fallback to demo data if no selected time slots
+          <>
+            <div className="bg-gray-50 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-xl font-medium mb-2">March 1</h3>
+              <p className="text-lg">8:00 AM - 1:30 PM</p>
+            </div>
+            <div className="bg-gray-50 rounded-2xl p-6 shadow-sm">
+              <h3 className="text-xl font-medium mb-2">March 2</h3>
+              <p className="text-lg">7:00 AM - 10:00 AM</p>
+            </div>
+          </>
+        )}
+      </div>
+      
+      <p className="text-center text-xl font-medium mb-8">
+        Does Carrie need a nudge?
+      </p>
       
       <button
         onClick={copyLink}
