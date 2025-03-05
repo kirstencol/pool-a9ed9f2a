@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -35,8 +34,12 @@ export interface Location {
 export interface LocationWithNote {
   name: string;
   note: string;
-  selected?: boolean;
-  userNote?: string;
+  selected: boolean;
+  userNote: string;
+}
+
+export interface LocationWithComments extends LocationWithNote {
+  abbyComment?: string;
 }
 
 export interface LocationResponse {
