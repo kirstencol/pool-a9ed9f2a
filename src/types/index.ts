@@ -46,6 +46,7 @@ export interface LocationWithComments extends LocationWithNote {
 
 export interface LocationResponse {
   userId: string;
+  responderName?: string;
   note?: string;
 }
 

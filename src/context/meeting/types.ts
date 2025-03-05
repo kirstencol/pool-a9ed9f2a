@@ -45,4 +45,5 @@ export interface MeetingContextType {
   respondToLocation?: (locationId: string, responderName: string, note?: string) => Promise<boolean>;
   isLoading?: boolean;
   error?: string | null;
+  storeMeetingInStorage?: (id: string, meeting: Partial<StoredMeeting>) => void;
 }

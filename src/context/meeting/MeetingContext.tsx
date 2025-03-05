@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, TimeSlot, Location, Meeting } from '@/types';
-import { MeetingContextType } from './types';
+import { MeetingContextType, StoredMeeting } from './types';
 import { 
   createMeeting, 
   addParticipants, 
@@ -28,6 +28,15 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
   const [currentMeetingId, setCurrentMeetingId] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  const storeMeetingInStorage = (id: string, meeting: Partial<StoredMeeting>) => {
+    try {
+      localStorage.setItem(`meeting_${id}`, JSON.stringify(meeting));
+      console.log(`Stored meeting ${id} in local storage:`, meeting);
+    } catch (err) {
+      console.error('Error storing meeting in localStorage:', err);
+    }
+  };
 
   const generateShareableLink = async () => {
     if (currentMeetingId) {
@@ -217,7 +226,42 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
       const meeting = await getMeetingById(id);
       
       if (!meeting) {
-        throw new Error('Meeting not found');
+        try {
+          const storedMeetingJson = localStorage.getItem(`meeting_${id}`);
+          if (storedMeetingJson) {
+            const storedMeeting = JSON.parse(storedMeetingJson) as StoredMeeting;
+            
+            const meeting: Meeting = {
+              id: storedMeeting.id || id,
+              creator: storedMeeting.creator || { id: 'unknown', name: 'Unknown', initial: 'U' },
+              participants: [],
+              timeSlots: storedMeeting.timeSlots || [],
+              selectedTimeSlot: storedMeeting.selectedTimeSlot || null,
+              locations: storedMeeting.locations || [],
+              selectedLocation: storedMeeting.selectedLocation || null,
+              notes: storedMeeting.notes || '',
+              status: 'draft'
+            };
+
+            if (meeting.creator) {
+              setCurrentUser(meeting.creator);
+            }
+            
+            setParticipants(meeting.participants || []);
+            setTimeSlots(meeting.timeSlots || []);
+            setSelectedTimeSlot(meeting.selectedTimeSlot);
+            setLocations(meeting.locations || []);
+            setSelectedLocation(meeting.selectedLocation);
+            setMeetingNotes(meeting.notes || '');
+            setCurrentMeetingId(meeting.id);
+
+            return meeting;
+          }
+        } catch (storageErr) {
+          console.error('Error loading meeting from localStorage:', storageErr);
+        }
+        
+        throw new Error('Meeting not found in database or local storage');
       }
 
       if (meeting.creator) {
@@ -385,7 +429,8 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
       respondToTimeSlot,
       respondToLocation,
       isLoading,
-      error
+      error,
+      storeMeetingInStorage
     }}>
       {children}
     </MeetingContext.Provider>
