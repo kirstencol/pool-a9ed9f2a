@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Check, Sparkles, Copy, Link, ChevronLeft, ArrowRight, MapPin, Plus } from "lucide-react";
@@ -7,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { TimeSlot } from "@/types";
 import { convertTimeToMinutes } from "@/utils/timeUtils";
+import Avatar from "@/components/Avatar";
 
 const Confirmation = () => {
   const navigate = useNavigate();
@@ -26,7 +26,6 @@ const Confirmation = () => {
   const [finalMeetingTime, setFinalMeetingTime] = useState<{date: string; startTime: string; endTime: string} | null>(null);
   
   useEffect(() => {
-    // Try to get the inviteId from location state
     const searchParams = new URLSearchParams(location.search);
     const inviteId = searchParams.get('id') || 'demo_invite';
     
@@ -40,7 +39,6 @@ const Confirmation = () => {
   }, [location, loadMeetingFromStorage]);
 
   const copyLink = () => {
-    // Generate a shareable link
     const baseUrl = window.location.origin;
     const shareableUrl = `${baseUrl}/select-user?id=${meetingData?.id || 'demo_invite'}`;
     
@@ -54,7 +52,6 @@ const Confirmation = () => {
   };
 
   const handleGoBack = () => {
-    // Navigate back to the respond page with the same invitation ID
     const searchParams = new URLSearchParams(location.search);
     const inviteId = searchParams.get('id') || 'demo_invite';
     navigate(`/respond/${inviteId}`);
@@ -70,13 +67,10 @@ const Confirmation = () => {
   };
 
   const calculateEndTime = (startTime: string, durationMinutes: string) => {
-    // Convert start time to minutes since midnight
     const startMinutes = convertTimeToMinutes(startTime);
     
-    // Add duration
     const endMinutes = startMinutes + parseInt(durationMinutes);
     
-    // Convert back to time format
     return formatMinutesToTime(endMinutes);
   };
 
@@ -125,20 +119,16 @@ const Confirmation = () => {
       return;
     }
     
-    // Here we would normally send this data to the backend
-    // For now, we'll just show a success message
     toast({
       title: "Suggestions sent!",
       description: "Your location suggestions have been sent",
     });
     
-    // Navigate to a confirmation page or reset the form
     setShowLocationSuggestion(false);
     setSelectedTimeSlot(null);
     setSuggestedLocations([]);
   };
 
-  // If no meeting data is available, show a fallback
   if (!meetingData) {
     return (
       <div className="max-w-md mx-auto px-4 py-8">
@@ -159,32 +149,24 @@ const Confirmation = () => {
     );
   }
 
-  // Find time slots with responses
   const timeSlotsWithResponses = meetingData.timeSlots?.filter((slot: TimeSlot) => 
     slot.responses && slot.responses.length > 0
   ) || [];
 
-  // Calculate overlapping availability for each time slot
   const overlappingTimeSlots = timeSlotsWithResponses.map((slot: TimeSlot) => {
-    // Start with creator's full availability
     let overlapStartMinutes = convertTimeToMinutes(slot.startTime);
     let overlapEndMinutes = convertTimeToMinutes(slot.endTime);
     
-    // Adjust based on each response
     slot.responses.forEach(response => {
       const responseStartMinutes = convertTimeToMinutes(response.startTime || "");
       const responseEndMinutes = convertTimeToMinutes(response.endTime || "");
       
       if (responseStartMinutes && responseEndMinutes) {
-        // Update overlap to be the later start time
         overlapStartMinutes = Math.max(overlapStartMinutes, responseStartMinutes);
-        
-        // Update overlap to be the earlier end time
         overlapEndMinutes = Math.min(overlapEndMinutes, responseEndMinutes);
       }
     });
     
-    // Only include slots where there's still a valid overlap
     if (overlapStartMinutes < overlapEndMinutes) {
       return {
         ...slot,
@@ -195,7 +177,6 @@ const Confirmation = () => {
     return null;
   }).filter(Boolean);
 
-  // Format minutes back to time string (e.g., "9:30 AM")
   function formatMinutesToTime(minutes: number): string {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -204,23 +185,19 @@ const Confirmation = () => {
     return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
   }
 
-  // Format names for display
   const responderNames = [...new Set(timeSlotsWithResponses.flatMap((slot: TimeSlot) => 
     slot.responses?.map((r: any) => r.responderName as string) || []
   ))];
   
-  // Display names without the friend labels
   const displayNames = [
     meetingData.creator?.name || "Abby", 
     ...responderNames
   ].filter(Boolean).join(" and ");
 
-  // Check if current user is Carrie based on URL params
   const searchParams = new URLSearchParams(location.search);
   const inviteId = searchParams.get('id') || "";
   const isCarrieFlow = inviteId === "carrie_demo";
 
-  // If this is Carrie's flow and we have location suggestions, show the location suggestion UI
   if (isCarrieFlow && showLocationSuggestion) {
     return (
       <div className="max-w-md mx-auto px-4 py-8">
@@ -236,7 +213,6 @@ const Confirmation = () => {
           </p>
         </div>
 
-        {/* Location suggestion form */}
         <div className="border border-gray-300 rounded-lg p-4 mb-6">
           <div className="flex items-center mb-4">
             <MapPin className="text-gray-400 mr-2" />
@@ -257,7 +233,6 @@ const Confirmation = () => {
           />
         </div>
 
-        {/* Display suggested locations */}
         {suggestedLocations.length > 0 && (
           <div className="space-y-4 mb-6">
             {suggestedLocations.map((location, index) => (
@@ -272,7 +247,6 @@ const Confirmation = () => {
           </div>
         )}
 
-        {/* Add another location button */}
         <button
           onClick={handleAddLocation}
           className="w-full border border-dashed border-gray-300 rounded-lg py-4 px-4 flex items-center justify-center text-gray-500 mb-6"
@@ -280,7 +254,6 @@ const Confirmation = () => {
           <Plus className="w-4 h-4 mr-2" /> add another option
         </button>
 
-        {/* Submit button */}
         <button
           onClick={handleSendSuggestions}
           className="w-full bg-purple-200 text-purple-800 py-4 rounded-lg flex items-center justify-center"
@@ -288,7 +261,6 @@ const Confirmation = () => {
           Send suggestions <ArrowRight className="ml-2 w-5 h-5" />
         </button>
 
-        {/* Go back button */}
         <button
           onClick={() => setShowLocationSuggestion(false)}
           className="flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors mt-6 mx-auto"
@@ -300,7 +272,6 @@ const Confirmation = () => {
     );
   }
 
-  // For Carrie's flow, show the time selection UI
   if (isCarrieFlow && overlappingTimeSlots.length > 0) {
     return (
       <div className="max-w-md mx-auto px-4 py-8">

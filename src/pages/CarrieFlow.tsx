@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Sparkles } from "lucide-react";
@@ -10,6 +9,7 @@ import TimeSelection from "@/components/carrie/TimeSelection";
 import LocationProposal from "@/components/location/LocationProposal";
 import Loading from "@/components/Loading";
 import { initializeDemoData } from "@/context/meeting/storage";
+import Avatar from "@/components/Avatar";
 
 interface Location {
   name: string;
@@ -57,6 +57,7 @@ const CarrieFlow = () => {
         
         // Calculate overlapping time slots
         const processedTimeSlots = calculateOverlappingTimeSlots(data.timeSlots);
+        console.log("CarrieFlow - Processed overlapping time slots:", processedTimeSlots);
         setOverlappingTimeSlots(processedTimeSlots);
         
         setLoading(false);
