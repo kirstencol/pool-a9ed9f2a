@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -14,10 +13,13 @@ export interface TimeSlot {
 }
 
 export interface UserResponse {
-  userId: string;
-  available: boolean;
+  userId?: string;
+  responderName?: string;
+  available?: boolean;
   selectedStartTime?: string;
   selectedEndTime?: string;
+  startTime?: string;
+  endTime?: string;
   note?: string;
 }
 

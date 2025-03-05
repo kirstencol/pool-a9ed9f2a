@@ -10,7 +10,7 @@ export interface StoredMeeting {
   selectedLocation?: Location | null;
   notes?: string;
   responses?: {
-    name: string;
+    responderName: string;  // Changed from 'name' to 'responderName' for consistency
     timeSlotId: string;
     startTime: string;
     endTime: string;
