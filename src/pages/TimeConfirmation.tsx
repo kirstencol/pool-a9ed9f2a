@@ -2,14 +2,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
-import Avatar from "@/components/Avatar";
-import TimeSlotCard from "@/components/TimeSlotCard";
-import { useToast } from "@/hooks/use-toast";
-import { Check, Copy } from "lucide-react";
+import Loading from "@/components/Loading";
+import TimeConfirmationHeader from "@/components/TimeConfirmation/TimeConfirmationHeader";
+import ConfirmedTimeSlots from "@/components/TimeConfirmation/ConfirmedTimeSlots";
+import ShareableLinks from "@/components/TimeConfirmation/ShareableLinks";
 
 const TimeConfirmation = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { 
     currentUser, 
     participants, 
@@ -20,7 +19,6 @@ const TimeConfirmation = () => {
     storeMeetingInStorage
   } = useMeeting();
   
-  const [copied, setCopied] = useState(false);
   const [shareableLink, setShareableLink] = useState("");
   const [inviteId, setInviteId] = useState("");
   const [burtDirectLink, setBurtDirectLink] = useState("");
@@ -100,11 +98,6 @@ const TimeConfirmation = () => {
           
         } catch (error) {
           console.error("Error generating link:", error);
-          toast({ 
-            title: "Error",
-            description: "Could not generate meeting link",
-            variant: "destructive"
-          });
         } finally {
           setIsLoading(false);
         }
@@ -112,40 +105,14 @@ const TimeConfirmation = () => {
     };
 
     setupMeetingData();
-  }, [currentUser, timeSlots, navigate, participants, clearTimeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage, toast]);
+  }, [currentUser, timeSlots, navigate, participants, clearTimeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage]);
 
   if (!currentUser) {
     return null;
   }
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(shareableLink);
-    setCopied(true);
-    toast({
-      title: "Link copied!",
-      description: "Share it with your friends",
-    });
-    setTimeout(() => setCopied(false), 3000);
-  };
-  
-  const copyBurtLink = () => {
-    navigator.clipboard.writeText(burtDirectLink);
-    setCopied(true);
-    toast({
-      title: "Burt's direct link copied!",
-      description: "This link will take you directly to Burt's response flow",
-    });
-    setTimeout(() => setCopied(false), 3000);
-  };
-
   if (isLoading) {
-    return (
-      <div className="max-w-md mx-auto px-6 py-12">
-        <div className="flex justify-center items-center h-40">
-          <p className="text-gray-500">Loading...</p>
-        </div>
-      </div>
-    );
+    return <Loading message="Preparing your meeting" subtitle="Creating your shareable link..." />;
   }
 
   // Make sure we display ALL time slots
@@ -153,51 +120,13 @@ const TimeConfirmation = () => {
 
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
-      <div className="flex items-center mb-8">
-        <Avatar initial={currentUser.initial} position="first" size="lg" className="mr-4" />
-        <div>
-          <h1 className="text-2xl font-semibold">Perfect, done!</h1>
-          <p className="text-gray-600">Let's share your availability.</p>
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <h2 className="font-medium mb-4">You're free:</h2>
-        <div className="space-y-4">
-          {timeSlots.map((timeSlot) => (
-            <TimeSlotCard 
-              key={timeSlot.id} 
-              timeSlot={timeSlot} 
-              creatorAvailable 
-              creatorName={currentUser.name} 
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div className="p-4 bg-green-50 rounded-xl mb-4 text-center">
-          <p className="text-green-700 font-medium">Your meeting data is saved!</p>
-          <p className="text-green-600 text-sm">
-            Your unique link ID: <span className="font-mono bg-white px-2 py-1 rounded">{inviteId}</span>
-          </p>
-        </div>
-        
-        <button
-          onClick={copyLink}
-          className="action-button w-full bg-purple-600 text-white py-3 px-4 rounded-xl flex items-center justify-center font-medium"
-        >
-          Copy link to send to friends
-          {copied ? <Check className="w-5 h-5 ml-2" /> : <Copy className="w-5 h-5 ml-2" />}
-        </button>
-        
-        <button
-          onClick={copyBurtLink}
-          className="border border-purple-500 text-purple-500 hover:bg-purple-50 px-4 py-2 rounded-md w-full transition-colors"
-        >
-          Copy direct link to Burt's view
-        </button>
-      </div>
+      <TimeConfirmationHeader currentUser={currentUser} />
+      <ConfirmedTimeSlots timeSlots={timeSlots} currentUserName={currentUser.name} />
+      <ShareableLinks 
+        shareableLink={shareableLink} 
+        burtDirectLink={burtDirectLink}
+        inviteId={inviteId}
+      />
     </div>
   );
 };
