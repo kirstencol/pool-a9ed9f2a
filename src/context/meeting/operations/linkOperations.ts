@@ -69,9 +69,12 @@ export const useLinkOperations = (
       }
 
       if (timeSlots.length > 0) {
+        console.log("Preparing to insert time slots with meeting ID:", meetingId);
+        console.log("Time slots to insert:", timeSlots);
+        
         const timeSlotsInsert = timeSlots.map(slot => ({
           meeting_id: meetingId,
-          date: slot.date,
+          date: slot.date, // Now saved as text
           start_time: slot.startTime,
           end_time: slot.endTime
         }));

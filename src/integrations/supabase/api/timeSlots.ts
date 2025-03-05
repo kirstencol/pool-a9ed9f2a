@@ -7,12 +7,16 @@ import { TimeSlotInsert, TimeResponseInsert } from './types';
 // Add time slots to a meeting
 export async function addTimeSlots(timeSlots: TimeSlotInsert[]): Promise<string[] | null> {
   try {
+    console.log("Adding time slots to Supabase:", timeSlots);
     const { data, error } = await supabase
       .from('time_slots')
       .insert(timeSlots)
       .select('id');
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error adding time slots:', error);
+      throw error;
+    }
     return data.map(slot => slot.id);
   } catch (error) {
     console.error('Error adding time slots:', error);
