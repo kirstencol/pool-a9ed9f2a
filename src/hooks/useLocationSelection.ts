@@ -1,10 +1,10 @@
 
 import { useState } from "react";
-import { LocationWithNote } from "@/types";
+import { LocationWithNote, LocationWithComments } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 
 export interface UseLocationSelectionProps {
-  initialLocations?: LocationWithNote[];
+  initialLocations?: LocationWithNote[] | LocationWithComments[];
   maxSelections?: number;
 }
 
@@ -13,7 +13,7 @@ export function useLocationSelection({
   maxSelections = 3 
 }: UseLocationSelectionProps = {}) {
   const { toast } = useToast();
-  const [locations, setLocations] = useState<LocationWithNote[]>(initialLocations);
+  const [locations, setLocations] = useState<LocationWithNote[] | LocationWithComments[]>(initialLocations);
   const [hasDifferentIdea, setHasDifferentIdea] = useState(false);
   const [differentIdeaText, setDifferentIdeaText] = useState("");
   const [differentIdeaName, setDifferentIdeaName] = useState("");

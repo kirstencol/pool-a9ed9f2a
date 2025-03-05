@@ -76,7 +76,7 @@ const BurtLocationConfirmation = () => {
         finalLocations.push({
           name: customLocation.name,
           note: "Your suggestion", // This is the key identifier we'll use in the Confirmation page
-          abbyComment: "",
+          abbyComment: "", // Explicitly add empty abbyComment to satisfy the LocationWithComments type
           selected: true,
           userNote: customLocation.note || ""
         });
