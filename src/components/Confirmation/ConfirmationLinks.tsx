@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 interface ConfirmationLinksProps {
   meetingId: string;
   onGoBack: () => void;
-  responderNames: string[];
+  responderNames: string[];  // Change to string[] to match the correct type
 }
 
 const ConfirmationLinks = ({ meetingId, onGoBack, responderNames }: ConfirmationLinksProps) => {
