@@ -45,7 +45,7 @@ const CarrieFlow = () => {
     if (selectedTimeSlot && selectedStartTime && selectedEndTime) {
       // Store the selected time in context or local storage
       // Navigate to location selection
-      navigate(`/select-location?id=${inviteId}&startTime=${selectedStartTime}&endTime=${selectedEndTime}&date=${selectedTimeSlot.date}`);
+      navigate(`/carrie-select-location?id=${inviteId}&startTime=${selectedStartTime}&endTime=${selectedEndTime}&date=${selectedTimeSlot.date}`);
     }
   };
 
@@ -57,7 +57,7 @@ const CarrieFlow = () => {
     return <div className="p-6">Error: Invalid or expired invitation</div>;
   }
 
-  const availabilityText = `Showing availability when both ${creatorName} and Burt are free`;
+  const availabilityText = `Showing availability when both Abby and Burt are free`;
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
@@ -83,7 +83,7 @@ const CarrieFlow = () => {
               showTimeSelector={selectedTimeSlot?.id === slot.id}
               onSelectTime={handleTimeChange}
               creatorAvailable={true}
-              creatorName={`${creatorName} & Burt`}
+              creatorName={`Abby and Burt`}
               onClick={() => handleSelectTimeSlot(slot)}
             />
           ))}
