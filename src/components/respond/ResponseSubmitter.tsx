@@ -50,7 +50,7 @@ export const useResponseSubmitter = ({
           // Add this response to the meeting data
           if (!existingMeeting.responses) existingMeeting.responses = [];
           existingMeeting.responses.push({
-            name: responderName,
+            responderName: responderName, // Changed from 'name' to 'responderName'
             timeSlotId: currentSelectedSlot.id,
             startTime: currentStartTime,
             endTime: currentEndTime
