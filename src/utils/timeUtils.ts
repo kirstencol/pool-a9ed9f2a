@@ -7,12 +7,18 @@
  * Converts a time string (e.g., "2:30 pm") to minutes since midnight
  */
 export const convertTimeToMinutes = (timeStr: string): number => {
-  if (!timeStr || timeStr === "--") return 0;
+  console.log(`convertTimeToMinutes called with: "${timeStr}"`);
+  
+  if (!timeStr || timeStr === "--") {
+    console.log(`convertTimeToMinutes: Empty time string, returning 0`);
+    return 0;
+  }
   
   // Normalize the string: trim whitespace and convert to lowercase
   const normalizedTime = timeStr.trim().toLowerCase();
+  console.log(`convertTimeToMinutes: Normalized to "${normalizedTime}"`);
   
-  // Match HH:MM AM/PM format
+  // Match HH:MM AM/PM format - include variants with or without space between time and AM/PM
   const timeRegex = /(\d+):(\d+)\s*(am|pm)/i;
   const match = normalizedTime.match(timeRegex);
   
@@ -25,6 +31,8 @@ export const convertTimeToMinutes = (timeStr: string): number => {
   let hours = parseInt(match[1], 10);
   const minutes = parseInt(match[2], 10);
   const period = match[3].toLowerCase();
+  
+  console.log(`convertTimeToMinutes: Parsed ${hours}:${minutes} ${period}`);
   
   // Validate hours and minutes
   if (isNaN(hours) || hours < 0 || hours > 12) {
@@ -44,13 +52,17 @@ export const convertTimeToMinutes = (timeStr: string): number => {
     hours = 0;
   }
   
-  return (hours * 60) + minutes;
+  const totalMinutes = (hours * 60) + minutes;
+  console.log(`convertTimeToMinutes: "${timeStr}" = ${totalMinutes} minutes`);
+  return totalMinutes;
 };
 
 /**
  * Parses a time string and returns its components
  */
 export const parseTimeString = (time: string): { hour: string, minute: string, period: string } => {
+  console.log(`parseTimeString called with: "${time}"`);
+  
   if (!time || time === "--") {
     console.log(`parseTimeString: Using default for empty time "${time}"`);
     return { hour: "12", minute: "00", period: "pm" };
@@ -58,8 +70,9 @@ export const parseTimeString = (time: string): { hour: string, minute: string, p
 
   // Normalize the time string
   const normalizedTime = time.trim().toLowerCase();
+  console.log(`parseTimeString: Normalized to "${normalizedTime}"`);
   
-  // Match HH:MM AM/PM format (more precise regex)
+  // Match HH:MM AM/PM format with more forgiving regex
   const timeRegex = /(\d+):(\d+)\s*(am|pm)/i;
   const match = normalizedTime.match(timeRegex);
   
@@ -89,17 +102,14 @@ export const parseTimeString = (time: string): { hour: string, minute: string, p
     return { hour: hourNum.toString(), minute: minuteNum.toString().padStart(2, '0'), period: "pm" };
   }
   
-  console.log(`parseTimeString: Successfully parsed "${time}" to:`, {
-    hour: hourNum.toString(),
-    minute: minuteNum.toString().padStart(2, '0'),
-    period
-  });
-  
-  return {
+  const result = {
     hour: hourNum.toString(),
     minute: minuteNum.toString().padStart(2, '0'),
     period
   };
+  
+  console.log(`parseTimeString: Successfully parsed "${time}" to:`, result);
+  return result;
 };
 
 /**
@@ -122,6 +132,8 @@ export const isTimeWithinBounds = (
   startTime?: string,
   isEndTime?: boolean
 ): boolean => {
+  console.log(`isTimeWithinBounds called with: testTime="${testTime}", minTime="${minTime}", maxTime="${maxTime}", startTime="${startTime || ''}", isEndTime=${isEndTime}`);
+  
   const testMinutes = convertTimeToMinutes(testTime);
   const minMinutes = minTime ? convertTimeToMinutes(minTime) : 0;
   const maxMinutes = maxTime ? convertTimeToMinutes(maxTime) : 24 * 60 - 1;

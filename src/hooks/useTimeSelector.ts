@@ -54,15 +54,17 @@ export const useTimeSelector = ({
   
   // Calculate constraint values
   const getTimeConstraints = useCallback(() => {
+    console.log("Calculating time constraints with:", { minTime, maxTime, startTime, isEndTime });
+    
     const minTimeMinutes = minTime ? convertTimeToMinutes(minTime) : 0;
     const maxTimeMinutes = maxTime ? convertTimeToMinutes(maxTime) : 24 * 60 - 1;
     const startTimeMinutes = startTime ? convertTimeToMinutes(startTime) : 0;
     
     // Effective minimum time is the max of minTime and startTime (for end time)
-    const effectiveMinMinutes = isEndTime ? 
+    const effectiveMinMinutes = isEndTime && startTime ? 
       Math.max(startTimeMinutes, minTimeMinutes) : minTimeMinutes;
       
-    console.log("Time constraints:", { 
+    console.log("Time constraints calculated:", { 
       minTimeMinutes, 
       maxTimeMinutes, 
       startTimeMinutes,
@@ -75,6 +77,44 @@ export const useTimeSelector = ({
       maxTimeMinutes
     };
   }, [minTime, maxTime, startTime, isEndTime, getCurrentTimeMinutes]);
+  
+  // Convert minutes to 12-hour time format
+  const minutesToTimeComponents = useCallback((totalMinutes: number) => {
+    // Handle edge cases
+    if (totalMinutes < 0) totalMinutes = 0;
+    if (totalMinutes >= 24 * 60) totalMinutes = 24 * 60 - 1;
+    
+    // Calculate hours in 24-hour format
+    let hours24 = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    // Convert to 12-hour format
+    const period = hours24 >= 12 ? "pm" : "am";
+    let hours12 = hours24 % 12;
+    if (hours12 === 0) hours12 = 12;
+    
+    console.log(`minutesToTimeComponents: ${totalMinutes} minutes = ${hours12}:${minutes} ${period}`);
+    return { hours: hours12, minutes, period };
+  }, []);
+  
+  // Format time components and notify parent
+  const updateTimeValues = useCallback((newHour: number, newMinute: number, newPeriod: string) => {
+    console.log(`updateTimeValues called with: ${newHour}:${newMinute} ${newPeriod}`);
+    
+    // Format values
+    const formattedHour = newHour.toString();
+    const formattedMinute = newMinute.toString().padStart(2, '0');
+    
+    // Update local state
+    setHour(formattedHour);
+    setMinute(formattedMinute);
+    setPeriod(newPeriod);
+    
+    // Notify parent component
+    const newTimeString = buildTimeString(formattedHour, formattedMinute, newPeriod);
+    console.log(`updateTimeValues: Calling onTimeChange with "${newTimeString}"`);
+    onTimeChange(newTimeString);
+  }, [onTimeChange]);
   
   // Check if we're at min/max bounds
   const isAtMinTime = useCallback(() => {
@@ -93,44 +133,6 @@ export const useTimeSelector = ({
     return result;
   }, [getCurrentTimeMinutes, getTimeConstraints]);
   
-  // Format time components and notify parent
-  const updateTimeValues = useCallback((newHourNum: number, newMinuteNum: number, newPeriod: string) => {
-    // Format values
-    const formattedHour = newHourNum.toString();
-    const formattedMinute = newMinuteNum.toString().padStart(2, '0');
-    
-    console.log(`updateTimeValues: Setting new time: ${formattedHour}:${formattedMinute} ${newPeriod}`);
-    
-    // Update local state
-    setHour(formattedHour);
-    setMinute(formattedMinute);
-    setPeriod(newPeriod);
-    
-    // Notify parent component
-    const newTimeString = buildTimeString(formattedHour, formattedMinute, newPeriod);
-    console.log(`updateTimeValues: Calling onTimeChange with "${newTimeString}"`);
-    onTimeChange(newTimeString);
-  }, [onTimeChange]);
-  
-  // Convert minutes to 12-hour time format
-  const minutesToTimeComponents = useCallback((totalMinutes: number) => {
-    // Handle edge case
-    if (totalMinutes < 0) totalMinutes = 0;
-    if (totalMinutes >= 24 * 60) totalMinutes = 24 * 60 - 1;
-    
-    // Calculate hours in 24-hour format
-    let hours24 = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    
-    // Convert to 12-hour format
-    const period = hours24 >= 12 ? "pm" : "am";
-    let hours12 = hours24 % 12;
-    if (hours12 === 0) hours12 = 12;
-    
-    console.log(`minutesToTimeComponents: ${totalMinutes} minutes = ${hours12}:${minutes} ${period}`);
-    return { hours: hours12, minutes, period };
-  }, []);
-  
   // Increment time by 15 minutes
   const incrementTime = useCallback(() => {
     console.log("incrementTime called");
@@ -147,6 +149,8 @@ export const useTimeSelector = ({
     
     // Calculate new time (increment by 15 min)
     const newTotalMinutes = Math.min(currentMinutes + 15, maxTimeMinutes);
+    console.log(`Incrementing from ${currentMinutes} to ${newTotalMinutes} minutes`);
+    
     const { hours, minutes, period } = minutesToTimeComponents(newTotalMinutes);
     
     // Update state and notify parent
@@ -169,6 +173,8 @@ export const useTimeSelector = ({
     
     // Calculate new time (decrement by 15 min)
     const newTotalMinutes = Math.max(currentMinutes - 15, minTimeMinutes);
+    console.log(`Decrementing from ${currentMinutes} to ${newTotalMinutes} minutes`);
+    
     const { hours, minutes, period } = minutesToTimeComponents(newTotalMinutes);
     
     // Update state and notify parent
