@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Copy, Check, ArrowRight } from "lucide-react";
+import { ArrowLeft, Copy, Check, ArrowRight, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
