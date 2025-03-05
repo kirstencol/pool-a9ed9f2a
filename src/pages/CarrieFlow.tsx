@@ -6,7 +6,7 @@ import { TimeSlot } from "@/types";
 import { Button } from "@/components/ui/button";
 import TimeSlotCard from "@/components/TimeSlotCard";
 import { useMeeting } from "@/context/meeting";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
 
@@ -67,6 +67,16 @@ const CarrieFlow = () => {
     }
   };
 
+  const handleCannotMakeIt = () => {
+    toast({
+      title: "Response submitted",
+      description: "We'll let Abby and Burt know you can't make these times."
+    });
+    
+    // Navigate back to the selection screen
+    navigate('/');
+  };
+
   if (isLoading) {
     return <div className="p-6">Loading...</div>;
   }
@@ -87,7 +97,7 @@ const CarrieFlow = () => {
 
       <div className="flex items-center mb-6">
         <Avatar initial="C" position="third" className="mr-3" />
-        <h2 className="font-medium text-lg">When are you free, Carrie?</h2>
+        <h2 className="font-medium text-lg">Carrie, which day works best for you?</h2>
       </div>
 
       <div className="mb-6">
@@ -123,6 +133,16 @@ const CarrieFlow = () => {
           </Button>
         </div>
       )}
+
+      <div className="mt-6 text-center">
+        <button 
+          onClick={handleCannotMakeIt}
+          className="text-gray-500 text-sm flex items-center justify-center mx-auto hover:text-gray-700 transition-colors"
+        >
+          <CalendarX size={14} className="mr-1" />
+          I can't make any of these days
+        </button>
+      </div>
     </div>
   );
 };
