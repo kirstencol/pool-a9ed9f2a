@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Copy, ChevronLeft, Sparkles } from "lucide-react";
+import { Copy, ChevronLeft } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
 import { useToast } from "@/hooks/use-toast";
 import { TimeSlot } from "@/types";
@@ -25,7 +24,6 @@ const Confirmation = () => {
       if (data) {
         setMeetingData(data);
         
-        // Simulate loading state
         setTimeout(() => {
           setIsLoading(false);
         }, 500);
@@ -45,7 +43,6 @@ const Confirmation = () => {
   };
 
   const formatDate = (dateString: string) => {
-    // If the format is already "March 1", return it as is
     if (dateString && dateString.includes(" ")) {
       return dateString;
     }
@@ -53,7 +50,6 @@ const Confirmation = () => {
     if (!dateString) return "March 1";
     
     try {
-      // Handle numeric date format (YYYY-MM-DD)
       if (dateString.includes("-")) {
         const [year, month, day] = dateString.split('-').map(Number);
         const date = new Date(year, month - 1, day);
@@ -63,7 +59,6 @@ const Confirmation = () => {
         });
       }
       
-      // If it's not a standard format but still contains a date, return as is
       return dateString;
     } catch (error) {
       console.error("Error formatting date:", error);
@@ -110,12 +105,6 @@ const Confirmation = () => {
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
-      <div className="flex justify-center mb-6">
-        <div className="w-24 h-24 rounded-full bg-purple-light flex items-center justify-center">
-          <Sparkles className="text-purple-700 w-10 h-10" />
-        </div>
-      </div>
-      
       <h1 className="text-center text-2xl font-semibold mb-12">
         Abby and Burt are both free...
       </h1>
@@ -129,7 +118,6 @@ const Confirmation = () => {
             </div>
           ))
         ) : (
-          // Fallback to demo data if no selected time slots
           <>
             <div className="bg-gray-50 rounded-2xl p-6 shadow-sm">
               <h3 className="text-xl font-medium mb-2">March 1</h3>
