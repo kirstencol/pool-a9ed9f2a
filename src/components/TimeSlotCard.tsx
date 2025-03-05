@@ -73,7 +73,7 @@ const TimeSlotCard = ({
 
   // Set default cannotMakeItText if not provided
   const dayOfWeek = getDayOfWeek(timeSlot.date);
-  const defaultCannotMakeItText = `I can't make it on ${dayOfWeek}`;
+  const defaultCannotMakeItText = `I can't make it on this day`;
   const finalCannotMakeItText = cannotMakeItText || defaultCannotMakeItText;
 
   const handleStartTimeChange = (newTime: string) => {

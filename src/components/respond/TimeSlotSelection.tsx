@@ -1,3 +1,4 @@
+
 import React, { memo, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import TimeSlotCard from "@/components/TimeSlotCard";
@@ -50,6 +51,22 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
     }
   };
 
+  const handleSlotCannotMakeIt = (slotId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    
+    // Remove this slot from configured slots
+    setConfiguredSlots(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(slotId);
+      return newSet;
+    });
+    
+    // If this was the expanded slot, collapse it
+    if (expandedSlotId === slotId) {
+      setExpandedSlotId(null);
+    }
+  };
+
   const hasConfiguredSlots = configuredSlots.size > 0;
 
   return (
@@ -88,8 +105,7 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
                   });
                 }}
                 onCannotMakeIt={(e) => {
-                  e?.stopPropagation?.();
-                  onCannotMakeIt(e);
+                  handleSlotCannotMakeIt(timeSlot.id, e);
                 }}
                 creatorAvailable
                 creatorName={creatorName}
