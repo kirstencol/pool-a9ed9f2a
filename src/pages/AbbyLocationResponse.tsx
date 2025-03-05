@@ -105,54 +105,39 @@ const AbbyLocationResponse = () => {
       
       <div className="space-y-4 mb-6">
         {locations.map((loc, index) => (
-          <div 
+          <LocationCard
             key={index}
-            className={`bg-white rounded-lg border ${loc.selected ? 'border-purple' : 'border-gray-200'} p-4 transition-all cursor-pointer`}
-            onClick={() => handleSelectLocation(index)}
-          >
-            <div className="flex items-start">
-              <div className="flex-grow">
-                <p className="font-medium text-gray-800">{loc.name}</p>
-                <div className="flex items-center mt-1 mb-1">
-                  <Avatar initial="C" size="sm" position="third" className="mr-2" />
-                  <p className="text-sm text-gray-600">{loc.note}</p>
-                </div>
-              </div>
-            </div>
-            
-            {loc.selected && (
-              <div className="mt-3">
-                <div className="flex items-center mb-1">
-                  <Avatar initial="A" size="sm" position="first" className="mr-2" />
-                  <p className="text-sm text-gray-600 font-medium">Your note:</p>
-                </div>
-                <textarea
-                  placeholder="Add a note (optional)"
-                  className="w-full p-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple"
-                  value={loc.userNote || ""}
-                  onChange={(e) => handleNoteChange(index, e.target.value)}
-                  onClick={(e) => e.stopPropagation()}
-                  rows={2}
-                />
-              </div>
-            )}
-          </div>
+            location={{
+              id: `loc-${index}`,
+              name: loc.name,
+              description: loc.note,
+              suggestedBy: "C"
+            }}
+            selectedByUser={loc.selected}
+            showNoteInput={true}
+            onSelect={() => handleSelectLocation(index)}
+            onNoteChange={(note) => handleNoteChange(index, note)}
+            showAuthor={true}
+            authorInitial="C"
+            authorPosition="third"
+            userInitial="A"
+            userPosition="first"
+          />
         ))}
       </div>
       
       {hasDifferentIdea ? (
         <div className="mb-6">
-          <div className="flex items-center mb-2">
-            <Avatar initial="A" size="sm" position="first" className="mr-2" />
-            <p className="text-sm text-gray-600 font-medium">Your suggestion:</p>
+          <div className="flex items-start">
+            <Avatar initial="A" size="sm" position="first" className="mr-2 mt-2" />
+            <textarea
+              value={differentIdeaText}
+              onChange={(e) => setDifferentIdeaText(e.target.value)}
+              placeholder="Suggest a different location..."
+              className="flex-grow p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple"
+              rows={3}
+            />
           </div>
-          <textarea
-            value={differentIdeaText}
-            onChange={(e) => setDifferentIdeaText(e.target.value)}
-            placeholder="Suggest a different location..."
-            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple"
-            rows={3}
-          />
         </div>
       ) : (
         <button

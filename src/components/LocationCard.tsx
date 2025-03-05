@@ -85,23 +85,22 @@ const LocationCard = ({
 
       {showNoteInput && selectedByUser && (
         <div className="mt-4">
-          <div className="flex items-center mb-1">
+          <div className="flex items-start mt-2">
             <Avatar 
               initial={userInitial} 
               size="sm" 
               position={userPosition} 
-              className="mr-2" 
+              className="mr-2 mt-2" 
             />
-            <p className="text-sm text-gray-600 font-medium">Your note:</p>
+            <textarea
+              placeholder="Add a note (optional)"
+              className="flex-grow p-2 rounded-lg bg-white border border-gray-200 focus:outline-none focus:border-purple-500 text-sm"
+              value={note}
+              onChange={handleNoteChange}
+              onClick={(e) => e.stopPropagation()}
+              rows={2}
+            />
           </div>
-          <textarea
-            placeholder="Add a note (optional)"
-            className="w-full p-2 rounded-lg bg-white border border-gray-200 focus:outline-none focus:border-purple-500 text-sm"
-            value={note}
-            onChange={handleNoteChange}
-            onClick={(e) => e.stopPropagation()}
-            rows={2}
-          />
         </div>
       )}
     </div>
