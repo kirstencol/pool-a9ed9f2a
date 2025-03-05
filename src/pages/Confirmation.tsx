@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Check, Sparkles, Copy, Link, ChevronLeft } from "lucide-react";
@@ -25,14 +24,14 @@ const Confirmation = () => {
     const endTime = searchParams.get('endTime');
     const date = searchParams.get('date');
     
-    // Check if this is coming from Carrie's flow - if so, redirect to her confirmation page
-    // Using a stronger check to detect if we're coming from Carrie's flow
-    const fromCarrie = searchParams.has('fromCarrie') || 
-                      location.pathname.includes('carrie') || 
-                      localStorage.getItem('currentUser') === 'Carrie';
+    // Check if this is coming from Carrie's flow and redirect if needed
+    const currentUser = localStorage.getItem('currentUser');
+    const isCarrieFlow = currentUser === 'Carrie' || 
+                         searchParams.has('fromCarrie') ||
+                         location.pathname.includes('carrie');
     
-    if (fromCarrie) {
-      console.log("Redirecting to Carrie's confirmation page");
+    if (isCarrieFlow && startTime && endTime && date) {
+      console.log("Redirecting to Carrie's time confirmation page");
       navigate(`/carrie-time-confirmation?id=${inviteId}&startTime=${startTime}&endTime=${endTime}&date=${date}`, { replace: true });
       return;
     }

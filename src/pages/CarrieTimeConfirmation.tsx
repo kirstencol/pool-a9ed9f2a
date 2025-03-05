@@ -20,8 +20,8 @@ const CarrieTimeConfirmation = () => {
   const startTime = searchParams.get("startTime") || "";
   const endTime = searchParams.get("endTime") || "";
   
-  // Use the same hook to get invite data
-  const { creatorName, responderName, inviteTimeSlots, isLoading } = useInviteData(inviteId, "Carrie");
+  // Use the hook to get invite data
+  const { isLoading } = useInviteData(inviteId, "Carrie");
   
   // For duration selection
   const [meetingDuration, setMeetingDuration] = useState("60"); // Default 60 minutes
@@ -32,6 +32,9 @@ const CarrieTimeConfirmation = () => {
     // Initialize with passed times
     setAdjustedStartTime(startTime);
     setAdjustedEndTime(endTime);
+    
+    // Force set Carrie as the current user in localStorage
+    localStorage.setItem('currentUser', 'Carrie');
   }, [startTime, endTime]);
 
   const handleTimeChange = (start: string, end: string) => {
@@ -79,7 +82,7 @@ const CarrieTimeConfirmation = () => {
           
           <div>
             <p className="text-sm text-gray-500">Attendees</p>
-            <p className="font-medium">Abby, Burt, and {responderName}</p>
+            <p className="font-medium">Abby, Burt, and Carrie</p>
           </div>
         </div>
       </div>
