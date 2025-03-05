@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useInviteData } from "@/hooks/useInviteData";
@@ -43,9 +42,8 @@ const CarrieFlow = () => {
 
   const handleContinue = () => {
     if (selectedTimeSlot && selectedStartTime && selectedEndTime) {
-      // Store the selected time in context or local storage
-      // Navigate to location selection
-      navigate(`/carrie-select-location?id=${inviteId}&startTime=${selectedStartTime}&endTime=${selectedEndTime}&date=${selectedTimeSlot.date}`);
+      // Navigate to the time confirmation page first
+      navigate(`/carrie-time-confirmation?id=${inviteId}&startTime=${selectedStartTime}&endTime=${selectedEndTime}&date=${selectedTimeSlot.date}`);
     }
   };
 
