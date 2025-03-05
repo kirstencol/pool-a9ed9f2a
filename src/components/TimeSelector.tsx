@@ -59,21 +59,19 @@ const TimeSelector = memo(({
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40">
-      <div className="flex justify-center">
-        <button 
-          className={cn(
-            "flex items-center justify-center py-2 w-full",
-            isAtMaxTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
-          )}
-          onClick={handleIncrementClick}
-          disabled={isAtMaxTime}
-          aria-label="Increase time"
-          type="button"
-        >
-          <ChevronUp size={24} />
-        </button>
-      </div>
+    <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40 relative">
+      <button 
+        className={cn(
+          "flex items-center justify-center py-3 w-full rounded-t-lg z-10",
+          isAtMaxTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+        )}
+        onClick={handleIncrementClick}
+        disabled={isAtMaxTime}
+        aria-label="Increase time"
+        type="button"
+      >
+        <ChevronUp size={24} />
+      </button>
       
       <TimeDisplay
         hour={hour}
@@ -81,20 +79,18 @@ const TimeSelector = memo(({
         period={period}
       />
       
-      <div className="flex justify-center">
-        <button 
-          className={cn(
-            "flex items-center justify-center py-2 w-full",
-            isAtMinTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
-          )}
-          onClick={handleDecrementClick}
-          disabled={isAtMinTime}
-          aria-label="Decrease time"
-          type="button"
-        >
-          <ChevronDown size={24} />
-        </button>
-      </div>
+      <button 
+        className={cn(
+          "flex items-center justify-center py-3 w-full rounded-b-lg z-10",
+          isAtMinTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+        )}
+        onClick={handleDecrementClick}
+        disabled={isAtMinTime}
+        aria-label="Decrease time"
+        type="button"
+      >
+        <ChevronDown size={24} />
+      </button>
     </div>
   );
 });

@@ -9,7 +9,7 @@ interface TimeDisplayProps {
 
 const TimeDisplay: React.FC<TimeDisplayProps> = ({ hour, minute, period }) => {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center">
+    <div className="flex-1 flex flex-col items-center justify-center pointer-events-none">
       <div className="text-4xl font-medium flex items-baseline">
         <span>{hour}</span>
         <span className="mx-1">:</span>
