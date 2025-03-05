@@ -24,7 +24,7 @@ const UserOption = ({
       <Avatar 
         initial={name.charAt(0)} 
         size="lg"
-        position={name === "Burt" ? "second" : name === "Carrie" ? "third" : "first"}
+        position={name === "Abby" ? "first" : name === "Burt" ? "second" : "third"}
         className="mr-6" 
       />
       <span className="text-2xl font-medium">{name}</span>
@@ -67,6 +67,12 @@ const SelectUser = () => {
       <h2 className="text-xl font-medium mb-4">You are:</h2>
       
       <div className="space-y-4 mb-8">
+        <UserOption 
+          name="Abby" 
+          isSelected={selectedUser === "Abby"} 
+          onClick={() => setSelectedUser("Abby")} 
+        />
+        
         <UserOption 
           name="Burt" 
           isSelected={selectedUser === "Burt"} 
