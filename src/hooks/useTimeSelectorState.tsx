@@ -30,6 +30,9 @@ export const useTimeSelectorState = ({
   const [hour, setHour] = useState<string>("12");
   const [minute, setMinute] = useState<string>("00");
   const [period, setPeriod] = useState<string>("pm");
+  
+  // We'll use this to force a re-render when time components change
+  const [timeKey, setTimeKey] = useState<number>(0);
 
   // Parse time string into components on mount and when props change
   useEffect(() => {
@@ -55,22 +58,26 @@ export const useTimeSelectorState = ({
     return result;
   }, [hour, minute, period, maxTime]);
 
-  // Update state and notify parent - simplified for direct updates
+  // Update state and notify parent
   const updateTimeValues = useCallback((newHour: string, newMinute: string, newPeriod: string) => {
     console.log(`🔄 updateTimeValues called with: ${newHour}:${newMinute} ${newPeriod}`);
     console.log(`🔄 Previous state was: ${hour}:${minute} ${period}`);
     
-    // Update internal state
+    // Create a new time string to notify parent
+    const newTimeString = buildTimeString(newHour, newMinute, newPeriod);
+    console.log(`Calling onTimeChange with: "${newTimeString}"`);
+    
+    // Update internal state - do this first so the state is updated before the parent rerenders
     setHour(newHour);
     setMinute(newMinute);
     setPeriod(newPeriod);
     
-    // Build new time string and notify parent
-    const newTimeString = buildTimeString(newHour, newMinute, newPeriod);
-    console.log(`Calling onTimeChange with: "${newTimeString}"`);
+    // Increment timeKey to force re-render
+    setTimeKey(prevKey => prevKey + 1);
+    
+    // Then notify parent
     onTimeChange(newTimeString);
     
-    // This log won't reflect the new state yet due to React's state batching
     console.log(`🔄 State after update call (but before render): ${hour}:${minute} ${period}`);
     
     // Schedule a log after the next render cycle
@@ -120,12 +127,13 @@ export const useTimeSelectorState = ({
   }, [hour, minute, period, minTime, isEndTime, startTime, updateTimeValues]);
 
   // Add a render counter to track re-renders
-  console.log(`🔄 useTimeSelectorState rendering with time: ${hour}:${minute} ${period}`);
+  console.log(`🔄 useTimeSelectorState rendering with time: ${hour}:${minute} ${period}, timeKey: ${timeKey}`);
 
   return {
     hour,
     minute, 
     period,
+    timeKey, // Add timeKey to force parent component to re-render
     isAtMinTime: checkIsAtMinTime(),
     isAtMaxTime: checkIsAtMaxTime(),
     handleIncrement,

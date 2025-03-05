@@ -14,7 +14,7 @@ interface TimeSelectorProps {
   maxTime?: string;
 }
 
-const TimeSelector = memo(({ 
+const TimeSelector = ({ 
   time, 
   onTimeChange, 
   isEndTime = false, 
@@ -28,6 +28,7 @@ const TimeSelector = memo(({
     hour,
     minute,
     period,
+    timeKey,
     isAtMinTime,
     isAtMaxTime,
     handleIncrement,
@@ -41,7 +42,7 @@ const TimeSelector = memo(({
     maxTime
   });
 
-  console.log("TimeSelector render state:", { hour, minute, period, isAtMinTime, isAtMaxTime });
+  console.log("TimeSelector render state:", { hour, minute, period, timeKey, isAtMinTime, isAtMaxTime });
 
   // Use direct function calls instead of useCallback to ensure events trigger correctly
   const handleIncrementClick = () => {
@@ -65,7 +66,7 @@ const TimeSelector = memo(({
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40 relative">
+    <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40 relative" key={timeKey}>
       <button 
         className={cn(
           "flex items-center justify-center py-3 w-full rounded-t-lg z-10",
@@ -99,8 +100,9 @@ const TimeSelector = memo(({
       </button>
     </div>
   );
-});
+};
 
+// Remove memo to ensure component always re-renders when props change
 TimeSelector.displayName = "TimeSelector";
 
 export default TimeSelector;
