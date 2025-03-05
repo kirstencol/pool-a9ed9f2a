@@ -3,6 +3,7 @@ import { TimeSlot } from "@/types";
 import { useState, useEffect, memo } from "react";
 import { cn } from "@/lib/utils";
 import TimeSelector from "./TimeSelector";
+import { X } from "lucide-react";
 
 interface TimeSlotCardProps {
   timeSlot: TimeSlot;
@@ -87,7 +88,7 @@ const TimeSlotCard = ({
   return (
     <div 
       className={cn(
-        "rounded-lg p-4 mb-4 transition-all hover:shadow-sm animate-fade-in",
+        "rounded-lg p-4 mb-4 transition-all hover:shadow-sm animate-fade-in relative",
         selectedByUser 
           ? "bg-purple-50 border border-purple-500" 
           : "border border-gray-200 hover:border-gray-300",
@@ -95,6 +96,19 @@ const TimeSlotCard = ({
       )}
       onClick={onClick}
     >
+      {selectedByUser && onCannotMakeIt && (
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            onCannotMakeIt(e);
+          }}
+          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 rounded-full p-1 transition-colors"
+          aria-label="Remove time slot"
+        >
+          <X size={16} />
+        </button>
+      )}
+
       <div className="mb-2">
         <div className="font-medium">{formatDate(timeSlot.date)}</div>
         {creatorAvailable && (
@@ -133,18 +147,6 @@ const TimeSlotCard = ({
             />
           </div>
         </div>
-      )}
-
-      {onCannotMakeIt && selectedByUser && (
-        <button 
-          onClick={(e) => {
-            e.stopPropagation();
-            onCannotMakeIt(e);
-          }}
-          className="text-purple-500 text-sm hover:underline mt-2"
-        >
-          {finalCannotMakeItText}
-        </button>
       )}
     </div>
   );
