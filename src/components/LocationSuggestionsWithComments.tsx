@@ -1,3 +1,4 @@
+
 import React from "react";
 import type { LocationWithComments } from "@/types";
 import Avatar from "./Avatar";
@@ -11,7 +12,7 @@ interface LocationSuggestionProps {
 }
 
 // For a single location card with comments
-const LocationWithComments = ({
+const LocationWithCommentsCard = ({
   location,
   isSelected,
   onSelect,
@@ -94,7 +95,7 @@ const LocationSuggestionsList = ({
   return (
     <div className="mb-6">
       {locations.map((location, index) => (
-        <LocationWithComments
+        <LocationWithCommentsCard
           key={index}
           location={location}
           isSelected={location.selected}

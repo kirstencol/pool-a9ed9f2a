@@ -69,7 +69,7 @@ const BurtLocationConfirmation = () => {
       });
       
       // Prepare the final selected locations to pass to the confirmation page
-      const finalLocations = [...selectedLocations];
+      const finalLocations: LocationWithComments[] = [...selectedLocations] as LocationWithComments[];
       
       // Add the custom location if it was selected
       if (hasCustomSelection && customLocation) {
@@ -110,7 +110,7 @@ const BurtLocationConfirmation = () => {
       <p className="mb-4 text-gray-700">Abby and Carrie like these spots. You get to pick!</p>
       
       <LocationSuggestionsList 
-        locations={locationSelection.locations}
+        locations={locationSelection.locations as LocationWithComments[]}
         onSelectLocation={locationSelection.handleSelectLocation}
         onNoteChange={locationSelection.handleNoteChange}
       />
