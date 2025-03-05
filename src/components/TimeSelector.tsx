@@ -51,10 +51,8 @@ const TimeSelector = ({
             isAtMaxTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
           onClick={() => {
-            console.log("🔼 Increment button clicked in UI");
-            if (!isAtMaxTime) {
-              handleIncrement();
-            }
+            console.log("⬆️ Increment button clicked");
+            if (!isAtMaxTime) handleIncrement();
           }}
           disabled={isAtMaxTime}
           aria-label="Increase time"
@@ -77,10 +75,8 @@ const TimeSelector = ({
             isAtMinTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
           onClick={() => {
-            console.log("🔽 Decrement button clicked in UI");
-            if (!isAtMinTime) {
-              handleDecrement();
-            }
+            console.log("⬇️ Decrement button clicked");
+            if (!isAtMinTime) handleDecrement();
           }}
           disabled={isAtMinTime}
           aria-label="Decrease time"
