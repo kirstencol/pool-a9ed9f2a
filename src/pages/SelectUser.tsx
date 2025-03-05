@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Avatar from "@/components/Avatar";
@@ -13,14 +14,6 @@ const UserOption = ({
   isSelected: boolean; 
   onClick: () => void 
 }) => {
-  // Determine proper position based on name
-  const getPosition = () => {
-    if (name === "Abby") return "first";
-    if (name === "Burt") return "second";
-    if (name === "Carrie") return "third";
-    return undefined;
-  };
-
   return (
     <div 
       className={`flex items-center p-4 rounded-xl mb-4 cursor-pointer transition-all ${
@@ -29,9 +22,9 @@ const UserOption = ({
       onClick={onClick}
     >
       <Avatar 
-        initial={name.charAt(0)}
+        initial={name.charAt(0)} 
         size="lg"
-        position={getPosition()}
+        position={name === "Abby" ? "first" : name === "Burt" ? "second" : "third"}
         className="mr-6" 
       />
       <span className="text-2xl font-medium">{name}</span>
@@ -123,17 +116,7 @@ const SelectUser = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 py-8 relative">
-      {/* Add a small avatar in the top right */}
-      {selectedUser && (
-        <Avatar 
-          initial={selectedUser.charAt(0)} 
-          size="sm"
-          position={selectedUser === "Abby" ? "first" : selectedUser === "Burt" ? "second" : "third"}
-          className="avatar-profile" 
-        />
-      )}
-      
+    <div className="max-w-md mx-auto px-4 py-8">
       <h1 className="text-2xl font-semibold mb-8 whitespace-pre-line">{headerText}</h1>
       
       <h2 className="text-xl font-medium mb-4">You are:</h2>
@@ -159,7 +142,7 @@ const SelectUser = () => {
       </div>
       
       <Button 
-        variant="primary"
+        className="action-button"
         onClick={handleContinue}
         disabled={!selectedUser}
       >

@@ -4,7 +4,6 @@ import { CalendarPlus, Copy, Check } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 
 const AddToCalendar = () => {
   const navigate = useNavigate();
@@ -59,26 +58,26 @@ const AddToCalendar = () => {
       </div>
 
       <div className="mb-8 space-y-4">
-        <Button 
-          asChild
-          variant="purpleOutline"
+        <a 
+          href={googleCalendarLink}
+          className="action-button bg-white text-purple-500 border-2 border-purple-500 hover:bg-purple-50"
         >
-          <a href={googleCalendarLink}>Google Calendar</a>
-        </Button>
+          Google Calendar
+        </a>
         
-        <Button 
-          asChild
-          variant="purpleOutline"
+        <a 
+          href={appleCalendarLink}
+          className="action-button bg-white text-purple-500 border-2 border-purple-500 hover:bg-purple-50"
         >
-          <a href={appleCalendarLink}>Apple Calendar</a>
-        </Button>
+          Apple Calendar
+        </a>
         
-        <Button 
-          asChild
-          variant="purpleOutline"
+        <a 
+          href={outlookCalendarLink}
+          className="action-button bg-white text-purple-500 border-2 border-purple-500 hover:bg-purple-50"
         >
-          <a href={outlookCalendarLink}>Outlook Calendar</a>
-        </Button>
+          Outlook Calendar
+        </a>
       </div>
 
       <div className="border border-gray-300 rounded-xl p-4 mb-8">
@@ -100,12 +99,12 @@ const AddToCalendar = () => {
         </pre>
       </div>
 
-      <Button
+      <button
         onClick={() => navigate("/")}
-        variant="secondaryAction"
+        className="secondary-button"
       >
         Back to home
-      </Button>
+      </button>
     </div>
   );
 };

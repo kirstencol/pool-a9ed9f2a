@@ -19,15 +19,18 @@ const CarrieTimeConfirmation = () => {
   const startTime = searchParams.get("startTime") || "";
   const endTime = searchParams.get("endTime") || "";
   
+  // Use the hook to get invite data
   const { isLoading } = useInviteData(inviteId, "Carrie");
   
   const [adjustedStartTime, setAdjustedStartTime] = useState(startTime);
   const [adjustedEndTime, setAdjustedEndTime] = useState(endTime);
 
   useEffect(() => {
+    // Initialize with passed times
     setAdjustedStartTime(startTime);
     setAdjustedEndTime(endTime);
     
+    // Force set Carrie as the current user in localStorage and context
     localStorage.setItem('currentUser', 'Carrie');
     if (!currentUser || currentUser.name !== 'Carrie') {
       setCurrentUser({
@@ -78,14 +81,13 @@ const CarrieTimeConfirmation = () => {
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
-      <Button 
+      <button 
         onClick={() => navigate(-1)}
-        variant="ghost"
-        className="text-gray-500 mb-6 p-0 h-auto"
+        className="flex items-center text-gray-500 mb-6"
       >
         <ArrowLeft size={16} className="mr-1" />
         Back
-      </Button>
+      </button>
 
       <h1 className="text-2xl font-semibold mb-6">It's Happening!</h1>
       <p className="text-gray-600 mb-6">

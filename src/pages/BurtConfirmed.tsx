@@ -84,9 +84,8 @@ const BurtConfirmed = () => {
       </div>
       
       <Button 
-        onClick={handleAddToCalendar}
-        variant="primary"
-        className="gap-2"
+        onClick={handleAddToCalendar} 
+        className="w-full py-5 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2"
       >
         <CalendarPlus size={20} />
         Add to Calendar

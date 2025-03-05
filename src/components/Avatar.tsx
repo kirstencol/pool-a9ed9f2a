@@ -15,21 +15,30 @@ const Avatar = ({ initial, size = "md", className, position }: AvatarProps) => {
     lg: "w-16 h-16 text-2xl",
   };
 
-  const getAvatarClass = (position?: string) => {
-    // Consistent color mapping based on position
-    if (position === "first") return 'bg-lime'; // Abby (lime green)
-    if (position === "second") return 'bg-purple-700'; // Burt (deep purple)
-    if (position === "third") return 'bg-purple-300'; // Carrie (light purple)
+  const getAvatarClass = (letter: string, position?: string) => {
+    // If position is provided, use that to determine color
+    if (position === "first") return 'bg-lime'; // Use lime green for Friend A
+    if (position === "second") return 'bg-purple-700'; // Deep purple for Friend B
+    if (position === "third") return 'bg-purple-300'; // Light purple for Friend C
     
-    // Fallback to a default color if no position specified
-    return 'bg-gray-300';
+    // Fallback to using initials-based colors if no position specified
+    const formattedLetter = letter.toUpperCase();
+    
+    if (formattedLetter === 'A') return 'bg-purple-300'; // Light purple
+    if (formattedLetter === 'J') return 'bg-purple-700'; // Deep purple
+    if (formattedLetter === 'S') return 'bg-lime'; // Lime green
+    
+    const charCode = letter.charCodeAt(0);
+    if (charCode % 4 === 0) return 'bg-purple-300'; // Light purple
+    if (charCode % 4 === 1 || charCode % 4 === 3) return 'bg-lime';  // Lime green
+    return 'bg-purple-700'; // Deep purple
   };
 
   return (
     <div 
       className={cn(
         "avatar-circle", 
-        getAvatarClass(position), 
+        getAvatarClass(initial, position), 
         sizeClasses[size], 
         className
       )}

@@ -6,7 +6,6 @@ import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import TimeSlotCard from "@/components/TimeSlotCard";
 import LocationCard from "@/components/LocationCard";
-import { Button } from "@/components/ui/button";
 
 const FinalConfirmation = () => {
   const navigate = useNavigate();
@@ -93,13 +92,13 @@ const FinalConfirmation = () => {
         />
       </div>
 
-      <Button
+      <button
         onClick={handleConfirm}
-        variant="primary"
+        className="action-button"
       >
         Add to calendar
-        <ArrowRight size={20} />
-      </Button>
+        <ArrowRight className="ml-2" size={20} />
+      </button>
     </div>
   );
 };
