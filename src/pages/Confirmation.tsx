@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Check, Sparkles, Copy, Link, ChevronLeft } from "lucide-react";
@@ -19,9 +18,17 @@ const Confirmation = () => {
   const [copied, setCopied] = useState(false);
   
   useEffect(() => {
-    // Try to get the inviteId from location state
     const searchParams = new URLSearchParams(location.search);
     const inviteId = searchParams.get('id') || 'demo_invite';
+    const startTime = searchParams.get('startTime');
+    const endTime = searchParams.get('endTime');
+    const date = searchParams.get('date');
+    const fromCarrie = searchParams.get('fromCarrie') === 'true';
+    
+    if (fromCarrie && startTime && endTime && date) {
+      navigate(`/carrie-time-confirmation?id=${inviteId}&startTime=${startTime}&endTime=${endTime}&date=${date}`);
+      return;
+    }
     
     if (inviteId) {
       const data = loadMeetingFromStorage(inviteId);
@@ -30,10 +37,9 @@ const Confirmation = () => {
         setCreatorName(data.creator?.name || "Abby");
       }
     }
-  }, [location, loadMeetingFromStorage]);
+  }, [location, loadMeetingFromStorage, navigate]);
 
   const copyLink = () => {
-    // Generate a shareable link
     const baseUrl = window.location.origin;
     const shareableUrl = `${baseUrl}/select-user?id=${meetingData?.id || 'demo_invite'}`;
     
@@ -47,13 +53,11 @@ const Confirmation = () => {
   };
 
   const handleGoBack = () => {
-    // Navigate back to the respond page with the same invitation ID
     const searchParams = new URLSearchParams(location.search);
     const inviteId = searchParams.get('id') || 'demo_invite';
     navigate(`/respond/${inviteId}`);
   };
 
-  // If no meeting data is available, show a fallback
   if (!meetingData) {
     return (
       <div className="max-w-md mx-auto px-4 py-8">
@@ -74,32 +78,24 @@ const Confirmation = () => {
     );
   }
 
-  // Find time slots with responses
-  const timeSlotsWithResponses = meetingData.timeSlots?.filter((slot: TimeSlot) => 
+  const timeSlotsWithResponses = meetingData?.timeSlots?.filter((slot: TimeSlot) => 
     slot.responses && slot.responses.length > 0
   ) || [];
 
-  // Calculate overlapping availability for each time slot
   const overlappingTimeSlots = timeSlotsWithResponses.map((slot: TimeSlot) => {
-    // Start with creator's full availability
     let overlapStartMinutes = convertTimeToMinutes(slot.startTime);
     let overlapEndMinutes = convertTimeToMinutes(slot.endTime);
     
-    // Adjust based on each response
     slot.responses.forEach(response => {
       const responseStartMinutes = convertTimeToMinutes(response.startTime || "");
       const responseEndMinutes = convertTimeToMinutes(response.endTime || "");
       
       if (responseStartMinutes && responseEndMinutes) {
-        // Update overlap to be the later start time
         overlapStartMinutes = Math.max(overlapStartMinutes, responseStartMinutes);
-        
-        // Update overlap to be the earlier end time
         overlapEndMinutes = Math.min(overlapEndMinutes, responseEndMinutes);
       }
     });
     
-    // Only include slots where there's still a valid overlap
     if (overlapStartMinutes < overlapEndMinutes) {
       return {
         ...slot,
@@ -110,7 +106,6 @@ const Confirmation = () => {
     return null;
   }).filter(Boolean);
 
-  // Format minutes back to time string (e.g., "9:30 AM")
   function formatMinutesToTime(minutes: number): string {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -119,14 +114,12 @@ const Confirmation = () => {
     return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
   }
 
-  // Format names for display
   const responderNames = [...new Set(timeSlotsWithResponses.flatMap((slot: TimeSlot) => 
     slot.responses?.map((r: any) => r.responderName as string) || []
   ))];
   
-  // Display names without the friend labels
   const displayNames = [
-    meetingData.creator?.name || "Abby", 
+    meetingData?.creator?.name || "Abby", 
     ...responderNames
   ].filter(Boolean).join(" and ");
 
@@ -141,7 +134,7 @@ const Confirmation = () => {
       </h1>
       
       <div className="space-y-6 mb-10">
-        {overlappingTimeSlots.map((timeSlot: any) => (
+        {overlappingTimeSlots?.map((timeSlot: any) => (
           <div key={timeSlot.id} className="space-y-1 bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
             <h2 className="text-xl font-medium">
               {timeSlot.date}
