@@ -1,4 +1,3 @@
-
 import { TimeSlot } from "@/types";
 import { useState, useEffect, memo } from "react";
 import { cn } from "@/lib/utils";
@@ -57,7 +56,6 @@ const TimeSlotCard = ({
     return date.toLocaleDateString('en-US', options);
   };
 
-  // Extract day of week for the "can't make it" text
   const getDayOfWeek = (dateString: string) => {
     const dateParts = dateString.split('-');
     if (dateParts.length !== 3) return "this day";
@@ -71,7 +69,6 @@ const TimeSlotCard = ({
     return date.toLocaleDateString('en-US', { weekday: 'long' });
   };
 
-  // Set default cannotMakeItText if not provided
   const dayOfWeek = getDayOfWeek(timeSlot.date);
   const defaultCannotMakeItText = `I can't make it on this day`;
   const finalCannotMakeItText = cannotMakeItText || defaultCannotMakeItText;
@@ -97,12 +94,8 @@ const TimeSlotCard = ({
       )}
       onClick={onClick}
     >
-      {/* Card Header - Always visible */}
       <div className="mb-2">
-        {/* Date is always shown */}
         <div className="font-medium">{formatDate(timeSlot.date)}</div>
-        
-        {/* Creator availability is always shown */}
         {creatorAvailable && (
           <div className="text-sm text-gray-600">
             {`${creatorName} is free ${timeSlot.startTime} - ${timeSlot.endTime}`}
@@ -110,20 +103,15 @@ const TimeSlotCard = ({
         )}
       </div>
 
-      {/* User's selection is shown if they've made one */}
       {selectedByUser && !showTimeSelector && (
         <div className="text-sm text-purple-700 font-medium mt-1">
           You selected {startTime} - {endTime}
         </div>
       )}
 
-      {/* Time selector appears below when expanded */}
       {showTimeSelector && selectedByUser && (
         <div className="bg-purple-100 rounded-lg p-4 my-3">
           <div className="text-center mb-3 font-medium">What time works for you?</div>
-          <div className="text-center mb-2 text-sm text-gray-600">
-            (Select times within {creatorName}'s availability)
-          </div>
           <div className="flex justify-center space-x-4 items-center">
             <TimeSelector 
               time={startTime} 
@@ -144,7 +132,6 @@ const TimeSlotCard = ({
         </div>
       )}
 
-      {/* "Can't make it" button appears only if the slot is selected */}
       {onCannotMakeIt && selectedByUser && (
         <button 
           onClick={(e) => {
