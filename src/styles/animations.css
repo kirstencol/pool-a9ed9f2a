@@ -1,19 +1,26 @@
 
-@keyframes celebration {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
-@keyframes fade-in {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-.animate-celebration {
-  animation: celebration 1s ease-in-out;
+@keyframes waiting-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.animate-fade-in {
-  animation: fade-in 0.5s ease-in-out;
+.waiting-animation {
+  animation: waiting-spin 1.5s linear infinite, pulse 2s ease-in-out infinite;
 }
