@@ -45,7 +45,8 @@ export interface LocationWithComments extends LocationWithNote {
 }
 
 export interface LocationResponse {
-  userId: string;
+  userId?: string; // Make userId optional to match API responses
+  responderName?: string; // Add responderName to match API responses
   note?: string;
 }
 

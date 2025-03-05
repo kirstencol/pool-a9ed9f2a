@@ -2,7 +2,7 @@
 // src/context/meeting/timeSlotOperations.ts
 import { TimeSlot } from '@/types';
 import { MeetingContextState, TimeSlotOperations } from './types';
-import { addTimeSlots, addTimeResponse } from '@/integrations/supabase/api';
+import { addTimeSlots, addTimeResponse, setSelectedTimeSlot as dbSetSelectedTimeSlot, updateMeetingStatus } from '@/integrations/supabase/api';
 
 type StateSetters = {
   setTimeSlots: (timeSlots: TimeSlot[]) => void;
@@ -69,10 +69,8 @@ export const useTimeSlotOperations = (
     
     if (currentMeetingId && timeSlot) {
       try {
-        await import('@/integrations/supabase/api').then(api => {
-          api.dbSetSelectedTimeSlot(currentMeetingId, timeSlot.id);
-          api.updateMeetingStatus(currentMeetingId, 'pending');
-        });
+        await dbSetSelectedTimeSlot(currentMeetingId, timeSlot.id);
+        await updateMeetingStatus(currentMeetingId, 'pending');
       } catch (err) {
         console.error('Error setting selected time slot:', err);
       }
@@ -94,7 +92,8 @@ export const useTimeSlotOperations = (
         throw new Error('Failed to add time response');
       }
 
-      setTimeSlots(prev => prev.map(slot => {
+      // Update the timeSlots state with the new response
+      const updatedTimeSlots = timeSlots.map(slot => {
         if (slot.id === timeSlotId) {
           const responses = slot.responses || [];
           return {
@@ -110,7 +109,9 @@ export const useTimeSlotOperations = (
           };
         }
         return slot;
-      }));
+      });
+      
+      setTimeSlots(updatedTimeSlots);
 
       return true;
     } catch (err) {

@@ -7,7 +7,7 @@ import {
   addParticipants, 
   addTimeSlots, 
   getMeetingById,
-  dbSetMeetingNotes
+  setMeetingNotes as dbSetMeetingNotes
 } from '@/integrations/supabase/api';
 import { storeMeetingInStorage as storeMeetingToStorage } from './storage';
 

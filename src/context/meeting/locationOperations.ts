@@ -2,7 +2,7 @@
 // src/context/meeting/locationOperations.ts
 import { Location } from '@/types';
 import { MeetingContextState, LocationOperations } from './types';
-import { addLocation as addLocationToDb, addLocationResponse, dbSetSelectedLocation, updateMeetingStatus } from '@/integrations/supabase/api';
+import { addLocation as addLocationToDb, addLocationResponse, setSelectedLocation as dbSetSelectedLocation, updateMeetingStatus } from '@/integrations/supabase/api';
 
 type StateSetters = {
   setLocations: (locations: Location[]) => void;
@@ -81,7 +81,8 @@ export const useLocationOperations = (
         throw new Error('Failed to add location response');
       }
 
-      setLocations(prev => prev.map(loc => {
+      // Update the locations state with the new response
+      const updatedLocations = locations.map(loc => {
         if (loc.id === locationId) {
           const responses = loc.responses || [];
           return {
@@ -89,14 +90,16 @@ export const useLocationOperations = (
             responses: [
               ...responses,
               {
-                userId: responderName,
+                responderName, // Using responderName instead of userId
                 note
               }
             ]
           };
         }
         return loc;
-      }));
+      });
+      
+      setLocations(updatedLocations);
 
       return true;
     } catch (err) {

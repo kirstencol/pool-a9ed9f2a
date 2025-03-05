@@ -1,6 +1,6 @@
 // src/integrations/supabase/api.ts
 import { supabase } from './client';
-import type { Meeting, TimeSlot, Location } from '@/types';
+import type { Meeting, TimeSlot, Location, LocationResponse, UserResponse } from '@/types';
 
 // Type definitions for Supabase tables
 export type MeetingInsert = {
@@ -167,6 +167,7 @@ export async function getMeetingById(id: string): Promise<Meeting | null> {
           description: loc.description || '',
           suggestedBy: loc.suggested_by,
           responses: locationResponsesData.map(resp => ({
+            userId: resp.responder_name,
             responderName: resp.responder_name,
             note: resp.note || ''
           }))
