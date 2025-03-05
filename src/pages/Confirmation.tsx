@@ -134,14 +134,6 @@ const Confirmation = () => {
             <p className="text-lg">
               {timeSlot.overlapStartTime} - {timeSlot.overlapEndTime}
             </p>
-            <p className="text-sm text-gray-500">
-              {creatorName}'s availability: {timeSlot.startTime} - {timeSlot.endTime}
-            </p>
-            {timeSlot.responses?.map((response: any, index: number) => (
-              <p key={index} className="text-sm text-gray-500">
-                {response.responderName}'s availability: {response.startTime} - {response.endTime}
-              </p>
-            ))}
           </div>
         ))}
       </div>
