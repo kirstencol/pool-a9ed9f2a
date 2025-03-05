@@ -45,15 +45,26 @@ const Confirmation = () => {
   };
 
   const formatDate = (dateString: string) => {
+    // If the format is already "March 1", return it as is
+    if (dateString && dateString.includes(" ")) {
+      return dateString;
+    }
+    
     if (!dateString) return "March 1";
     
     try {
-      const [year, month, day] = dateString.split('-').map(Number);
-      const date = new Date(year, month - 1, day);
-      return date.toLocaleDateString('en-US', { 
-        month: 'long', 
-        day: 'numeric' 
-      });
+      // Handle numeric date format (YYYY-MM-DD)
+      if (dateString.includes("-")) {
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+        return date.toLocaleDateString('en-US', { 
+          month: 'long', 
+          day: 'numeric' 
+        });
+      }
+      
+      // If it's not a standard format but still contains a date, return as is
+      return dateString;
     } catch (error) {
       console.error("Error formatting date:", error);
       return dateString;
@@ -95,6 +106,7 @@ const Confirmation = () => {
   }
 
   const selectedTimeSlots = getSelectedTimeSlots();
+  console.log("Selected time slots:", selectedTimeSlots);
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
