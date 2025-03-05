@@ -1,14 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
+import { MapPin, ArrowRight, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Avatar from "@/components/Avatar";
 
-type Location = {
+type LocationOption = {
   id: string;
   name: string;
-  address?: string;
+  note?: string;
 };
 
 const CarrieSelectLocation = () => {
@@ -22,101 +23,121 @@ const CarrieSelectLocation = () => {
   const startTime = searchParams.get("startTime") || "";
   const endTime = searchParams.get("endTime") || "";
   
-  const [locations, setLocations] = useState<Location[]>([
-    { id: "1", name: "Coffee Shop", address: "123 Main St" },
-    { id: "2", name: "Library", address: "456 Oak Ave" },
-    { id: "3", name: "Park", address: "789 Pine Blvd" }
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([
+    { id: "1", name: "", note: "" }
   ]);
   
-  const [newLocation, setNewLocation] = useState("");
-  const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
+  const MAX_LOCATIONS = 3;
+
+  // Format the date for display
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    
+    const dateParts = dateString.split('-');
+    if (dateParts.length !== 3) return dateString;
+    
+    const year = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1;
+    const day = parseInt(dateParts[2]);
+    
+    const dateObj = new Date(year, month, day);
+    
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric'
+    };
+    
+    return dateObj.toLocaleDateString('en-US', options);
+  };
+
+  const handleLocationChange = (id: string, field: 'name' | 'note', value: string) => {
+    setLocationOptions(prev => 
+      prev.map(loc => 
+        loc.id === id ? { ...loc, [field]: value } : loc
+      )
+    );
+  };
 
   const handleAddLocation = () => {
-    if (newLocation.trim()) {
-      const newLoc = {
-        id: Date.now().toString(),
-        name: newLocation.trim()
-      };
-      setLocations([...locations, newLoc]);
-      setNewLocation("");
-      setSelectedLocationId(newLoc.id);
+    if (locationOptions.length < MAX_LOCATIONS) {
+      setLocationOptions([...locationOptions, { id: Date.now().toString(), name: "", note: "" }]);
     }
   };
 
-  const handleContinue = () => {
-    if (!selectedLocationId) {
+  const handleSendSuggestions = () => {
+    // Filter out empty locations
+    const validLocations = locationOptions.filter(loc => loc.name.trim() !== "");
+    
+    if (validLocations.length === 0) {
       toast({
-        title: "Please select a location",
+        title: "Please suggest at least one location",
         variant: "destructive"
       });
       return;
     }
 
-    const selectedLocation = locations.find(loc => loc.id === selectedLocationId);
-    if (selectedLocation) {
-      navigate(`/carrie-confirmation?id=${inviteId}&date=${date}&startTime=${startTime}&endTime=${endTime}&location=${selectedLocation.name}`);
-    }
+    // Combine all location names with commas
+    const locationNames = validLocations.map(loc => loc.name).join(", ");
+    
+    navigate(`/carrie-confirmation?id=${inviteId}&date=${date}&startTime=${startTime}&endTime=${endTime}&location=${locationNames}`);
   };
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
-      <button 
-        onClick={() => navigate(-1)}
-        className="flex items-center text-gray-500 mb-6"
-      >
-        <ArrowLeft size={16} className="mr-1" />
-        Back
-      </button>
+      <div className="flex justify-center mb-4">
+        <Avatar initial="C" size="lg" position="third" />
+      </div>
 
-      <h1 className="text-2xl font-semibold mb-6">Where should we meet?</h1>
+      <h1 className="text-xl font-semibold text-center mb-2">Almost done!</h1>
+      <p className="text-gray-600 text-center mb-4">Suggest a spot to meet:</p>
+      
+      <div className="bg-purple-50 rounded-lg p-4 mb-6 text-center">
+        <p className="text-gray-700">
+          {formatDate(date)} from {startTime} to {endTime}
+        </p>
+      </div>
 
-      <div className="mb-6">
-        <div className="flex mb-4">
-          <input
-            type="text"
-            value={newLocation}
-            onChange={(e) => setNewLocation(e.target.value)}
-            placeholder="Add a new location"
-            className="flex-1 border-b border-gray-300 py-2 focus:outline-none focus:border-purple-DEFAULT"
-          />
-          <Button 
-            onClick={handleAddLocation}
-            variant="ghost"
-            className="ml-2"
-            disabled={!newLocation.trim()}
-          >
-            <Plus size={20} />
-          </Button>
-        </div>
-
-        <div className="space-y-3 mt-6">
-          {locations.map((loc) => (
-            <div
-              key={loc.id}
-              className={`p-4 rounded-lg border ${
-                selectedLocationId === loc.id 
-                  ? "border-purple-500 bg-purple-50" 
-                  : "border-gray-200 hover:border-gray-300"
-              } cursor-pointer transition-all`}
-              onClick={() => setSelectedLocationId(loc.id)}
-            >
-              <h3 className="font-medium">{loc.name}</h3>
-              {loc.address && <p className="text-sm text-gray-600">{loc.address}</p>}
+      <div className="space-y-4 mb-6">
+        {locationOptions.map((loc, index) => (
+          <div key={loc.id} className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin size={18} className="text-gray-400" />
+              <input
+                type="text"
+                value={loc.name}
+                onChange={(e) => handleLocationChange(loc.id, 'name', e.target.value)}
+                placeholder="Enter place name"
+                className="w-full border-none focus:outline-none focus:ring-0 p-0"
+              />
             </div>
-          ))}
-        </div>
+            <textarea
+              value={loc.note}
+              onChange={(e) => handleLocationChange(loc.id, 'note', e.target.value)}
+              placeholder="Add a note (optional)"
+              className="w-full text-sm text-gray-500 border-none focus:outline-none focus:ring-0 resize-none p-0"
+              rows={2}
+            />
+          </div>
+        ))}
+
+        {locationOptions.length < MAX_LOCATIONS && (
+          <button 
+            onClick={handleAddLocation}
+            className="w-full border-2 border-dashed border-gray-200 rounded-lg p-4 text-gray-400 flex items-center justify-center hover:bg-gray-50 transition-colors"
+          >
+            <Plus size={16} className="mr-2" /> add another option
+          </button>
+        )}
       </div>
 
-      <div className="flex justify-end mt-8">
-        <Button 
-          onClick={handleContinue}
-          disabled={!selectedLocationId}
-          className="flex items-center"
-        >
-          Continue
-          <ArrowRight size={16} className="ml-2" />
-        </Button>
-      </div>
+      <Button 
+        onClick={handleSendSuggestions}
+        className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center gap-2"
+        variant="secondary"
+      >
+        Send suggestions <ArrowRight size={16} />
+      </Button>
     </div>
   );
 };
