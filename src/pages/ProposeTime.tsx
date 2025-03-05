@@ -6,6 +6,7 @@ import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import DateTimePicker from "@/components/DateTimePicker";
 import { TimeSlot } from "@/types";
+import { Button } from "@/components/ui/button";
 
 const ProposeTime = () => {
   const navigate = useNavigate();
@@ -142,7 +143,7 @@ const ProposeTime = () => {
         {timeSlots.map((slot, index) => (
           <div 
             key={index} 
-            className={`p-3 sm:p-4 ${!slot.isValid ? 'border border-red-500 rounded-xl' : ''}`}
+            className={`bg-white rounded-lg border ${!slot.isValid ? 'border-red-500' : 'border-gray-200'} p-4 shadow-sm transition-all hover:shadow-md`}
           >
             <DateTimePicker
               onDateChange={(date) => updateTimeSlot(index, "date", date)}
@@ -153,26 +154,30 @@ const ProposeTime = () => {
               isValid={slot.isValid}
               onClear={() => clearTimeSlot(index)}
             />
+            {!slot.isValid && (
+              <p className="text-red-500 text-sm mt-2">End time must be after start time</p>
+            )}
           </div>
         ))}
 
         {timeSlots.length < 3 && (
-          <button
+          <Button
             onClick={addNewTimeSlot}
-            className="action-button bg-white text-purple-500 border-2 border-purple-500 hover:bg-purple-50 flex items-center justify-center"
+            variant="outline"
+            className="w-full border-2 border-purple hover:bg-purple-50 text-purple-700 flex items-center justify-center gap-2"
           >
-            <Plus size={18} className="mr-2" />
+            <Plus size={18} />
             Add another time option
-          </button>
+          </Button>
         )}
 
-        <button
+        <Button
           onClick={handleSendToFriends}
-          className={`action-button mt-6 sm:mt-8 ${!hasValidTimeSlots() ? 'bg-purple-300 hover:bg-purple-300 cursor-not-allowed' : 'bg-purple hover:bg-purple/90'}`}
+          className="w-full bg-purple hover:bg-purple/90 text-white flex items-center justify-center"
           disabled={!hasValidTimeSlots()}
         >
           <ArrowRight size={20} />
-        </button>
+        </Button>
       </div>
     </div>
   );
