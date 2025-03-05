@@ -1,20 +1,19 @@
 
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
-import { LocationWithNote } from "@/types";
 import LocationSuggestionsList from "@/components/LocationSuggestionsList";
 import CustomLocationInput from "@/components/CustomLocationInput";
+import { useLocationSelection } from "@/hooks/useLocationSelection";
 
 const AbbyLocationResponse = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
   // Demo data for Carrie's location suggestions
-  const [locations, setLocations] = useState<LocationWithNote[]>([
+  const initialLocations = [
     { 
       name: "Central Cafe", 
       note: "Great coffee and shouldn't be too hard to get a table.",
@@ -27,77 +26,16 @@ const AbbyLocationResponse = () => {
       selected: false,
       userNote: ""
     }
-  ]);
+  ];
+  
+  const locationSelection = useLocationSelection({ initialLocations });
   
   // Updated date and time for the demo
   const date = "Saturday, March 2nd";
   const timeRange = "8:00 a.m. to 9:00 a.m.";
   
-  const [hasDifferentIdea, setHasDifferentIdea] = useState(false);
-  const [differentIdeaText, setDifferentIdeaText] = useState("");
-  const [differentIdeaName, setDifferentIdeaName] = useState("");
-  const [differentIdeaSelected, setDifferentIdeaSelected] = useState(true); // Default to selected
-  
-  const handleSelectLocation = (index: number) => {
-    const updatedLocations = [...locations];
-    updatedLocations[index].selected = !updatedLocations[index].selected;
-    setLocations(updatedLocations);
-    
-    // Count total selected options including user's custom idea
-    const totalSelected = updatedLocations.filter(loc => loc.selected).length + 
-                         (differentIdeaSelected ? 1 : 0);
-    
-    // If we're trying to select more than 3 options, show a toast
-    if (totalSelected > 3) {
-      toast({
-        title: "Maximum selections reached",
-        description: "Please select a maximum of 3 locations",
-        variant: "destructive"
-      });
-      // Revert selection
-      updatedLocations[index].selected = !updatedLocations[index].selected;
-      setLocations(updatedLocations);
-    }
-  };
-  
-  const handleNoteChange = (index: number, note: string) => {
-    const updatedLocations = [...locations];
-    updatedLocations[index].userNote = note;
-    setLocations(updatedLocations);
-  };
-  
-  const handleDifferentIdea = () => {
-    setHasDifferentIdea(true);
-    setDifferentIdeaSelected(true); // Auto-select when added
-  };
-  
-  const toggleDifferentIdeaSelection = () => {
-    // Count total selected options from regular locations
-    const totalSelected = locations.filter(loc => loc.selected).length;
-    
-    if (!differentIdeaSelected && totalSelected >= 3) {
-      toast({
-        title: "Maximum selections reached",
-        description: "Please select a maximum of 3 locations",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    setDifferentIdeaSelected(!differentIdeaSelected);
-  };
-
-  const clearDifferentIdea = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent triggering the parent onClick
-    setHasDifferentIdea(false);
-    setDifferentIdeaName("");
-    setDifferentIdeaText("");
-    setDifferentIdeaSelected(false);
-  };
-  
   const handleSubmit = () => {
-    const selectedLocations = locations.filter(loc => loc.selected);
-    const hasCustomSelection = hasDifferentIdea && differentIdeaName && differentIdeaSelected;
+    const { selectedLocations, hasCustomSelection, customLocation } = locationSelection.getSelectedLocations();
     
     if (selectedLocations.length > 0 || hasCustomSelection) {
       let description = "";
@@ -107,15 +45,15 @@ const AbbyLocationResponse = () => {
         description = `You selected: ${locationNames}`;
       }
       
-      if (hasCustomSelection) {
+      if (hasCustomSelection && customLocation) {
         if (description) {
-          description += ` and your suggestion: ${differentIdeaName}`;
+          description += ` and your suggestion: ${customLocation.name}`;
         } else {
-          description = `You suggested: ${differentIdeaName}`;
+          description = `You suggested: ${customLocation.name}`;
         }
         
-        if (differentIdeaText) {
-          description += ` - ${differentIdeaText}`;
+        if (customLocation.note) {
+          description += ` - ${customLocation.note}`;
         }
       }
       
@@ -148,24 +86,27 @@ const AbbyLocationResponse = () => {
       <p className="mb-4 text-gray-700">Carrie suggests these spots. Which work for you? <span className="text-sm text-gray-500">(Select up to 3)</span></p>
       
       <LocationSuggestionsList 
-        locations={locations}
-        onSelectLocation={handleSelectLocation}
-        onNoteChange={handleNoteChange}
+        locations={locationSelection.locations}
+        onSelectLocation={locationSelection.handleSelectLocation}
+        onNoteChange={locationSelection.handleNoteChange}
       />
       
-      {hasDifferentIdea ? (
+      {locationSelection.hasDifferentIdea ? (
         <CustomLocationInput 
-          isSelected={differentIdeaSelected}
-          locationName={differentIdeaName}
-          setLocationName={setDifferentIdeaName}
-          noteText={differentIdeaText}
-          setNoteText={setDifferentIdeaText}
-          onToggleSelection={toggleDifferentIdeaSelection}
-          onClear={clearDifferentIdea}
+          isSelected={locationSelection.differentIdeaSelected}
+          locationName={locationSelection.differentIdeaName}
+          setLocationName={locationSelection.setDifferentIdeaName}
+          noteText={locationSelection.differentIdeaText}
+          setNoteText={locationSelection.setDifferentIdeaText}
+          onToggleSelection={locationSelection.toggleDifferentIdeaSelection}
+          onClear={(e) => {
+            e.stopPropagation();
+            locationSelection.clearDifferentIdea();
+          }}
         />
       ) : (
         <button
-          onClick={handleDifferentIdea}
+          onClick={locationSelection.handleDifferentIdea}
           className="w-full text-center text-gray-500 py-2 mb-6 text-sm"
         >
           I've got a different idea
