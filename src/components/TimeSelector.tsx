@@ -1,5 +1,4 @@
 
-import { memo } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { useTimeSelector } from "@/hooks/useTimeSelector";
 import { cn } from "@/lib/utils";
@@ -38,15 +37,9 @@ const TimeSelector = ({
     maxTime
   });
 
-  const handleIncrement = () => {
-    console.log("TimeSelector: handleIncrement clicked");
-    incrementTime();
-  };
-
-  const handleDecrement = () => {
-    console.log("TimeSelector: handleDecrement clicked");
-    decrementTime();
-  };
+  // Direct function references for the buttons
+  const handleIncrement = incrementTime;
+  const handleDecrement = decrementTime;
 
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40">
@@ -92,4 +85,4 @@ const TimeSelector = ({
   );
 };
 
-export default memo(TimeSelector);
+export default TimeSelector;

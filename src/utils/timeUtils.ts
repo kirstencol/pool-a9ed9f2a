@@ -61,9 +61,6 @@ export const parseTimeString = (time: string): { hour: string, minute: string, p
  * Builds a time string from components
  */
 export const buildTimeString = (hour: string, minute: string, period: string): string => {
-  if (hour === "--" || period === "") {
-    return "--";
-  }
   return `${hour}:${minute} ${period}`;
 };
 

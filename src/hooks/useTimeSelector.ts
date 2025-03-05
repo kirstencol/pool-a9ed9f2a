@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { parseTimeString, buildTimeString, convertTimeToMinutes } from "@/utils/timeUtils";
 
 interface UseTimeSelectorProps {
@@ -33,27 +33,8 @@ export const useTimeSelector = ({
     setPeriod(newPeriod || "pm");
   }, [time]);
 
-  // Notify parent when time components change
-  useEffect(() => {
-    if (hour === "--" || period === "") {
-      return;
-    }
-    
-    const newTime = buildTimeString(hour, minute, period);
-    if (newTime.toLowerCase() !== time.toLowerCase() && newTime !== "--") {
-      onTimeChange(newTime);
-    }
-  }, [hour, minute, period, onTimeChange, time]);
-
-  // Calculate time constraints
-  const minTimeMinutes = useMemo(() => convertTimeToMinutes(minTime), [minTime]);
-  const maxTimeMinutes = useMemo(() => convertTimeToMinutes(maxTime), [maxTime]);
-  const startTimeMinutes = useMemo(() => isEndTime ? convertTimeToMinutes(startTime) : 0, [isEndTime, startTime]);
-
-  // Calculate if we're at the minimum or maximum allowed values
-  const currentTimeMinutes = useMemo(() => {
-    if (hour === "--" || period === "") return 0;
-    
+  // Helper function to get current time in minutes
+  const getCurrentTimeMinutes = useCallback(() => {
     let hourNum = parseInt(hour);
     let minuteNum = parseInt(minute);
     
@@ -67,76 +48,59 @@ export const useTimeSelector = ({
     return hourNum * 60 + minuteNum;
   }, [hour, minute, period]);
 
-  const effectiveMinTime = useMemo(() => 
-    isEndTime && startTime ? Math.max(startTimeMinutes, minTimeMinutes) : minTimeMinutes, 
-    [isEndTime, startTime, startTimeMinutes, minTimeMinutes]
-  );
+  // Get constraint time values in minutes
+  const minTimeMinutes = minTime ? convertTimeToMinutes(minTime) : 0;
+  const maxTimeMinutes = maxTime ? convertTimeToMinutes(maxTime) : 24 * 60 - 1;
+  const startTimeMinutes = isEndTime && startTime ? convertTimeToMinutes(startTime) : 0;
+  
+  // Effective minimum time considering both minTime and startTime (for end time)
+  const effectiveMinTime = isEndTime && startTime ? 
+    Math.max(startTimeMinutes, minTimeMinutes) : minTimeMinutes;
 
-  const isAtMinTime = useMemo(() => {
-    // Only apply constraints if min time is actually set
-    if ((minTimeMinutes <= 0) && (!isEndTime || startTimeMinutes <= 0)) {
-      return false;
-    }
-    return currentTimeMinutes <= effectiveMinTime;
-  }, [currentTimeMinutes, effectiveMinTime, minTimeMinutes, isEndTime, startTimeMinutes]);
+  // Checks if we're at min/max bounds
+  const isAtMinTime = minTimeMinutes > 0 || (isEndTime && startTimeMinutes > 0) ? 
+    getCurrentTimeMinutes() <= effectiveMinTime : false;
+    
+  const isAtMaxTime = maxTimeMinutes > 0 ? 
+    getCurrentTimeMinutes() >= maxTimeMinutes : false;
 
-  const isAtMaxTime = useMemo(() => {
-    // Only apply max constraint if max time is actually set
-    if (maxTimeMinutes <= 0) {
-      return false;
-    }
-    return currentTimeMinutes >= maxTimeMinutes;
-  }, [currentTimeMinutes, maxTimeMinutes]);
+  // Updates time values and calls the parent callback
+  const updateTimeValues = useCallback((newHour: number, newMinutes: number, newPeriod: string) => {
+    // Format values as strings
+    const formattedHour = newHour.toString();
+    const formattedMinute = newMinutes.toString().padStart(2, '0');
+    
+    // Update state
+    setHour(formattedHour);
+    setMinute(formattedMinute);
+    setPeriod(newPeriod);
+    
+    // Notify parent
+    const newTimeString = buildTimeString(formattedHour, formattedMinute, newPeriod);
+    console.log("Updating time to:", newTimeString);
+    onTimeChange(newTimeString);
+  }, [onTimeChange]);
 
-  // Time increment/decrement functions (in 15-minute intervals)
-  const adjustTime = useCallback((minutes: number) => {
-    console.log("Adjusting time by minutes:", minutes);
+  // Increment time by 15 minutes
+  const incrementTime = useCallback(() => {
+    console.log("Increment time called");
     
-    // Calculate new time in minutes
-    let hourNum = parseInt(hour);
-    let minuteNum = parseInt(minute);
+    // Get current time in minutes
+    const currentMinutes = getCurrentTimeMinutes();
+    const newTotalMinutes = currentMinutes + 15;
     
-    // Convert to 24-hour format for calculation
-    if (period === "pm" && hourNum < 12) {
-      hourNum += 12;
-    } else if (period === "am" && hourNum === 12) {
-      hourNum = 0;
-    }
-    
-    // Total minutes in 24-hour format
-    let totalMinutes = hourNum * 60 + minuteNum;
-    let newTotalMinutes = totalMinutes + minutes;
-    
-    console.log("Current time (24h format):", `${hourNum}:${minuteNum}`);
-    console.log("Current minutes since midnight:", totalMinutes);
-    console.log("New minutes since midnight:", newTotalMinutes);
-    
-    // Apply constraints but only if they are actually set
-    let skipConstraints = false;
-    
-    // For debugging, try skipping constraints entirely
-    if (skipConstraints) {
-      console.log("DEBUG MODE: Skipping time constraints");
-    } else {
-      const effectiveMinMinutes = isEndTime && startTime ? 
-        Math.max(startTimeMinutes, minTimeMinutes) : minTimeMinutes;
-      
-      if (minutes > 0 && maxTimeMinutes > 0 && newTotalMinutes > maxTimeMinutes) {
-        console.log("Cannot increment: would exceed max time limit of", maxTimeMinutes);
-        return;
-      }
-      
-      if (minutes < 0 && effectiveMinMinutes > 0 && newTotalMinutes < effectiveMinMinutes) {
-        console.log("Cannot decrement: would go below min time limit of", effectiveMinMinutes);
-        return;
-      }
+    // Check if increment would exceed max time
+    if (maxTimeMinutes > 0 && newTotalMinutes > maxTimeMinutes) {
+      console.log("Cannot increment: would exceed max time of", maxTimeMinutes);
+      return;
     }
     
     // Convert back to 12-hour format
     let newHours = Math.floor(newTotalMinutes / 60);
     const newMinutes = newTotalMinutes % 60;
-    let newPeriod = newHours >= 12 ? "pm" : "am";
+    const newPeriod = newHours >= 12 ? "pm" : "am";
     
+    // Convert hours to 12-hour format
     if (newHours > 12) {
       newHours -= 12;
     } else if (newHours === 0) {
@@ -144,22 +108,38 @@ export const useTimeSelector = ({
     }
     
     console.log(`Setting new time: ${newHours}:${newMinutes.toString().padStart(2, '0')} ${newPeriod}`);
-    
-    // Update state - force as strings
-    setHour(newHours.toString());
-    setMinute(newMinutes.toString().padStart(2, '0'));
-    setPeriod(newPeriod);
-  }, [hour, minute, period, maxTimeMinutes, minTimeMinutes, startTimeMinutes, isEndTime, startTime]);
-
-  const incrementTime = useCallback(() => {
-    console.log("Increment time called");
-    adjustTime(15);
-  }, [adjustTime]);
+    updateTimeValues(newHours, newMinutes, newPeriod);
+  }, [getCurrentTimeMinutes, maxTimeMinutes, updateTimeValues]);
   
+  // Decrement time by 15 minutes
   const decrementTime = useCallback(() => {
     console.log("Decrement time called");
-    adjustTime(-15);
-  }, [adjustTime]);
+    
+    // Get current time in minutes
+    const currentMinutes = getCurrentTimeMinutes();
+    const newTotalMinutes = currentMinutes - 15;
+    
+    // Check if decrement would go below min time
+    if (effectiveMinTime > 0 && newTotalMinutes < effectiveMinTime) {
+      console.log("Cannot decrement: would go below min time of", effectiveMinTime);
+      return;
+    }
+    
+    // Convert back to 12-hour format
+    let newHours = Math.floor(newTotalMinutes / 60);
+    const newMinutes = newTotalMinutes % 60;
+    const newPeriod = newHours >= 12 ? "pm" : "am";
+    
+    // Convert hours to 12-hour format
+    if (newHours > 12) {
+      newHours -= 12;
+    } else if (newHours === 0) {
+      newHours = 12;
+    }
+    
+    console.log(`Setting new time: ${newHours}:${newMinutes.toString().padStart(2, '0')} ${newPeriod}`);
+    updateTimeValues(newHours, newMinutes, newPeriod);
+  }, [getCurrentTimeMinutes, effectiveMinTime, updateTimeValues]);
 
   return {
     hour,
