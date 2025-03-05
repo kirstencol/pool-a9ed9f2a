@@ -85,6 +85,7 @@ export const useTimeSelectorState = ({
       console.log(`Increment result: ${result.hour}:${result.minute} ${result.period}`);
       // Make sure we're definitely calling updateTimeValues
       updateTimeValues(result.hour, result.minute, result.period);
+      console.log(`After updateTimeValues, current state: hour=${hour}, minute=${minute}, period=${period}`);
     } else {
       console.log("Increment returned null - at max limit");
     }
@@ -105,6 +106,7 @@ export const useTimeSelectorState = ({
       console.log(`Decrement result: ${result.hour}:${result.minute} ${result.period}`);
       // Make sure we're definitely calling updateTimeValues
       updateTimeValues(result.hour, result.minute, result.period);
+      console.log(`After updateTimeValues, current state: hour=${hour}, minute=${minute}, period=${period}`);
     } else {
       console.log("Decrement returned null - at min limit");
     }

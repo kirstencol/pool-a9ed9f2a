@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for time calculations and formatting
  */
@@ -93,12 +94,15 @@ export const incrementTime = (
   totalMinutes = Math.round(totalMinutes / 15) * 15;
   
   // Check if exceeding max time
-  if (maxTime) {
-    const maxMinutes = timeToMinutes(maxTime);
-    if (totalMinutes > maxMinutes) {
-      console.log(`Cannot increment: ${totalMinutes} > ${maxMinutes} (max time limit)`);
-      return null;
-    }
+  const currentMinutes = (hours24 * 60) + minutes;
+  const maxMinutes = maxTime ? timeToMinutes(maxTime) : 24 * 60 - 1;
+  
+  console.log(`Checking constraints: min=N/A, max=${maxMinutes}, current=${currentMinutes}`);
+  console.log(`After increment would be: ${totalMinutes} minutes`);
+  
+  if (maxTime && totalMinutes > maxMinutes) {
+    console.log(`Cannot increment: ${totalMinutes} > ${maxMinutes} (max time limit)`);
+    return null;
   }
   
   // Convert back to 12-hour format
@@ -155,17 +159,16 @@ export const decrementTime = (
   totalMinutes = Math.round(totalMinutes / 15) * 15;
   
   // Calculate minimum allowed time
-  let effectiveMinMinutes = 0;
+  const minMinutes = minTime ? timeToMinutes(minTime) : 0;
+  const startTimeMinutes = startTime ? timeToMinutes(startTime) : 0;
+  const effectiveMinMinutes = isEndTime && startTime ? 
+    Math.max(startTimeMinutes, minMinutes) : minMinutes;
   
-  if (minTime) {
-    const minMinutes = timeToMinutes(minTime);
-    effectiveMinMinutes = minMinutes;
-  }
+  // Current time in minutes
+  const currentMinutes = (hours24 * 60) + minutes;
   
-  if (isEndTime && startTime) {
-    const startTimeMinutes = timeToMinutes(startTime);
-    effectiveMinMinutes = Math.max(effectiveMinMinutes, startTimeMinutes);
-  }
+  console.log(`Checking constraints: min=${effectiveMinMinutes}, max=N/A, current=${currentMinutes}`);
+  console.log(`After decrement would be: ${totalMinutes} minutes`);
   
   // Check if below minimum allowed time
   if (totalMinutes < effectiveMinMinutes) {
@@ -208,6 +211,8 @@ export const isAtMinTime = (
   const effectiveMinMinutes = isEndTime && startTime ? 
     Math.max(startTimeMinutes, minMinutes) : minMinutes;
   
+  console.log(`Checking constraints: min=${effectiveMinMinutes}, max=N/A, current=${currentMinutes}`);
+  
   const result = currentMinutes <= effectiveMinMinutes;
   console.log(`isAtMinTime: ${currentTime} (${currentMinutes} mins) <= ${minTime || "00:00 am"} (${minMinutes} mins) or ${startTime || "N/A"} (${startTimeMinutes} mins) = ${result}`);
   return result;
@@ -224,6 +229,8 @@ export const isAtMaxTime = (
   const currentMinutes = timeToMinutes(currentTime);
   
   const maxMinutes = maxTime ? timeToMinutes(maxTime) : 24 * 60 - 1;
+  
+  console.log(`Checking constraints: min=N/A, max=${maxMinutes}, current=${currentMinutes}`);
   
   const result = currentMinutes >= maxMinutes;
   console.log(`isAtMaxTime: ${currentTime} (${currentMinutes} mins) >= ${maxTime || "11:59 pm"} (${maxMinutes} mins) = ${result}`);
