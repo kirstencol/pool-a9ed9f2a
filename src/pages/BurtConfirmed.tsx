@@ -1,28 +1,17 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CalendarPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
 import { Button } from "@/components/ui/button";
-import { useMeeting } from "@/context/meeting";
 
 const BurtConfirmed = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { loadMeetingFromStorage } = useMeeting();
   
-  const [meetingData, setMeetingData] = useState<any>(null);
   const { selectedLocations } = location.state || { selectedLocations: [] };
-  
-  useEffect(() => {
-    // Load meeting data to get time information
-    const data = loadMeetingFromStorage("burt_demo");
-    if (data) {
-      setMeetingData(data);
-    }
-  }, [loadMeetingFromStorage]);
   
   if (!selectedLocations || selectedLocations.length === 0) {
     navigate("/");
@@ -32,21 +21,9 @@ const BurtConfirmed = () => {
   // Just use the first selected location for the demo
   const finalLocation = selectedLocations[0];
   
-  // Get date and time from meetingData if available, otherwise use defaults
-  const getFormattedDate = () => {
-    if (meetingData?.timeSlots?.[0]?.date) {
-      return meetingData.timeSlots[0].date;
-    }
-    return "Saturday, March 2nd";
-  };
-
-  const getFormattedTime = () => {
-    if (meetingData?.timeSlots?.[0]) {
-      const slot = meetingData.timeSlots[0];
-      return `${slot.startTime} to ${slot.endTime}`;
-    }
-    return "8:00 a.m. to 9:00 a.m.";
-  };
+  // Demo date and time
+  const date = "Saturday, March 2nd";
+  const timeRange = "8:00 a.m. to 9:00 a.m.";
   
   const handleAddToCalendar = () => {
     navigate("/add-to-calendar");
@@ -57,17 +34,17 @@ const BurtConfirmed = () => {
       <div className="flex items-start">
         <Avatar initial="B" size="lg" position="second" className="mr-3" />
         <div>
-          <h1 className="heading-2 mb-1">Confirmed!</h1>
-          <p className="body-text">You're all set.</p>
+          <h1 className="text-2xl font-semibold mb-1">Confirmed!</h1>
+          <p className="text-gray-600">You're all set.</p>
         </div>
       </div>
       
       <div className="my-6 p-6 bg-white rounded-xl border border-gray-200">
-        <h2 className="heading-3 mb-2">Getting together</h2>
-        <p className="body-text mb-4">{getFormattedDate()} from {getFormattedTime()}</p>
+        <h2 className="font-semibold mb-2">Getting together</h2>
+        <p className="text-gray-700 mb-4">{date} from {timeRange}</p>
         
-        <h2 className="heading-3 mb-2">Location</h2>
-        <p className="body-text">{finalLocation.name}</p>
+        <h2 className="font-semibold mb-2">Location</h2>
+        <p className="text-gray-700">{finalLocation.name}</p>
         
         {finalLocation.note && finalLocation.note !== "Your suggestion" && (
           <div className="flex items-start mt-3">
@@ -77,7 +54,7 @@ const BurtConfirmed = () => {
               position="third" 
               className="mr-2" 
             />
-            <p className="small-text">{finalLocation.note}</p>
+            <p className="text-sm text-gray-600">{finalLocation.note}</p>
           </div>
         )}
         
@@ -89,7 +66,7 @@ const BurtConfirmed = () => {
               position="first" 
               className="mr-2" 
             />
-            <p className="small-text">{finalLocation.abbyComment}</p>
+            <p className="text-sm text-gray-600">{finalLocation.abbyComment}</p>
           </div>
         )}
         
@@ -101,7 +78,7 @@ const BurtConfirmed = () => {
               position="second" 
               className="mr-2" 
             />
-            <p className="small-text">{finalLocation.userNote}</p>
+            <p className="text-sm text-gray-600">{finalLocation.userNote}</p>
           </div>
         )}
       </div>
