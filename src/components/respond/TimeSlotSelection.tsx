@@ -80,15 +80,6 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
           return (
             <div 
               key={timeSlot.id}
-              className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                isConfigured 
-                  ? "border-purple-500 bg-purple-50" 
-                  : "border-gray-200 hover:border-purple-300"
-              } ${
-                isExpanded 
-                  ? "shadow-md" 
-                  : ""
-              }`}
               onClick={() => toggleSlotExpansion(timeSlot.id)}
             >
               <TimeSlotCard 

@@ -92,14 +92,6 @@
   .avatar-s {
     @apply bg-green-500;
   }
-
-  .time-slot-card {
-    @apply border-2 border-lime rounded-xl p-4 mb-4 transition-all hover:shadow-sm animate-fade-in;
-  }
-  
-  .time-slot-card.selected {
-    @apply border-2 border-lime bg-lime/10;
-  }
   
   .location-card {
     @apply border-2 border-lime rounded-xl p-4 mb-4 transition-all hover:shadow-sm animate-fade-in;

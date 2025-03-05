@@ -89,8 +89,10 @@ const TimeSlotCard = ({
   return (
     <div 
       className={cn(
-        "time-slot-card",
-        selectedByUser && "selected",
+        "rounded-lg p-4 mb-4 transition-all hover:shadow-sm animate-fade-in",
+        selectedByUser 
+          ? "bg-purple-50 border border-purple-500" 
+          : "border border-gray-200 hover:border-gray-300",
         className
       )}
       onClick={onClick}
