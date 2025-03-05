@@ -148,6 +148,9 @@ const TimeConfirmation = () => {
     );
   }
 
+  // Make sure we display ALL time slots
+  console.log("Displaying time slots:", timeSlots);
+
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
       <div className="flex items-center mb-8">

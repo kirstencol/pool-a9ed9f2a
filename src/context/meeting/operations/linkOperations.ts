@@ -29,6 +29,7 @@ export const useLinkOperations = (
   } = state;
 
   const generateShareableLink = async () => {
+    // If we already have a meeting ID, just return the shareable link
     if (state.currentMeetingId) {
       const baseUrl = window.location.origin;
       const shareableUrl = `${baseUrl}/respond/${state.currentMeetingId}`;
@@ -44,6 +45,7 @@ export const useLinkOperations = (
     setError(null);
 
     try {
+      // Create the meeting first
       const meetingId = await createMeeting({
         creator_name: currentUser.name,
         creator_initial: currentUser.initial,
@@ -54,8 +56,11 @@ export const useLinkOperations = (
         throw new Error('Failed to create meeting');
       }
 
+      // Set the meeting ID in the context
       setCurrentMeetingId(meetingId);
+      console.log("Created meeting with ID:", meetingId);
 
+      // Add all participants (including the current user)
       const allParticipants = [currentUser, ...participants];
       const participantsInsert = allParticipants.map(p => ({
         meeting_id: meetingId,
@@ -68,13 +73,15 @@ export const useLinkOperations = (
         throw new Error('Failed to add participants');
       }
 
+      // Add time slots if any exist - IMPORTANT: All with the same meeting_id
       if (timeSlots.length > 0) {
         console.log("Preparing to insert time slots with meeting ID:", meetingId);
         console.log("Time slots to insert:", timeSlots);
         
+        // Ensure all time slots use the same meeting_id
         const timeSlotsInsert = timeSlots.map(slot => ({
-          meeting_id: meetingId,
-          date: slot.date, // Now saved as text
+          meeting_id: meetingId, // Use the same meeting ID for all slots
+          date: slot.date,
           start_time: slot.startTime,
           end_time: slot.endTime
         }));
@@ -84,13 +91,16 @@ export const useLinkOperations = (
           throw new Error('Failed to add time slots');
         }
 
+        // Update the time slots in context with the new IDs
         const updatedTimeSlots = timeSlots.map((slot, index) => ({
           ...slot,
           id: timeSlotIds[index]
         }));
         setTimeSlots(updatedTimeSlots);
+        console.log("Successfully added time slots with IDs:", timeSlotIds);
       }
 
+      // Generate the shareable URL
       const baseUrl = window.location.origin;
       const shareableUrl = `${baseUrl}/respond/${meetingId}`;
 
