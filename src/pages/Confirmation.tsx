@@ -105,6 +105,11 @@ const Confirmation = () => {
     );
   }
 
+  // Helper function to determine if a location was suggested by Abby
+  const isAbbySuggestion = (location: LocationWithNote) => {
+    return location.note === "Your suggestion";
+  };
+
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
       <div className="mb-10">
@@ -118,10 +123,12 @@ const Confirmation = () => {
         {locationResponses.map((location, index) => (
           <div key={index} className="bg-purple-light rounded-xl p-4">
             <h3 className="text-lg font-semibold mb-2">{location.name}</h3>
-            <div className="flex items-start mb-3">
-              <Avatar initial="C" size="sm" position="third" className="mr-2 flex-shrink-0" />
-              <p className="text-gray-700 text-sm">{location.note}</p>
-            </div>
+            {!isAbbySuggestion(location) && (
+              <div className="flex items-start mb-3">
+                <Avatar initial="C" size="sm" position="third" className="mr-2 flex-shrink-0" />
+                <p className="text-gray-700 text-sm">{location.note}</p>
+              </div>
+            )}
             <div className="flex items-start">
               <Avatar initial="A" size="sm" position="first" className="mr-2 flex-shrink-0" />
               <p className="text-gray-700 text-sm">{location.userNote}</p>

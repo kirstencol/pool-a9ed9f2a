@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -69,7 +68,7 @@ const AbbyLocationResponse = () => {
       if (hasCustomSelection && customLocation) {
         finalLocations.push({
           name: customLocation.name,
-          note: "Your suggestion",
+          note: "Your suggestion", // This is the key identifier we'll use in the Confirmation page
           selected: true,
           userNote: customLocation.note || ""
         });
