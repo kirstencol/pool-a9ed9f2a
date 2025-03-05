@@ -42,14 +42,27 @@ const AbbyLocationResponse = () => {
   const [hasDifferentIdea, setHasDifferentIdea] = useState(false);
   const [differentIdeaText, setDifferentIdeaText] = useState("");
   const [differentIdeaName, setDifferentIdeaName] = useState("");
+  const [differentIdeaSelected, setDifferentIdeaSelected] = useState(false);
   
   const handleSelectLocation = (index: number) => {
     const updatedLocations = [...locations];
     updatedLocations[index].selected = !updatedLocations[index].selected;
     setLocations(updatedLocations);
     
-    if (hasDifferentIdea) {
-      setHasDifferentIdea(false);
+    // Count total selected options including user's custom idea
+    const totalSelected = updatedLocations.filter(loc => loc.selected).length + 
+                         (differentIdeaSelected ? 1 : 0);
+    
+    // If we're trying to select more than 3 options, show a toast
+    if (totalSelected > 3) {
+      toast({
+        title: "Maximum selections reached",
+        description: "Please select a maximum of 3 locations",
+        variant: "destructive"
+      });
+      // Revert selection
+      updatedLocations[index].selected = !updatedLocations[index].selected;
+      setLocations(updatedLocations);
     }
   };
   
@@ -60,25 +73,52 @@ const AbbyLocationResponse = () => {
   };
   
   const handleDifferentIdea = () => {
-    // Deselect all locations when suggesting a different idea
-    setLocations(locations.map(loc => ({ ...loc, selected: false })));
     setHasDifferentIdea(true);
+  };
+  
+  const toggleDifferentIdeaSelection = () => {
+    // Count total selected options from regular locations
+    const totalSelected = locations.filter(loc => loc.selected).length;
+    
+    if (!differentIdeaSelected && totalSelected >= 3) {
+      toast({
+        title: "Maximum selections reached",
+        description: "Please select a maximum of 3 locations",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setDifferentIdeaSelected(!differentIdeaSelected);
   };
   
   const handleSubmit = () => {
     const selectedLocations = locations.filter(loc => loc.selected);
+    const hasCustomSelection = hasDifferentIdea && differentIdeaName && differentIdeaSelected;
     
-    if (selectedLocations.length > 0) {
-      const locationNames = selectedLocations.map(loc => loc.name).join(", ");
+    if (selectedLocations.length > 0 || hasCustomSelection) {
+      let description = "";
+      
+      if (selectedLocations.length > 0) {
+        const locationNames = selectedLocations.map(loc => loc.name).join(", ");
+        description = `You selected: ${locationNames}`;
+      }
+      
+      if (hasCustomSelection) {
+        if (description) {
+          description += ` and your suggestion: ${differentIdeaName}`;
+        } else {
+          description = `You suggested: ${differentIdeaName}`;
+        }
+        
+        if (differentIdeaText) {
+          description += ` - ${differentIdeaText}`;
+        }
+      }
+      
       toast({
         title: "Response submitted!",
-        description: `You selected: ${locationNames}`
-      });
-      navigate("/confirmation");
-    } else if (hasDifferentIdea && differentIdeaName) {
-      toast({
-        title: "Response submitted!",
-        description: `You suggested: ${differentIdeaName} - ${differentIdeaText}`
+        description
       });
       navigate("/confirmation");
     } else {
@@ -102,7 +142,7 @@ const AbbyLocationResponse = () => {
         <p className="text-gray-700">{date} from {timeRange}</p>
       </div>
       
-      <p className="mb-4 text-gray-700">Carrie suggests these spots. Which work for you?</p>
+      <p className="mb-4 text-gray-700">Carrie suggests these spots. Which work for you? <span className="text-sm text-gray-500">(Select up to 3)</span></p>
       
       <div className="space-y-4 mb-6">
         {locations.map((loc, index) => (
@@ -128,7 +168,8 @@ const AbbyLocationResponse = () => {
       </div>
       
       {hasDifferentIdea ? (
-        <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4 animate-fade-in">
+        <div className={`mb-6 bg-white rounded-lg border ${differentIdeaSelected ? "border-purple" : "border-gray-200"} p-4 animate-fade-in`}
+             onClick={toggleDifferentIdeaSelection}>
           <div className="flex items-center gap-2 mb-3">
             <MapPin size={18} className="text-gray-400" />
             <input
@@ -137,6 +178,7 @@ const AbbyLocationResponse = () => {
               onChange={(e) => setDifferentIdeaName(e.target.value)}
               placeholder="Enter place name"
               className="w-full border-none focus:outline-none focus:ring-0 p-0"
+              onClick={(e) => e.stopPropagation()}
             />
           </div>
           <textarea
@@ -145,6 +187,7 @@ const AbbyLocationResponse = () => {
             placeholder="Add a note (optional)"
             className="w-full text-sm text-gray-500 border-none focus:outline-none focus:ring-0 resize-none p-0"
             rows={2}
+            onClick={(e) => e.stopPropagation()}
           />
         </div>
       ) : (
