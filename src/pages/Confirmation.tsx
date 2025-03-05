@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
-import { TimeSlot } from "@/types";
+import { TimeSlot, UserResponse } from "@/types";
 import { 
   ConfirmationHeader, 
   OverlappingTimeSlots, 
@@ -76,10 +76,10 @@ const Confirmation = () => {
   // Calculate overlapping availability for each time slot
   const overlappingTimeSlots = calculateOverlappingTimeSlots(timeSlotsWithResponses);
 
-  // Format names for display
-  const responderNames = [...new Set(timeSlotsWithResponses.flatMap((slot: TimeSlot) => 
-    slot.responses?.map((r: any) => r.responderName as string) || []
-  ))];
+  // Format names for display - fixing the type issue here
+  const responderNames: string[] = [...new Set(timeSlotsWithResponses.flatMap((slot: TimeSlot) => 
+    (slot.responses || []).map((r: UserResponse) => r.responderName || "")
+  ))].filter(Boolean) as string[];
   
   // Display names without the friend labels
   const displayNames = [
