@@ -111,8 +111,7 @@ const TimeSlotSelection: React.FC<TimeSlotSelectionProps> = ({
           onClick={onSubmit} 
           className="w-full mt-4 flex items-center justify-center"
         >
-          Confirm times
-          <ArrowRight className="ml-2" size={20} />
+          <ArrowRight className="w-5 h-5" />
         </Button>
       )}
     </div>
