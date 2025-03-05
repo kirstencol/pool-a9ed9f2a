@@ -69,6 +69,17 @@ export const useResponseSubmitter = ({
         startTime: selection.startTime,
         endTime: selection.endTime
       });
+      
+      // Also add the response to the specific time slot
+      const timeSlot = meetingData.timeSlots?.find((ts: any) => ts.id === selection.slot.id);
+      if (timeSlot) {
+        timeSlot.responses = timeSlot.responses || [];
+        timeSlot.responses.push({
+          name: responderName,
+          startTime: selection.startTime,
+          endTime: selection.endTime
+        });
+      }
     });
     
     // Update the meeting data with the new responses
@@ -84,8 +95,8 @@ export const useResponseSubmitter = ({
       variant: "default"
     });
     
-    // Navigate to confirmation page
-    navigate("/confirmation");
+    // Navigate to confirmation page with the invite ID
+    navigate(`/confirmation?id=${inviteId}`);
   }, [selectedTimeSlots, responderName, inviteId, navigate, toast, storeMeetingInStorage, loadMeetingFromStorage]);
 
   const handleCantMakeIt = useCallback((e?: React.MouseEvent) => {
@@ -101,7 +112,7 @@ export const useResponseSubmitter = ({
     });
     
     // Navigate to cannot-make-it page
-    navigate("/cannot-make-it");
+    navigate("/confirmation");
   }, [responderName, navigate, toast]);
 
   return {

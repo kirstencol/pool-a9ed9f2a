@@ -12,6 +12,7 @@ const Welcome = lazy(() => import("./pages/Welcome"));
 const ProposeTime = lazy(() => import("./pages/ProposeTime"));
 const TimeConfirmation = lazy(() => import("./pages/TimeConfirmation"));
 const RespondToInvite = lazy(() => import("./pages/RespondToInvite"));
+const Confirmation = lazy(() => import("./pages/Confirmation"));
 const SelectLocation = lazy(() => import("./pages/SelectLocation"));
 const LocationConfirmation = lazy(() => import("./pages/LocationConfirmation"));
 const FinalConfirmation = lazy(() => import("./pages/FinalConfirmation"));
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="/propose-time" element={<ProposeTime />} />
               <Route path="/time-confirmation" element={<TimeConfirmation />} />
               <Route path="/respond/:inviteId" element={<RespondToInvite />} />
+              <Route path="/confirmation" element={<Confirmation />} />
               {/* Add a redirect for the broken "respond" route with no ID */}
               <Route path="/respond" element={<Navigate to="/" replace />} />
               <Route path="/select-location" element={<SelectLocation />} />
