@@ -44,7 +44,7 @@ const App = () => (
               <Route path="/select-user" element={<SelectUser />} />
               <Route path="/respond/:inviteId" element={<RespondToInvite />} />
               <Route path="/confirmation" element={<Confirmation />} />
-              {/* Add a redirect for the broken "respond" route with no ID */}
+              {/* Redirect direct respond routes to the select-user page first */}
               <Route path="/respond" element={<Navigate to="/select-user" replace />} />
               <Route path="/select-location" element={<SelectLocation />} />
               <Route path="/location-confirmation" element={<LocationConfirmation />} />

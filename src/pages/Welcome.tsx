@@ -39,15 +39,15 @@ const Welcome = () => {
   const goToRespondAsFriend = () => {
     // Make sure demo data is initialized before navigating
     initializeDemoData();
-    console.log("Navigating to Friend Response Flow: /respond/demo_invite");
-    navigate("/respond/demo_invite");
+    console.log("Navigating to Friend Selection Screen: /select-user?id=demo_invite");
+    navigate("/select-user?id=demo_invite");
   };
 
   const goToRespondAsBurt = () => {
     // Make sure demo data is initialized before navigating
     initializeDemoData();
-    console.log("Navigating to Burt Response Flow: /respond/burt_demo");
-    navigate("/respond/burt_demo");
+    console.log("Navigating to Burt Selection Screen: /select-user?id=burt_demo");
+    navigate("/select-user?id=burt_demo");
   };
 
   return (
