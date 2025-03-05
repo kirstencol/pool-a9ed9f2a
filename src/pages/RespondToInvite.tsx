@@ -1,102 +1,90 @@
-
+// src/pages/RespondToInvite.tsx
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
-import { useInviteData } from "@/hooks/useInviteData";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import InvitationHeader from "@/components/respond/InvitationHeader";
 import ResponseForm from "@/components/respond/ResponseForm";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
-import { initializeDemoData } from "@/context/meeting/storage";
 import Loading from "@/components/Loading";
+import { initializeDemoData, getDemoMeetingId } from "@/utils/demo-data";
 
 const RespondToInvite = () => {
   const navigate = useNavigate();
   const { inviteId: rawInviteId } = useParams();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const userName = searchParams.get('name') || ""; // Get the selected user name
+  const userName = searchParams.get('name') || ""; 
   const currentUserFromStorage = localStorage.getItem('currentUser');
   
-  const inviteId = rawInviteId || "demo_invite"; // Fallback to demo_invite if no ID provided
-  const { timeSlots: contextTimeSlots } = useMeeting();
-  const initialLoadComplete = useRef(false);
-  const [forcedError, setForcedError] = useState<'invalid' | null>(null);
-  
-  // Initialize demo data on component mount
+  const { loadMeetingFromStorage, timeSlots, isLoading, error } = useMeeting();
+  const [responderName, setResponderName] = useState<string>("");
+  const [creatorName, setCreatorName] = useState<string>("");
+  const [loadingState, setLoadingState] = useState<'loading'|'loaded'|'error'>('loading');
+  const [meetingId, setMeetingId] = useState<string>("");
+
+  // Initialize data and load meeting
   useEffect(() => {
-    if (!initialLoadComplete.current) {
-      // This ensures demo data is available immediately when component loads
-      initializeDemoData();
-      console.log("RespondToInvite - Initialized demo data on mount");
-      initialLoadComplete.current = true;
+    const initData = async () => {
+      // First ensure demo data exists in Supabase
+      await initializeDemoData();
+      
+      // Process the invite ID
+      const inviteId = rawInviteId || "demo_invite";
+      
+      // For demo scenarios, translate the link ID to an actual meeting ID
+      if (inviteId === "demo_invite" || inviteId === "burt_demo" || inviteId === "carrie_demo") {
+        const demoId = await getDemoMeetingId(inviteId);
+        if (demoId) {
+          setMeetingId(demoId);
+        } else {
+          setLoadingState('error');
+          return;
+        }
+      } else {
+        // For real invites, use the ID directly
+        setMeetingId(inviteId);
+      }
       
       // Only redirect Carrie to CarrieFlow, not Burt
       const effectiveUserName = userName || currentUserFromStorage;
       if (effectiveUserName === "Carrie") {
-        console.log("RespondToInvite - Redirecting Carrie to CarrieFlow");
         navigate(`/carrie-flow?id=${inviteId}`, { replace: true });
+        return;
       }
-    }
-  }, [navigate, inviteId, userName, currentUserFromStorage]);
-  
-  // Add a safety timeout to prevent infinite loading
-  useEffect(() => {
-    const safetyTimer = setTimeout(() => {
-      console.log("RespondToInvite - Safety timeout reached, forcing error state");
-      setForcedError('invalid');
-    }, 10000); // Extended to 10 seconds to avoid premature errors
-    
-    return () => {
-      clearTimeout(safetyTimer);
+      
+      // Load the meeting data
+      try {
+        const meeting = await loadMeetingFromStorage(meetingId || inviteId);
+        if (!meeting) {
+          setLoadingState('error');
+          return;
+        }
+        
+        // Set creator and responder names
+        setCreatorName(meeting.creator?.name || "Abby");
+        setResponderName(userName || currentUserFromStorage || "Burt");
+        setLoadingState('loaded');
+      } catch (err) {
+        console.error("Error loading meeting:", err);
+        setLoadingState('error');
+      }
     };
-  }, []);
-  
-  console.log("RespondToInvite - Received inviteId param:", rawInviteId);
-  console.log("RespondToInvite - Selected user name:", userName);
-  console.log("RespondToInvite - Using inviteId:", inviteId);
-  console.log("RespondToInvite - Initial contextTimeSlots:", contextTimeSlots);
-  
-  const {
-    isLoading,
-    inviteError,
-    creatorName,
-    responderName,
-    inviteTimeSlots
-  } = useInviteData(inviteId, userName); // Pass the userName to the hook
+    
+    initData();
+  }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate]);
 
-  // Only redirect Carrie, not Burt
-  useEffect(() => {
-    const effectiveUserName = userName || currentUserFromStorage;
-    if (effectiveUserName === "Carrie" && !isLoading) {
-      console.log("RespondToInvite - Redirecting Carrie to CarrieFlow after loading");
-      navigate(`/carrie-flow?id=${inviteId}`, { replace: true });
-    }
-  }, [isLoading, userName, navigate, inviteId, currentUserFromStorage]);
-
-  // Handle loading state with better feedback
-  if (isLoading && !forcedError) {
-    console.log("RespondToInvite - Still loading...");
+  // Show loading state
+  if (loadingState === 'loading' || isLoading) {
     return <Loading message="Loading invitation..." subtitle="Please wait while we prepare your time options" />;
   }
 
-  // Only show error if BOTH inviteError is set AND we don't have time slots
-  // This prevents flashing an error when we actually have valid data
-  if ((inviteError || forcedError) && (!inviteTimeSlots || inviteTimeSlots.length === 0)) {
-    const errorReason = inviteError || forcedError;
-    console.log("RespondToInvite - Error:", errorReason);
-    return <InvalidInvitation reason={errorReason} />;
+  // Show error state
+  if (loadingState === 'error' || error || !meetingId) {
+    return <InvalidInvitation reason="invalid" />;
   }
 
-  // Make sure we have time slots loaded - checking our local copy from the hook
-  console.log("RespondToInvite - Checking inviteTimeSlots:", { 
-    inviteTimeSlots, 
-    inviteTimeSlotsLength: inviteTimeSlots?.length || 0
-  });
-  
-  // Let's try to continue with any data we have
-  // Only show error if we truly have no data at all
-  if (!inviteTimeSlots || inviteTimeSlots.length === 0) {
-    console.log("RespondToInvite - No inviteTimeSlots found for invite:", inviteId);
+  // Make sure we have time slots loaded
+  if (!timeSlots || timeSlots.length === 0) {
     return <InvalidInvitation reason="invalid" />;
   }
 
@@ -104,13 +92,13 @@ const RespondToInvite = () => {
     <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
       <InvitationHeader 
         creatorName={creatorName} 
-        responderName={userName || responderName} 
+        responderName={responderName} 
       />
 
       <ResponseForm
         creatorName={creatorName}
-        responderName={userName || responderName}
-        inviteId={inviteId}
+        responderName={responderName}
+        inviteId={meetingId}
       />
     </div>
   );
