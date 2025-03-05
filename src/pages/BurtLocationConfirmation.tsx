@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -13,7 +12,6 @@ const BurtLocationConfirmation = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Demo data for Carrie's location suggestions with Abby's comments
   const initialLocations: LocationWithComments[] = [
     { 
       name: "Central Cafe", 
@@ -33,10 +31,9 @@ const BurtLocationConfirmation = () => {
   
   const locationSelection = useLocationSelection({ 
     initialLocations,
-    maxSelections: 1 // Ensure only one location can be selected
+    maxSelections: 1
   });
   
-  // Updated date and time for the demo
   const date = "Saturday, March 2nd";
   const timeRange = "8:00 a.m. to 9:00 a.m.";
   
@@ -68,21 +65,18 @@ const BurtLocationConfirmation = () => {
         description
       });
       
-      // Prepare the final selected locations to pass to the confirmation page
       const finalLocations: LocationWithComments[] = [...selectedLocations] as LocationWithComments[];
       
-      // Add the custom location if it was selected
       if (hasCustomSelection && customLocation) {
         finalLocations.push({
           name: customLocation.name,
-          note: "Your suggestion", // This is the key identifier we'll use in the Confirmation page
-          abbyComment: "", // Explicitly add empty abbyComment to satisfy the LocationWithComments type
+          note: "Your suggestion",
+          abbyComment: "",
           selected: true,
           userNote: customLocation.note || ""
         });
       }
       
-      // Navigate to confirmation page with the selected locations in state
       navigate("/burt-confirmed", { 
         state: { selectedLocations: finalLocations }
       });
@@ -139,7 +133,8 @@ const BurtLocationConfirmation = () => {
       
       <Button
         onClick={handleSubmit}
-        className="w-full bg-purple-light hover:bg-purple-light/90 text-purple-700 flex justify-center items-center"
+        variant="purpleOutline"
+        className="flex justify-center items-center"
       >
         Works for me! <ArrowRight size={16} className="ml-1" />
       </Button>

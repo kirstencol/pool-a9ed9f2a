@@ -85,13 +85,14 @@ const CarrieConfirmation = () => {
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
-      <button 
+      <Button 
         onClick={() => navigate(-1)}
-        className="flex items-center text-gray-500 mb-6"
+        variant="ghost"
+        className="text-gray-500 mb-6 p-0 h-auto"
       >
         <ArrowLeft size={16} className="mr-1" />
         Back
-      </button>
+      </Button>
 
       <div className="flex justify-center mb-4">
         <Avatar initial="C" size="lg" position="third" />
@@ -120,8 +121,8 @@ const CarrieConfirmation = () => {
       </div>
 
       <Button
-        variant="default"
-        className="w-full flex items-center justify-center bg-purple-600 hover:bg-purple-700"
+        variant="primary"
+        className="w-full flex items-center justify-center"
         onClick={handleCopyLink}
       >
         {copied ? (

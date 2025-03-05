@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Avatar from "@/components/Avatar";
@@ -160,7 +159,7 @@ const SelectUser = () => {
       </div>
       
       <Button 
-        className="action-button"
+        variant="primary"
         onClick={handleContinue}
         disabled={!selectedUser}
       >

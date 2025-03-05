@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Check, Copy, Link, ChevronLeft } from "lucide-react";
@@ -29,12 +28,10 @@ const Confirmation = () => {
       if (data) {
         setMeetingData(data);
         
-        // Get location data from state if available (when coming from AbbyLocationResponse)
         const stateLocations = location.state?.selectedLocations;
         if (stateLocations && Array.isArray(stateLocations)) {
           setLocationResponses(stateLocations);
         } else {
-          // Fallback to demo data if no state was passed
           setLocationResponses([
             { 
               name: "Central Cafe", 
@@ -51,7 +48,6 @@ const Confirmation = () => {
           ]);
         }
         
-        // Simulate loading state
         setTimeout(() => {
           setIsLoading(false);
         }, 1000);
@@ -105,7 +101,6 @@ const Confirmation = () => {
     );
   }
 
-  // Helper function to determine if a location was suggested by Abby
   const isAbbySuggestion = (location: LocationWithNote) => {
     return location.note === "Your suggestion";
   };
@@ -139,20 +134,22 @@ const Confirmation = () => {
       
       <p className="mb-4 text-center text-gray-700 font-medium">Does Burt need a nudge?</p>
       
-      <button
+      <Button
         onClick={copyLink}
-        className="w-full py-4 bg-purple-light text-purple-700 rounded-xl flex items-center justify-center mb-8"
+        variant="purpleOutline"
+        className="w-full py-4 mb-8 flex items-center justify-center"
       >
         Copy link <Copy className="ml-2 w-5 h-5" />
-      </button>
+      </Button>
       
-      <button
+      <Button
         onClick={handleGoBack}
-        className="flex items-center justify-center text-gray-500 hover:text-gray-700 transition-colors mx-auto"
+        variant="ghost"
+        className="flex mx-auto items-center justify-center text-gray-500 hover:text-gray-700 h-auto p-0"
       >
         <ChevronLeft className="w-4 h-4 mr-1" />
         <span>Go back</span>
-      </button>
+      </Button>
     </div>
   );
 };

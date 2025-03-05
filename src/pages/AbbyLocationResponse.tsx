@@ -131,7 +131,8 @@ const AbbyLocationResponse = () => {
       
       <Button
         onClick={handleSubmit}
-        className="w-full bg-purple-light hover:bg-purple-light/90 text-purple-700 flex justify-center items-center"
+        variant="purpleOutline"
+        className="flex justify-center items-center"
       >
         These work for me! <ArrowRight size={16} className="ml-1" />
       </Button>

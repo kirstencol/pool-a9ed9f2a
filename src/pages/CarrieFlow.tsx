@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useInviteData } from "@/hooks/useInviteData";
@@ -23,7 +22,6 @@ const CarrieFlow = () => {
   const [selectedEndTime, setSelectedEndTime] = useState("");
   const { setCurrentUser } = useMeeting();
 
-  // Set Carrie as the current user when component mounts
   useEffect(() => {
     setCurrentUser({
       id: "carrie-id",
@@ -31,7 +29,6 @@ const CarrieFlow = () => {
       initial: "C"
     });
     
-    // Store that we're in Carrie's flow
     localStorage.setItem('currentUser', 'Carrie');
     console.log("CarrieFlow - Set current user to Carrie");
   }, [setCurrentUser]);
@@ -49,7 +46,6 @@ const CarrieFlow = () => {
 
   const handleContinue = () => {
     if (selectedTimeSlot && selectedStartTime && selectedEndTime) {
-      // Add a toast to confirm the selection
       toast({
         title: "Time selected!",
         description: "Moving to time confirmation"
@@ -62,7 +58,6 @@ const CarrieFlow = () => {
         endTime: selectedEndTime
       });
       
-      // Navigate directly to CarrieTimeConfirmation
       navigate(`/carrie-time-confirmation?id=${inviteId}&date=${selectedTimeSlot.date}&startTime=${selectedStartTime}&endTime=${selectedEndTime}`);
     }
   };
@@ -73,7 +68,6 @@ const CarrieFlow = () => {
       description: "We'll let Abby and Burt know you can't make these times."
     });
     
-    // Navigate back to the selection screen
     navigate('/');
   };
 
@@ -87,13 +81,14 @@ const CarrieFlow = () => {
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
-      <button 
+      <Button 
         onClick={() => navigate(-1)}
-        className="flex items-center text-gray-500 mb-6"
+        variant="ghost"
+        className="text-gray-500 mb-6 p-0 h-auto"
       >
         <ArrowLeft size={16} className="mr-1" />
         Back
-      </button>
+      </Button>
 
       <div className="flex items-center mb-6">
         <Avatar initial="C" position="third" className="mr-3" />
@@ -107,14 +102,12 @@ const CarrieFlow = () => {
               key={slot.id}
               timeSlot={{
                 ...slot,
-                // Override the creator display name explicitly
                 creatorDisplayName: "Abby and Burt"
               }}
               selectedByUser={selectedTimeSlot?.id === slot.id}
               showTimeSelector={selectedTimeSlot?.id === slot.id}
               onSelectTime={handleTimeChange}
               creatorAvailable={true}
-              // Set this explicitly to ensure it's used if creatorDisplayName is not processed
               creatorName="Abby and Burt"
               onClick={() => handleSelectTimeSlot(slot)}
               customTimeSelectorText="You get to pick the final time!"
@@ -136,13 +129,14 @@ const CarrieFlow = () => {
       )}
 
       <div className="mt-6 text-center">
-        <button 
+        <Button 
           onClick={handleCannotMakeIt}
-          className="text-gray-500 text-sm flex items-center justify-center mx-auto hover:text-gray-700 transition-colors"
+          variant="ghost"
+          className="text-gray-500 text-sm flex items-center justify-center mx-auto p-0 h-auto hover:text-gray-700 transition-colors"
         >
           <CalendarX size={14} className="mr-1" />
           I can't make any of these days
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -29,7 +28,6 @@ const CarrieSelectLocation = () => {
   
   const MAX_LOCATIONS = 3;
 
-  // Format the date for display
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
     
@@ -142,8 +140,8 @@ const CarrieSelectLocation = () => {
 
       <Button 
         onClick={handleSendSuggestions}
-        className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center gap-2"
         variant="secondary"
+        className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center gap-2"
       >
         <ArrowRight size={16} />
       </Button>
