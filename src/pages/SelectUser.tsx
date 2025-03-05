@@ -38,9 +38,10 @@ const SelectUser = () => {
   const { toast } = useToast();
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   
-  // Get the inviteId from the URL if present
+  // Get the inviteId and flow type from the URL if present
   const searchParams = new URLSearchParams(location.search);
   const inviteId = searchParams.get('id');
+  const flowType = searchParams.get('flow');
   
   const handleContinue = () => {
     if (!selectedUser) {
@@ -54,6 +55,12 @@ const SelectUser = () => {
     
     // Store the selected user in localStorage
     localStorage.setItem('currentUser', selectedUser);
+    
+    // Special case for the Abby location response flow
+    if (flowType === 'abby-location-response') {
+      navigate('/abby-location-response');
+      return;
+    }
     
     // For Carrie, navigate directly to CarrieFlow
     if (selectedUser === "Carrie") {
