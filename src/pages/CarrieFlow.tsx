@@ -28,6 +28,9 @@ const CarrieFlow = () => {
       name: "Carrie",
       initial: "C"
     });
+    
+    // Store that we're in Carrie's flow
+    localStorage.setItem('currentUser', 'Carrie');
   }, [setCurrentUser]);
 
   const handleSelectTimeSlot = (slot: TimeSlot) => {
@@ -43,7 +46,7 @@ const CarrieFlow = () => {
 
   const handleContinue = () => {
     if (selectedTimeSlot && selectedStartTime && selectedEndTime) {
-      // Navigate directly to the CarrieTimeConfirmation page
+      // Navigate directly to the CarrieTimeConfirmation page with clear parameters
       navigate(`/carrie-time-confirmation?id=${inviteId}&startTime=${selectedStartTime}&endTime=${selectedEndTime}&date=${selectedTimeSlot.date}`);
     }
   };

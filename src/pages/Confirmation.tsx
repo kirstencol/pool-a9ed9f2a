@@ -26,8 +26,14 @@ const Confirmation = () => {
     const date = searchParams.get('date');
     
     // Check if this is coming from Carrie's flow - if so, redirect to her confirmation page
-    if (searchParams.get('fromCarrie') === 'true' || searchParams.has('fromCarrie')) {
-      navigate(`/carrie-time-confirmation?id=${inviteId}&startTime=${startTime}&endTime=${endTime}&date=${date}`);
+    // Using a stronger check to detect if we're coming from Carrie's flow
+    const fromCarrie = searchParams.has('fromCarrie') || 
+                      location.pathname.includes('carrie') || 
+                      localStorage.getItem('currentUser') === 'Carrie';
+    
+    if (fromCarrie) {
+      console.log("Redirecting to Carrie's confirmation page");
+      navigate(`/carrie-time-confirmation?id=${inviteId}&startTime=${startTime}&endTime=${endTime}&date=${date}`, { replace: true });
       return;
     }
     

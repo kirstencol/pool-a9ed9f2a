@@ -2,16 +2,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMeeting } from "@/context/meeting";
-import TimeSelector from "@/components/TimeSelector";
-import { format } from "date-fns";
+import { useInviteData } from "@/hooks/useInviteData";
 
 const CarrieTimeConfirmation = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { currentUser } = useMeeting();
+  
   const searchParams = new URLSearchParams(location.search);
   
   const inviteId = searchParams.get("id") || "carrie_demo";
@@ -19,48 +20,37 @@ const CarrieTimeConfirmation = () => {
   const startTime = searchParams.get("startTime") || "";
   const endTime = searchParams.get("endTime") || "";
   
-  const [selectedStartTime, setSelectedStartTime] = useState(startTime);
-  const [selectedEndTime, setSelectedEndTime] = useState(endTime);
+  // Use the same hook to get invite data
+  const { creatorName, responderName, inviteTimeSlots, isLoading } = useInviteData(inviteId, "Carrie");
   
-  const { currentUser } = useMeeting();
+  // For duration selection
+  const [meetingDuration, setMeetingDuration] = useState("60"); // Default 60 minutes
+  const [adjustedStartTime, setAdjustedStartTime] = useState(startTime);
+  const [adjustedEndTime, setAdjustedEndTime] = useState(endTime);
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "";
-    
-    const dateParts = dateString.split('-');
-    if (dateParts.length !== 3) return dateString;
-    
-    const year = parseInt(dateParts[0]);
-    const month = parseInt(dateParts[1]) - 1;
-    const day = parseInt(dateParts[2]);
-    
-    try {
-      const date = new Date(year, month, day);
-      return format(date, "EEEE, MMMM d");
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return dateString;
-    }
+  useEffect(() => {
+    // Initialize with passed times
+    setAdjustedStartTime(startTime);
+    setAdjustedEndTime(endTime);
+  }, [startTime, endTime]);
+
+  const handleTimeChange = (start: string, end: string) => {
+    setAdjustedStartTime(start);
+    setAdjustedEndTime(end);
   };
 
   const handleContinue = () => {
-    if (selectedStartTime && selectedEndTime) {
-      navigate(`/carrie-select-location?id=${inviteId}&date=${date}&startTime=${selectedStartTime}&endTime=${selectedEndTime}`);
-    } else {
-      toast({
-        title: "Please select a time",
-        variant: "destructive"
-      });
-    }
+    toast({
+      title: "Time selected!",
+      description: "Moving on to location selection"
+    });
+    
+    navigate(`/carrie-select-location?id=${inviteId}&date=${date}&startTime=${adjustedStartTime}&endTime=${adjustedEndTime}`);
   };
 
-  const handleStartTimeChange = (newTime: string) => {
-    setSelectedStartTime(newTime);
-  };
-
-  const handleEndTimeChange = (newTime: string) => {
-    setSelectedEndTime(newTime);
-  };
+  if (isLoading) {
+    return <div className="p-6">Loading...</div>;
+  }
 
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
@@ -72,32 +62,45 @@ const CarrieTimeConfirmation = () => {
         Back
       </button>
 
-      <h1 className="text-2xl font-semibold mb-2">Good news! This day works for everyone.</h1>
-      <p className="text-gray-600 mb-6">Confirm the time:</p>
+      <h1 className="text-2xl font-semibold mb-2">Good news!</h1>
+      <p className="text-gray-600 mb-6">This day works for everyone!</p>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
-        <h2 className="font-medium text-lg mb-1">{formatDate(date)}</h2>
-        <p className="text-gray-700 mb-4">Everyone's free {startTime} - {endTime}</p>
-        
-        <div className="bg-purple-50 rounded-lg p-4">
-          <p className="text-sm text-center text-gray-700 mb-3">Adjust the time if needed:</p>
-          <div className="flex justify-center space-x-4 items-center">
-            <TimeSelector 
-              time={selectedStartTime} 
-              onTimeChange={handleStartTimeChange}
-            />
-            <span className="text-gray-500">to</span>
-            <TimeSelector 
-              time={selectedEndTime} 
-              onTimeChange={handleEndTimeChange}
-              isEndTime={true}
-              startTime={selectedStartTime}
-            />
+      <div className="bg-purple-50 rounded-lg p-6 mb-8 border border-purple-100">
+        <div className="space-y-3">
+          <div>
+            <p className="text-sm text-gray-500">Date</p>
+            <p className="font-medium">{date}</p>
+          </div>
+          
+          <div>
+            <p className="text-sm text-gray-500">Time</p>
+            <p className="font-medium">{adjustedStartTime} - {adjustedEndTime}</p>
+          </div>
+          
+          <div>
+            <p className="text-sm text-gray-500">Attendees</p>
+            <p className="font-medium">Abby, Burt, and {responderName}</p>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="mb-6">
+        <h2 className="font-medium mb-3">Meeting duration:</h2>
+        <div className="flex space-x-2">
+          {["30", "45", "60", "90"].map((duration) => (
+            <Button
+              key={duration}
+              variant={meetingDuration === duration ? "default" : "outline"}
+              onClick={() => setMeetingDuration(duration)}
+              className="flex-1"
+            >
+              {duration} min
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-end mt-8">
         <Button 
           onClick={handleContinue}
           className="flex items-center"
