@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Check, Sparkles, Copy, Link, ChevronLeft } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
 import { Button } from "@/components/ui/button";
@@ -25,15 +25,24 @@ const Confirmation = () => {
     const inviteId = searchParams.get('id') || 'demo_invite';
     
     if (inviteId) {
-      const data = loadMeetingFromStorage(inviteId);
-      if (data) {
-        setMeetingData(data);
-        setCreatorName(data.creator?.name || "Abby");
-      }
+      const fetchMeetingData = async () => {
+        try {
+          const data = await loadMeetingFromStorage(inviteId);
+          if (data) {
+            setMeetingData(data);
+            setCreatorName(data.creator?.name || "Abby");
+          }
+          
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 500);
+        } catch (error) {
+          console.error("Error loading meeting data:", error);
+          setIsLoading(false);
+        }
+      };
       
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
+      fetchMeetingData();
     }
   }, [location, loadMeetingFromStorage]);
 
