@@ -43,7 +43,7 @@ const CarrieFlow = () => {
 
   const handleContinue = () => {
     if (selectedTimeSlot && selectedStartTime && selectedEndTime) {
-      // Navigate to the time confirmation page first
+      // Navigate directly to the CarrieTimeConfirmation page
       navigate(`/carrie-time-confirmation?id=${inviteId}&startTime=${selectedStartTime}&endTime=${selectedEndTime}&date=${selectedTimeSlot.date}`);
     }
   };
