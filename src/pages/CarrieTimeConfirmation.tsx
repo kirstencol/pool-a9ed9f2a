@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -92,14 +91,13 @@ const CarrieTimeConfirmation = () => {
 
       <h1 className="text-2xl font-semibold mb-6">It's Happening!</h1>
       <p className="text-gray-600 mb-6">
-        Abby, Burt, and Carrie are getting together on {formattedDate} {adjustedStartTime} to {adjustedEndTime}
+        Abby, Burt, and Carrie are getting together
       </p>
 
       <div className="bg-purple-50 rounded-lg p-6 mb-8 border border-purple-100">
         <div className="space-y-3">
           <p className="font-medium">{formattedDate}</p>
           <p className="font-medium">{adjustedStartTime} - {adjustedEndTime}</p>
-          <p className="font-medium">Abby, Burt, and Carrie</p>
         </div>
       </div>
 
