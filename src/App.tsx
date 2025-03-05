@@ -23,8 +23,6 @@ const CarrieSelectLocation = lazy(() => import("./pages/CarrieSelectLocation"));
 const CarrieConfirmation = lazy(() => import("./pages/CarrieConfirmation"));
 const CarrieTimeConfirmation = lazy(() => import("./pages/CarrieTimeConfirmation"));
 const AbbyLocationResponse = lazy(() => import("./pages/AbbyLocationResponse"));
-const BurtLocationConfirmation = lazy(() => import("./pages/BurtLocationConfirmation"));
-const BurtConfirmed = lazy(() => import("./pages/BurtConfirmed"));
 
 // Create QueryClient outside component to prevent recreation on render
 const queryClient = new QueryClient({
@@ -66,10 +64,6 @@ const App = () => (
               
               {/* Abby's location response flow */}
               <Route path="/abby-location-response" element={<AbbyLocationResponse />} />
-              
-              {/* Burt's location confirmation flow */}
-              <Route path="/burt-location-confirmation" element={<BurtLocationConfirmation />} />
-              <Route path="/burt-confirmed" element={<BurtConfirmed />} />
               
               <Route path="*" element={<NotFound />} />
             </Routes>

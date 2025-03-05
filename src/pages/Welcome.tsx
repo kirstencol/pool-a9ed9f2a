@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -61,13 +62,6 @@ const Welcome = () => {
     initializeDemoData();
     console.log("Navigating to Abby Location Response: /select-user?flow=abby-location-response");
     navigate("/select-user?flow=abby-location-response");
-  };
-
-  const goToBurtLocationConfirmation = () => {
-    // Make sure demo data is initialized before navigating
-    initializeDemoData();
-    console.log("Navigating to Burt Location Confirmation: /select-user?flow=burt-location-confirmation");
-    navigate("/select-user?flow=burt-location-confirmation");
   };
 
   return (
@@ -162,13 +156,6 @@ const Welcome = () => {
                 className="w-full justify-start"
               >
                 Test Abby's Location Response Flow
-              </Button>
-              <Button 
-                onClick={goToBurtLocationConfirmation}
-                variant="outline"
-                className="w-full justify-start"
-              >
-                Test Burt's Location Confirmation Flow
               </Button>
             </div>
           </div>
