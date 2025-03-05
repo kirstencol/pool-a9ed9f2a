@@ -43,15 +43,20 @@ const TimeSelector = memo(({
 
   console.log("TimeSelector render state:", { hour, minute, period, isAtMinTime, isAtMaxTime });
 
-  const handleIncrementClick = useCallback(() => {
+  // Use direct function calls instead of useCallback to ensure events trigger correctly
+  const handleIncrementClick = () => {
     console.log("⬆️ Increment button clicked");
-    if (!isAtMaxTime) handleIncrement();
-  }, [isAtMaxTime, handleIncrement]);
+    if (!isAtMaxTime) {
+      handleIncrement();
+    }
+  };
 
-  const handleDecrementClick = useCallback(() => {
+  const handleDecrementClick = () => {
     console.log("⬇️ Decrement button clicked");
-    if (!isAtMinTime) handleDecrement();
-  }, [isAtMinTime, handleDecrement]);
+    if (!isAtMinTime) {
+      handleDecrement();
+    }
+  };
 
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40">

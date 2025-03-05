@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import { 
   parseTimeString, 
@@ -54,7 +55,7 @@ export const useTimeSelectorState = ({
     return result;
   }, [hour, minute, period, maxTime]);
 
-  // Update state and notify parent
+  // Update state and notify parent - simplified for direct updates
   const updateTimeValues = useCallback((newHour: string, newMinute: string, newPeriod: string) => {
     console.log(`🔄 updateTimeValues called with: ${newHour}:${newMinute} ${newPeriod}`);
     
@@ -84,7 +85,6 @@ export const useTimeSelectorState = ({
       console.log(`Increment result: ${result.hour}:${result.minute} ${result.period}`);
       // Make sure we're definitely calling updateTimeValues
       updateTimeValues(result.hour, result.minute, result.period);
-      console.log(`After updateTimeValues, current state: hour=${hour}, minute=${minute}, period=${period}`);
     } else {
       console.log("Increment returned null - at max limit");
     }
@@ -105,7 +105,6 @@ export const useTimeSelectorState = ({
       console.log(`Decrement result: ${result.hour}:${result.minute} ${result.period}`);
       // Make sure we're definitely calling updateTimeValues
       updateTimeValues(result.hour, result.minute, result.period);
-      console.log(`After updateTimeValues, current state: hour=${hour}, minute=${minute}, period=${period}`);
     } else {
       console.log("Decrement returned null - at min limit");
     }
