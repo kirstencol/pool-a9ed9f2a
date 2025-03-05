@@ -72,7 +72,7 @@ const Confirmation = () => {
 
   // Format names for display
   const responderNames = [...new Set(matchingTimes.flatMap((slot: any) => 
-    slot.responses?.map((r: any) => r.responderName) || []
+    slot.responses?.map((r: any) => r.responderName as string) || []
   ))];
   
   // Add friend labels to names
