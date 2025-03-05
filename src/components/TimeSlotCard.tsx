@@ -108,31 +108,29 @@ const TimeSlotCard = ({
         </button>
       )}
 
-      <div className="mb-2">
-        <div className="font-medium">{formatDate(timeSlot.date)}</div>
+      <div className="mb-4">
+        <div className="text-2xl font-medium">{formatDate(timeSlot.date)}</div>
         {creatorAvailable && (
           <div className={cn(
-            "text-sm",
-            selectedByUser && !showTimeSelector ? "text-purple-700" : "text-gray-600"
+            "text-lg mt-1",
+            selectedByUser && !showTimeSelector ? "text-purple-700" : "text-gray-800"
           )}>
-            {selectedByUser && !showTimeSelector ? 
-              `You and ${creatorName} are free ${startTime} - ${endTime}` :
-              `${creatorName} is free ${timeSlot.startTime} - ${timeSlot.endTime}`}
+            {creatorName} is free {timeSlot.startTime} - {timeSlot.endTime}
           </div>
         )}
       </div>
 
       {showTimeSelector && selectedByUser && (
-        <div className="bg-purple-100 rounded-lg p-4 my-3">
-          <div className="text-center mb-3 font-medium">What time works for you?</div>
-          <div className="flex justify-center space-x-4 items-center">
+        <div className="bg-purple-100 rounded-lg p-6 my-3">
+          <div className="text-center mb-5 text-xl font-medium">What time works for you?</div>
+          <div className="flex justify-center space-x-6 items-center">
             <TimeSelector 
               time={startTime} 
               onTimeChange={handleStartTimeChange}
               minTime={timeSlot.startTime}
               maxTime={timeSlot.endTime}
             />
-            <span className="text-gray-500">to</span>
+            <span className="text-gray-500 text-lg px-2">to</span>
             <TimeSelector 
               time={endTime} 
               onTimeChange={handleEndTimeChange}

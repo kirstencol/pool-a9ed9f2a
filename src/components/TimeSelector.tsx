@@ -1,13 +1,8 @@
 
 import { memo } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { useTimeSelector } from "@/hooks/useTimeSelector";
+import { cn } from "@/lib/utils";
 
 interface TimeSelectorProps {
   time: string;
@@ -30,12 +25,14 @@ const TimeSelector = ({
     hour,
     minute,
     period,
-    validHourOptions,
-    validMinuteOptions,
-    periods,
-    handleHourChange,
-    handleMinuteChange,
-    handlePeriodChange
+    incrementHour,
+    decrementHour,
+    incrementMinute,
+    decrementMinute,
+    isMinHour,
+    isMaxHour,
+    isMinMinute,
+    isMaxMinute
   } = useTimeSelector({
     time,
     onTimeChange,
@@ -46,68 +43,35 @@ const TimeSelector = ({
   });
 
   return (
-    <div className="time-selector-container flex space-x-1">
-      <Select 
-        value={hour} 
-        onValueChange={handleHourChange}
+    <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40">
+      <button 
+        className={cn(
+          "flex items-center justify-center py-2",
+          (isMaxHour && isMaxMinute) ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
+        )}
+        onClick={incrementHour}
+        disabled={isMaxHour && isMaxMinute}
+        aria-label="Increase time"
       >
-        <SelectTrigger className="w-12 px-2 bg-white">
-          <SelectValue placeholder="--" />
-        </SelectTrigger>
-        <SelectContent className="bg-white z-50 min-w-[4rem] shadow-md">
-          {validHourOptions.map((h) => (
-            <SelectItem 
-              key={h} 
-              value={h}
-              className="cursor-pointer hover:bg-gray-100"
-            >
-              {h}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select 
-        value={minute} 
-        onValueChange={handleMinuteChange}
-        disabled={hour === "--"}
+        <ChevronUp size={24} />
+      </button>
+      
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <div className="text-4xl font-medium">{hour}:{minute}</div>
+        <div className="text-gray-500 mt-1">{period}</div>
+      </div>
+      
+      <button 
+        className={cn(
+          "flex items-center justify-center py-2",
+          (isMinHour && isMinMinute) ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
+        )}
+        onClick={decrementHour}
+        disabled={isMinHour && isMinMinute}
+        aria-label="Decrease time"
       >
-        <SelectTrigger className="w-14 px-2 bg-white">
-          <SelectValue placeholder="00" />
-        </SelectTrigger>
-        <SelectContent className="bg-white z-50 min-w-[4rem] shadow-md">
-          {validMinuteOptions.map((m) => (
-            <SelectItem 
-              key={m} 
-              value={m}
-              className="cursor-pointer hover:bg-gray-100"
-            >
-              {m}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <Select 
-        value={period} 
-        onValueChange={handlePeriodChange}
-        disabled={hour === "--"}
-      >
-        <SelectTrigger className="w-14 px-2 bg-white">
-          <SelectValue placeholder="--" />
-        </SelectTrigger>
-        <SelectContent className="bg-white z-50 min-w-[4rem] shadow-md">
-          {periods.map((p) => (
-            <SelectItem 
-              key={p} 
-              value={p} 
-              className="cursor-pointer hover:bg-gray-100"
-            >
-              {p}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <ChevronDown size={24} />
+      </button>
     </div>
   );
 };

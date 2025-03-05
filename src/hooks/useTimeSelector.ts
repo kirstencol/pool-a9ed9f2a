@@ -1,6 +1,6 @@
 
-import { useState, useEffect, useMemo } from "react";
-import { parseTimeString, buildTimeString, isTimeWithinBounds } from "@/utils/timeUtils";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { parseTimeString, buildTimeString, isTimeWithinBounds, convertTimeToMinutes } from "@/utils/timeUtils";
 
 interface UseTimeSelectorProps {
   time: string;
@@ -19,10 +19,6 @@ export const useTimeSelector = ({
   minTime = "",
   maxTime = ""
 }: UseTimeSelectorProps) => {
-  const hourOptions = ["--", "12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"];
-  const minuteOptions = ["00", "15", "30", "45"];
-  const periods = ["am", "pm"];
-
   // Parse initial time string into components
   const parsedTime = parseTimeString(time);
   const [hour, setHour] = useState<string>(parsedTime.hour);
@@ -32,9 +28,9 @@ export const useTimeSelector = ({
   // Update component state when the time prop changes
   useEffect(() => {
     const { hour: newHour, minute: newMinute, period: newPeriod } = parseTimeString(time);
-    setHour(newHour);
+    setHour(newHour === "--" ? "12" : newHour);
     setMinute(newMinute);
-    setPeriod(newPeriod);
+    setPeriod(newPeriod || "pm");
   }, [time]);
 
   // Notify parent when time components change
@@ -49,93 +45,121 @@ export const useTimeSelector = ({
     }
   }, [hour, minute, period, onTimeChange, time]);
 
-  // Set default period based on startTime (for end time selector)
-  useEffect(() => {
-    if (isEndTime && startTime && startTime !== "--") {
-      const parsed = parseTimeString(startTime);
-      if (parsed.period === "pm") {
-        setPeriod("pm");
-      }
-    }
-  }, [isEndTime, startTime]);
+  // Calculate time constraints
+  const minTimeMinutes = useMemo(() => convertTimeToMinutes(minTime), [minTime]);
+  const maxTimeMinutes = useMemo(() => convertTimeToMinutes(maxTime), [maxTime]);
+  const startTimeMinutes = useMemo(() => isEndTime ? convertTimeToMinutes(startTime) : 0, [isEndTime, startTime]);
 
-  // Filter valid hour options based on time constraints
-  const validHourOptions = useMemo(() => {
-    if (!minTime && !maxTime) {
-      return hourOptions;
-    }
-
-    return hourOptions.filter(h => {
-      if (h === "--") return true;
-      
-      for (const m of minuteOptions) {
-        for (const p of periods) {
-          const testTime = buildTimeString(h, m, p);
-          
-          if (isTimeWithinBounds(testTime, minTime, maxTime, startTime, isEndTime)) {
-            return true;
-          }
-        }
-      }
-      
-      return false;
-    });
-  }, [hourOptions, minuteOptions, periods, minTime, maxTime, isEndTime, startTime]);
-
-  // Filter valid minute options based on selected hour and constraints
-  const validMinuteOptions = useMemo(() => {
-    if (hour === "--" || !period) {
-      return minuteOptions;
-    }
-
-    return minuteOptions.filter(m => {
-      const testTime = buildTimeString(hour, m, period);
-      return isTimeWithinBounds(testTime, minTime, maxTime, startTime, isEndTime);
-    });
-  }, [hour, period, minuteOptions, minTime, maxTime, isEndTime, startTime]);
-
-  // Handle time component changes
-  const handleHourChange = (value: string) => {
-    setHour(value);
+  // Check if we're at the minimum allowed value
+  const isMinHour = useMemo(() => {
+    const currentTime = buildTimeString(hour, minute, period);
+    const currentMinutes = convertTimeToMinutes(currentTime);
+    const effectiveMinTime = isEndTime && startTime ? 
+      Math.max(startTimeMinutes, minTimeMinutes) : 
+      minTimeMinutes;
     
-    // When hour changes, ensure minute is still valid
-    const newValidMinutes = minuteOptions.filter(m => {
-      const testTime = buildTimeString(value, m, period);
-      return isTimeWithinBounds(testTime, minTime, maxTime, startTime, isEndTime);
-    });
-    
-    if (newValidMinutes.length > 0 && !newValidMinutes.includes(minute)) {
-      setMinute(newValidMinutes[0]);
-    }
-  };
+    return Math.floor(currentMinutes / 60) === Math.floor(effectiveMinTime / 60);
+  }, [hour, minute, period, minTimeMinutes, startTimeMinutes, isEndTime, startTime]);
 
-  const handleMinuteChange = (value: string) => {
-    setMinute(value);
-  };
+  const isMinMinute = useMemo(() => {
+    const currentTime = buildTimeString(hour, minute, period);
+    const currentMinutes = convertTimeToMinutes(currentTime);
+    const effectiveMinTime = isEndTime && startTime ? 
+      Math.max(startTimeMinutes, minTimeMinutes) : 
+      minTimeMinutes;
+    
+    return isMinHour && (currentMinutes % 60) <= (effectiveMinTime % 60);
+  }, [hour, minute, period, minTimeMinutes, startTimeMinutes, isEndTime, startTime, isMinHour]);
 
-  const handlePeriodChange = (value: string) => {
-    setPeriod(value);
+  // Check if we're at the maximum allowed value
+  const isMaxHour = useMemo(() => {
+    const currentTime = buildTimeString(hour, minute, period);
+    const currentMinutes = convertTimeToMinutes(currentTime);
     
-    // When period changes, ensure minute is still valid
-    const newValidMinutes = minuteOptions.filter(m => {
-      const testTime = buildTimeString(hour, m, value);
-      return isTimeWithinBounds(testTime, minTime, maxTime, startTime, isEndTime);
-    });
+    return Math.floor(currentMinutes / 60) === Math.floor(maxTimeMinutes / 60);
+  }, [hour, minute, period, maxTimeMinutes]);
+
+  const isMaxMinute = useMemo(() => {
+    const currentTime = buildTimeString(hour, minute, period);
+    const currentMinutes = convertTimeToMinutes(currentTime);
     
-    if (newValidMinutes.length > 0 && !newValidMinutes.includes(minute)) {
-      setMinute(newValidMinutes[0]);
+    return isMaxHour && (currentMinutes % 60) >= (maxTimeMinutes % 60);
+  }, [hour, minute, period, maxTimeMinutes, isMaxHour]);
+
+  // Time increment/decrement functions 
+  const incrementTime = useCallback((minutes: number) => {
+    const currentTime = buildTimeString(hour, minute, period);
+    const currentMinutes = convertTimeToMinutes(currentTime);
+    const newTotalMinutes = currentMinutes + minutes;
+    
+    // Don't go beyond max time
+    if (newTotalMinutes > maxTimeMinutes) {
+      return;
     }
-  };
+    
+    // Convert back to 12-hour format
+    let newHours = Math.floor(newTotalMinutes / 60);
+    const newMinutes = newTotalMinutes % 60;
+    let newPeriod = newHours >= 12 ? "pm" : "am";
+    
+    if (newHours > 12) {
+      newHours -= 12;
+    } else if (newHours === 0) {
+      newHours = 12;
+    }
+    
+    setHour(newHours.toString());
+    setMinute(newMinutes.toString().padStart(2, '0'));
+    setPeriod(newPeriod);
+  }, [hour, minute, period, maxTimeMinutes]);
+
+  const decrementTime = useCallback((minutes: number) => {
+    const currentTime = buildTimeString(hour, minute, period);
+    const currentMinutes = convertTimeToMinutes(currentTime);
+    const effectiveMinTime = isEndTime && startTime ? 
+      Math.max(startTimeMinutes, minTimeMinutes) : 
+      minTimeMinutes;
+    
+    const newTotalMinutes = currentMinutes - minutes;
+    
+    // Don't go below min time
+    if (newTotalMinutes < effectiveMinTime) {
+      return;
+    }
+    
+    // Convert back to 12-hour format
+    let newHours = Math.floor(newTotalMinutes / 60);
+    const newMinutes = newTotalMinutes % 60;
+    let newPeriod = newHours >= 12 ? "pm" : "am";
+    
+    if (newHours > 12) {
+      newHours -= 12;
+    } else if (newHours === 0) {
+      newHours = 12;
+    }
+    
+    setHour(newHours.toString());
+    setMinute(newMinutes.toString().padStart(2, '0'));
+    setPeriod(newPeriod);
+  }, [hour, minute, period, minTimeMinutes, startTimeMinutes, isEndTime, startTime]);
+
+  // Increment/decrement hour and minute
+  const incrementHour = useCallback(() => incrementTime(60), [incrementTime]);
+  const decrementHour = useCallback(() => decrementTime(60), [decrementTime]);
+  const incrementMinute = useCallback(() => incrementTime(15), [incrementTime]);
+  const decrementMinute = useCallback(() => decrementTime(15), [decrementTime]);
 
   return {
     hour,
     minute,
     period,
-    validHourOptions,
-    validMinuteOptions,
-    periods,
-    handleHourChange,
-    handleMinuteChange,
-    handlePeriodChange
+    incrementHour,
+    decrementHour,
+    incrementMinute,
+    decrementMinute,
+    isMinHour,
+    isMaxHour,
+    isMinMinute,
+    isMaxMinute
   };
 };
