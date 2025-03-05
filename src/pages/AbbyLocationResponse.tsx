@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, MapPin, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
 import LocationCard from "@/components/LocationCard";
@@ -42,7 +42,7 @@ const AbbyLocationResponse = () => {
   const [hasDifferentIdea, setHasDifferentIdea] = useState(false);
   const [differentIdeaText, setDifferentIdeaText] = useState("");
   const [differentIdeaName, setDifferentIdeaName] = useState("");
-  const [differentIdeaSelected, setDifferentIdeaSelected] = useState(false);
+  const [differentIdeaSelected, setDifferentIdeaSelected] = useState(true); // Default to selected
   
   const handleSelectLocation = (index: number) => {
     const updatedLocations = [...locations];
@@ -74,6 +74,7 @@ const AbbyLocationResponse = () => {
   
   const handleDifferentIdea = () => {
     setHasDifferentIdea(true);
+    setDifferentIdeaSelected(true); // Auto-select when added
   };
   
   const toggleDifferentIdeaSelection = () => {
@@ -90,6 +91,14 @@ const AbbyLocationResponse = () => {
     }
     
     setDifferentIdeaSelected(!differentIdeaSelected);
+  };
+
+  const clearDifferentIdea = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the parent onClick
+    setHasDifferentIdea(false);
+    setDifferentIdeaName("");
+    setDifferentIdeaText("");
+    setDifferentIdeaSelected(false);
   };
   
   const handleSubmit = () => {
@@ -168,8 +177,14 @@ const AbbyLocationResponse = () => {
       </div>
       
       {hasDifferentIdea ? (
-        <div className={`mb-6 bg-white rounded-lg border ${differentIdeaSelected ? "border-purple" : "border-gray-200"} p-4 animate-fade-in`}
+        <div className={`mb-6 bg-white rounded-lg border ${differentIdeaSelected ? "border-purple" : "border-gray-200"} p-4 animate-fade-in relative`}
              onClick={toggleDifferentIdeaSelection}>
+          <button 
+            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={clearDifferentIdea}
+          >
+            <X size={18} />
+          </button>
           <div className="flex items-center gap-2 mb-3">
             <MapPin size={18} className="text-gray-400" />
             <input
