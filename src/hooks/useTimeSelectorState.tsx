@@ -74,10 +74,16 @@ export const useTimeSelectorState = ({
   const handleIncrement = useCallback(() => {
     console.log("🔼 Increment button clicked in hook");
     
+    // Direct calculation approach
+    const currentTimeString = buildTimeString(hour, minute, period);
+    console.log(`Current time before increment: ${currentTimeString}`);
+    
+    // Perform the increment operation
     const result = incrementTime(hour, minute, period, maxTime);
     
     if (result) {
       console.log(`Increment result: ${result.hour}:${result.minute} ${result.period}`);
+      // Make sure we're definitely calling updateTimeValues
       updateTimeValues(result.hour, result.minute, result.period);
     } else {
       console.log("Increment returned null - at max limit");
@@ -88,10 +94,16 @@ export const useTimeSelectorState = ({
   const handleDecrement = useCallback(() => {
     console.log("🔽 Decrement button clicked in hook");
     
+    // Direct calculation approach
+    const currentTimeString = buildTimeString(hour, minute, period);
+    console.log(`Current time before decrement: ${currentTimeString}`);
+    
+    // Perform the decrement operation
     const result = decrementTime(hour, minute, period, minTime, isEndTime, startTime);
     
     if (result) {
       console.log(`Decrement result: ${result.hour}:${result.minute} ${result.period}`);
+      // Make sure we're definitely calling updateTimeValues
       updateTimeValues(result.hour, result.minute, result.period);
     } else {
       console.log("Decrement returned null - at min limit");
