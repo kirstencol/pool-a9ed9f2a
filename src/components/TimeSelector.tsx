@@ -38,6 +38,16 @@ const TimeSelector = ({
     maxTime
   });
 
+  const handleIncrement = () => {
+    console.log("TimeSelector: handleIncrement clicked");
+    incrementTime();
+  };
+
+  const handleDecrement = () => {
+    console.log("TimeSelector: handleDecrement clicked");
+    decrementTime();
+  };
+
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40">
       <div className="flex justify-center">
@@ -46,7 +56,7 @@ const TimeSelector = ({
             "flex items-center justify-center py-2 w-full",
             isAtMaxTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
-          onClick={incrementTime}
+          onClick={handleIncrement}
           disabled={isAtMaxTime}
           aria-label="Increase time"
           type="button"
@@ -70,7 +80,7 @@ const TimeSelector = ({
             "flex items-center justify-center py-2 w-full",
             isAtMinTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
-          onClick={decrementTime}
+          onClick={handleDecrement}
           disabled={isAtMinTime}
           aria-label="Decrease time"
           type="button"

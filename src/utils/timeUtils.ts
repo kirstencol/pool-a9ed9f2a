@@ -9,8 +9,15 @@
 export const convertTimeToMinutes = (timeStr: string): number => {
   if (!timeStr || timeStr === "--") return 0;
   
-  const match = timeStr.match(/(\d+):(\d+)\s?(am|pm)/i);
-  if (!match) return 0;
+  // Handle case insensitivity and normalize the string
+  const normalizedTime = timeStr.trim().toLowerCase();
+  
+  // Try to match various time formats
+  const match = normalizedTime.match(/(\d+):(\d+)\s?(am|pm)/i);
+  if (!match) {
+    console.warn(`Failed to parse time string: "${timeStr}"`);
+    return 0;
+  }
   
   let hours = parseInt(match[1]);
   const minutes = parseInt(match[2]);
@@ -31,10 +38,13 @@ export const convertTimeToMinutes = (timeStr: string): number => {
  */
 export const parseTimeString = (time: string): { hour: string, minute: string, period: string } => {
   if (!time || time === "--") {
-    return { hour: "--", minute: "00", period: "" };
+    return { hour: "12", minute: "00", period: "pm" };
   }
 
-  const match = time.match(/(\d+):(\d+)\s?(am|pm)/i);
+  // Normalize the time string
+  const normalizedTime = time.trim().toLowerCase();
+  
+  const match = normalizedTime.match(/(\d+):(\d+)\s?(am|pm)/i);
   if (match) {
     return {
       hour: match[1],
@@ -43,7 +53,8 @@ export const parseTimeString = (time: string): { hour: string, minute: string, p
     };
   }
   
-  return { hour: "--", minute: "00", period: "" };
+  console.warn(`Failed to parse time components from: "${time}"`);
+  return { hour: "12", minute: "00", period: "pm" };
 };
 
 /**

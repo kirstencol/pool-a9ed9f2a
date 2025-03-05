@@ -52,8 +52,19 @@ export const useTimeSelector = ({
 
   // Calculate if we're at the minimum or maximum allowed values
   const currentTimeMinutes = useMemo(() => {
-    const currentTime = buildTimeString(hour, minute, period);
-    return convertTimeToMinutes(currentTime);
+    if (hour === "--" || period === "") return 0;
+    
+    let hourNum = parseInt(hour);
+    let minuteNum = parseInt(minute);
+    
+    // Convert to 24-hour format for calculation
+    if (period === "pm" && hourNum < 12) {
+      hourNum += 12;
+    } else if (period === "am" && hourNum === 12) {
+      hourNum = 0;
+    }
+    
+    return hourNum * 60 + minuteNum;
   }, [hour, minute, period]);
 
   const effectiveMinTime = useMemo(() => 
@@ -63,7 +74,7 @@ export const useTimeSelector = ({
 
   const isAtMinTime = useMemo(() => {
     // Only apply constraints if min time is actually set
-    if (minTimeMinutes <= 0 && (!isEndTime || startTimeMinutes <= 0)) {
+    if ((minTimeMinutes <= 0) && (!isEndTime || startTimeMinutes <= 0)) {
       return false;
     }
     return currentTimeMinutes <= effectiveMinTime;
@@ -100,18 +111,25 @@ export const useTimeSelector = ({
     console.log("Current minutes since midnight:", totalMinutes);
     console.log("New minutes since midnight:", newTotalMinutes);
     
-    // Check constraints
-    const effectiveMinMinutes = isEndTime && startTime ? Math.max(startTimeMinutes, minTimeMinutes) : minTimeMinutes;
-    
     // Apply constraints but only if they are actually set
-    if (minutes > 0 && maxTimeMinutes > 0 && newTotalMinutes > maxTimeMinutes) {
-      console.log("Cannot increment: would exceed max time limit of", maxTimeMinutes);
-      return;
-    }
+    let skipConstraints = false;
     
-    if (minutes < 0 && effectiveMinMinutes > 0 && newTotalMinutes < effectiveMinMinutes) {
-      console.log("Cannot decrement: would go below min time limit of", effectiveMinMinutes);
-      return;
+    // For debugging, try skipping constraints entirely
+    if (skipConstraints) {
+      console.log("DEBUG MODE: Skipping time constraints");
+    } else {
+      const effectiveMinMinutes = isEndTime && startTime ? 
+        Math.max(startTimeMinutes, minTimeMinutes) : minTimeMinutes;
+      
+      if (minutes > 0 && maxTimeMinutes > 0 && newTotalMinutes > maxTimeMinutes) {
+        console.log("Cannot increment: would exceed max time limit of", maxTimeMinutes);
+        return;
+      }
+      
+      if (minutes < 0 && effectiveMinMinutes > 0 && newTotalMinutes < effectiveMinMinutes) {
+        console.log("Cannot decrement: would go below min time limit of", effectiveMinMinutes);
+        return;
+      }
     }
     
     // Convert back to 12-hour format
@@ -127,7 +145,7 @@ export const useTimeSelector = ({
     
     console.log(`Setting new time: ${newHours}:${newMinutes.toString().padStart(2, '0')} ${newPeriod}`);
     
-    // Update state
+    // Update state - force as strings
     setHour(newHours.toString());
     setMinute(newMinutes.toString().padStart(2, '0'));
     setPeriod(newPeriod);
