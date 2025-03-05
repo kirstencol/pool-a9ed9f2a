@@ -1,15 +1,15 @@
 
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Check, Copy } from "lucide-react";
+import { CalendarPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
+import { Button } from "@/components/ui/button";
 
 const BurtConfirmed = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [copied, setCopied] = useState(false);
   
   const { selectedLocations } = location.state || { selectedLocations: [] };
   
@@ -25,17 +25,8 @@ const BurtConfirmed = () => {
   const date = "Saturday, March 2nd";
   const timeRange = "8:00 a.m. to 9:00 a.m.";
   
-  const shareableLink = window.location.origin + "/final-confirmation";
-  
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareableLink);
-    setCopied(true);
-    toast({
-      title: "Link copied!",
-      description: "Share it with your friends"
-    });
-    
-    setTimeout(() => setCopied(false), 3000);
+  const handleAddToCalendar = () => {
+    navigate("/add-to-calendar");
   };
 
   return (
@@ -92,27 +83,13 @@ const BurtConfirmed = () => {
         )}
       </div>
       
-      <div className="mb-6">
-        <h2 className="font-medium mb-3">Share with your friends:</h2>
-        <div className="flex -space-x-2 mb-4">
-          <Avatar initial="A" position="first" className="border-2 border-white" />
-          <Avatar initial="C" position="third" className="border-2 border-white" />
-        </div>
-        
-        <div 
-          className="border border-gray-300 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:border-purple-500"
-          onClick={handleCopyLink}
-        >
-          <div className="truncate flex-grow">
-            <span className="text-gray-600 text-sm">{shareableLink}</span>
-          </div>
-          {copied ? (
-            <Check className="text-green-500 ml-2" size={20} />
-          ) : (
-            <Copy className="text-gray-500 ml-2" size={20} />
-          )}
-        </div>
-      </div>
+      <Button 
+        onClick={handleAddToCalendar} 
+        className="w-full py-5 bg-purple-600 hover:bg-purple-700 flex items-center justify-center gap-2"
+      >
+        <CalendarPlus size={20} />
+        Add to Calendar
+      </Button>
     </div>
   );
 };
