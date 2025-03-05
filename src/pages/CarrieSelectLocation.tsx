@@ -80,7 +80,16 @@ const CarrieSelectLocation = () => {
     // Combine all location names with commas
     const locationNames = validLocations.map(loc => loc.name).join(", ");
     
-    navigate(`/carrie-confirmation?id=${inviteId}&date=${date}&startTime=${startTime}&endTime=${endTime}&location=${locationNames}`);
+    // Include notes in the URL if they exist
+    const locationData = validLocations.map(loc => ({
+      name: loc.name,
+      note: loc.note || ""
+    }));
+    
+    // Convert to JSON and encode
+    const encodedLocations = encodeURIComponent(JSON.stringify(locationData));
+    
+    navigate(`/carrie-confirmation?id=${inviteId}&date=${date}&startTime=${startTime}&endTime=${endTime}&location=${locationNames}&locData=${encodedLocations}`);
   };
 
   return (
@@ -136,7 +145,7 @@ const CarrieSelectLocation = () => {
         className="w-full bg-purple-50 hover:bg-purple-100 text-purple-700 flex items-center justify-center gap-2"
         variant="secondary"
       >
-        Send suggestions <ArrowRight size={16} />
+        <ArrowRight size={16} />
       </Button>
     </div>
   );
