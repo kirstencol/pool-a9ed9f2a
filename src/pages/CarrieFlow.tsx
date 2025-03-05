@@ -21,7 +21,6 @@ const CarrieFlow = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
-  const [meetingDuration, setMeetingDuration] = useState("60"); // Default 60 minutes
   const { setCurrentUser } = useMeeting();
 
   // Set Carrie as the current user when component mounts
@@ -114,31 +113,13 @@ const CarrieFlow = () => {
       </div>
 
       {selectedTimeSlot && (
-        <div className="mb-6">
-          <h2 className="font-medium mb-3">Meeting duration:</h2>
-          <div className="flex space-x-2">
-            {["30", "45", "60", "90"].map((duration) => (
-              <Button
-                key={duration}
-                variant={meetingDuration === duration ? "default" : "outline"}
-                onClick={() => setMeetingDuration(duration)}
-                className="flex-1"
-              >
-                {duration} min
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {selectedTimeSlot && (
         <div className="flex justify-end mt-8">
           <Button 
             onClick={handleContinue}
-            className="flex items-center"
+            size="icon"
+            className="rounded-full h-10 w-10"
           >
-            Continue
-            <ArrowRight size={16} className="ml-2" />
+            <ArrowRight size={18} />
           </Button>
         </div>
       )}
