@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -29,6 +30,13 @@ export interface Location {
   description: string;
   suggestedBy: string;
   responses?: LocationResponse[];
+}
+
+export interface LocationWithNote {
+  name: string;
+  note: string;
+  selected?: boolean;
+  userNote?: string;
 }
 
 export interface LocationResponse {

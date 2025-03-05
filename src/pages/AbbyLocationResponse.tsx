@@ -2,18 +2,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MapPin, X } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
-import LocationCard from "@/components/LocationCard";
-import { Location } from "@/types";
-
-type LocationWithNote = {
-  name: string;
-  note: string;
-  selected?: boolean;
-  userNote?: string;
-};
+import { LocationWithNote } from "@/types";
+import LocationSuggestionsList from "@/components/LocationSuggestionsList";
+import CustomLocationInput from "@/components/CustomLocationInput";
 
 const AbbyLocationResponse = () => {
   const navigate = useNavigate();
@@ -153,58 +147,22 @@ const AbbyLocationResponse = () => {
       
       <p className="mb-4 text-gray-700">Carrie suggests these spots. Which work for you? <span className="text-sm text-gray-500">(Select up to 3)</span></p>
       
-      <div className="space-y-4 mb-6">
-        {locations.map((loc, index) => (
-          <LocationCard
-            key={index}
-            location={{
-              id: `loc-${index}`,
-              name: loc.name,
-              description: loc.note,
-              suggestedBy: "C"
-            }}
-            selectedByUser={loc.selected}
-            showNoteInput={true}
-            onSelect={() => handleSelectLocation(index)}
-            onNoteChange={(note) => handleNoteChange(index, note)}
-            showAuthor={true}
-            authorInitial="C"
-            authorPosition="third"
-            userInitial="A"
-            userPosition="first"
-          />
-        ))}
-      </div>
+      <LocationSuggestionsList 
+        locations={locations}
+        onSelectLocation={handleSelectLocation}
+        onNoteChange={handleNoteChange}
+      />
       
       {hasDifferentIdea ? (
-        <div className={`mb-6 bg-white rounded-lg border ${differentIdeaSelected ? "border-purple" : "border-gray-200"} p-4 animate-fade-in relative`}
-             onClick={toggleDifferentIdeaSelection}>
-          <button 
-            className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 transition-colors"
-            onClick={clearDifferentIdea}
-          >
-            <X size={18} />
-          </button>
-          <div className="flex items-center gap-2 mb-3">
-            <MapPin size={18} className="text-gray-400" />
-            <input
-              type="text"
-              value={differentIdeaName}
-              onChange={(e) => setDifferentIdeaName(e.target.value)}
-              placeholder="Enter place name"
-              className="w-full border-none focus:outline-none focus:ring-0 p-0"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
-          <textarea
-            value={differentIdeaText}
-            onChange={(e) => setDifferentIdeaText(e.target.value)}
-            placeholder="Add a note (optional)"
-            className="w-full text-sm text-gray-500 border-none focus:outline-none focus:ring-0 resize-none p-0"
-            rows={2}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
+        <CustomLocationInput 
+          isSelected={differentIdeaSelected}
+          locationName={differentIdeaName}
+          setLocationName={setDifferentIdeaName}
+          noteText={differentIdeaText}
+          setNoteText={setDifferentIdeaText}
+          onToggleSelection={toggleDifferentIdeaSelection}
+          onClear={clearDifferentIdea}
+        />
       ) : (
         <button
           onClick={handleDifferentIdea}
