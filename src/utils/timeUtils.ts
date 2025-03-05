@@ -9,19 +9,33 @@
 export const convertTimeToMinutes = (timeStr: string): number => {
   if (!timeStr || timeStr === "--") return 0;
   
-  // Handle case insensitivity and normalize the string
+  // Normalize the string: trim whitespace and convert to lowercase
   const normalizedTime = timeStr.trim().toLowerCase();
   
-  // Try to match various time formats
-  const match = normalizedTime.match(/(\d+):(\d+)\s?(am|pm)/i);
+  // Match HH:MM AM/PM format
+  const timeRegex = /(\d+):(\d+)\s*(am|pm)/i;
+  const match = normalizedTime.match(timeRegex);
+  
   if (!match) {
-    console.warn(`Failed to parse time string: "${timeStr}"`);
+    console.warn(`Time conversion failed: cannot parse "${timeStr}"`);
     return 0;
   }
   
-  let hours = parseInt(match[1]);
-  const minutes = parseInt(match[2]);
+  // Extract hours, minutes, and period
+  let hours = parseInt(match[1], 10);
+  const minutes = parseInt(match[2], 10);
   const period = match[3].toLowerCase();
+  
+  // Validate hours and minutes
+  if (isNaN(hours) || hours < 0 || hours > 12) {
+    console.warn(`Time conversion failed: invalid hours in "${timeStr}"`);
+    return 0;
+  }
+  
+  if (isNaN(minutes) || minutes < 0 || minutes > 59) {
+    console.warn(`Time conversion failed: invalid minutes in "${timeStr}"`);
+    return 0;
+  }
   
   // Convert to 24-hour format
   if (period === "pm" && hours < 12) {
@@ -30,7 +44,7 @@ export const convertTimeToMinutes = (timeStr: string): number => {
     hours = 0;
   }
   
-  return hours * 60 + minutes;
+  return (hours * 60) + minutes;
 };
 
 /**
@@ -38,30 +52,64 @@ export const convertTimeToMinutes = (timeStr: string): number => {
  */
 export const parseTimeString = (time: string): { hour: string, minute: string, period: string } => {
   if (!time || time === "--") {
+    console.log(`parseTimeString: Using default for empty time "${time}"`);
     return { hour: "12", minute: "00", period: "pm" };
   }
 
   // Normalize the time string
   const normalizedTime = time.trim().toLowerCase();
   
-  const match = normalizedTime.match(/(\d+):(\d+)\s?(am|pm)/i);
-  if (match) {
-    return {
-      hour: match[1],
-      minute: match[2],
-      period: match[3].toLowerCase()
-    };
+  // Match HH:MM AM/PM format (more precise regex)
+  const timeRegex = /(\d+):(\d+)\s*(am|pm)/i;
+  const match = normalizedTime.match(timeRegex);
+  
+  if (!match) {
+    console.warn(`parseTimeString: Failed to parse "${time}", using defaults`);
+    return { hour: "12", minute: "00", period: "pm" };
   }
   
-  console.warn(`Failed to parse time components from: "${time}"`);
-  return { hour: "12", minute: "00", period: "pm" };
+  // Get the hour, ensuring it's in 1-12 range
+  let hourNum = parseInt(match[1], 10);
+  if (isNaN(hourNum) || hourNum < 1 || hourNum > 12) {
+    console.warn(`parseTimeString: Invalid hour in "${time}", using default hour`);
+    hourNum = 12;
+  }
+  
+  // Get the minute, ensuring it's in 00-59 range
+  let minuteNum = parseInt(match[2], 10);
+  if (isNaN(minuteNum) || minuteNum < 0 || minuteNum > 59) {
+    console.warn(`parseTimeString: Invalid minute in "${time}", using default minute`);
+    minuteNum = 0;
+  }
+  
+  // Get the period, ensuring it's either "am" or "pm"
+  const period = match[3].toLowerCase();
+  if (period !== "am" && period !== "pm") {
+    console.warn(`parseTimeString: Invalid period in "${time}", using default period`);
+    return { hour: hourNum.toString(), minute: minuteNum.toString().padStart(2, '0'), period: "pm" };
+  }
+  
+  console.log(`parseTimeString: Successfully parsed "${time}" to:`, {
+    hour: hourNum.toString(),
+    minute: minuteNum.toString().padStart(2, '0'),
+    period
+  });
+  
+  return {
+    hour: hourNum.toString(),
+    minute: minuteNum.toString().padStart(2, '0'),
+    period
+  };
 };
 
 /**
  * Builds a time string from components
  */
 export const buildTimeString = (hour: string, minute: string, period: string): string => {
-  return `${hour}:${minute} ${period}`;
+  const formattedMinute = minute.padStart(2, '0');
+  const formattedTime = `${hour}:${formattedMinute} ${period}`;
+  console.log(`buildTimeString: Built time string: "${formattedTime}"`);
+  return formattedTime;
 };
 
 /**
@@ -78,10 +126,15 @@ export const isTimeWithinBounds = (
   const minMinutes = minTime ? convertTimeToMinutes(minTime) : 0;
   const maxMinutes = maxTime ? convertTimeToMinutes(maxTime) : 24 * 60 - 1;
   
+  // For end time, it must be after start time
   if (isEndTime && startTime && startTime !== "--") {
     const startMinutes = convertTimeToMinutes(startTime);
-    return testMinutes > startMinutes && testMinutes <= maxMinutes;
+    const result = testMinutes > startMinutes && testMinutes <= maxMinutes;
+    console.log(`isTimeWithinBounds (endTime): ${testTime} > ${startTime} && ${testTime} <= ${maxTime} = ${result}`);
+    return result;
   } else {
-    return testMinutes >= minMinutes && testMinutes < maxMinutes;
+    const result = testMinutes >= minMinutes && testMinutes <= maxMinutes;
+    console.log(`isTimeWithinBounds: ${testTime} >= ${minTime} && ${testTime} <= ${maxTime} = ${result}`);
+    return result;
   }
 };

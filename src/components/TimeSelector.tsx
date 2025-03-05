@@ -20,6 +20,8 @@ const TimeSelector = ({
   minTime = "",
   maxTime = ""
 }: TimeSelectorProps) => {
+  console.log("TimeSelector rendering with:", { time, isEndTime, startTime, minTime, maxTime });
+  
   const {
     hour,
     minute,
@@ -37,9 +39,7 @@ const TimeSelector = ({
     maxTime
   });
 
-  // Direct function references for the buttons
-  const handleIncrement = incrementTime;
-  const handleDecrement = decrementTime;
+  console.log("TimeSelector state:", { hour, minute, period, isAtMinTime, isAtMaxTime });
 
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40">
@@ -49,7 +49,7 @@ const TimeSelector = ({
             "flex items-center justify-center py-2 w-full",
             isAtMaxTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
-          onClick={handleIncrement}
+          onClick={incrementTime}
           disabled={isAtMaxTime}
           aria-label="Increase time"
           type="button"
@@ -73,7 +73,7 @@ const TimeSelector = ({
             "flex items-center justify-center py-2 w-full",
             isAtMinTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
-          onClick={handleDecrement}
+          onClick={decrementTime}
           disabled={isAtMinTime}
           aria-label="Decrease time"
           type="button"
