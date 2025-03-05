@@ -50,51 +50,46 @@ export const useTimeSelector = ({
   const maxTimeMinutes = useMemo(() => convertTimeToMinutes(maxTime), [maxTime]);
   const startTimeMinutes = useMemo(() => isEndTime ? convertTimeToMinutes(startTime) : 0, [isEndTime, startTime]);
 
-  // Check if we're at the minimum allowed value
-  const isMinHour = useMemo(() => {
+  // Calculate if we're at the minimum or maximum allowed values
+  const currentTimeMinutes = useMemo(() => {
     const currentTime = buildTimeString(hour, minute, period);
-    const currentMinutes = convertTimeToMinutes(currentTime);
-    const effectiveMinTime = isEndTime && startTime ? 
-      Math.max(startTimeMinutes, minTimeMinutes) : 
-      minTimeMinutes;
-    
-    return Math.floor(currentMinutes / 60) === Math.floor(effectiveMinTime / 60);
-  }, [hour, minute, period, minTimeMinutes, startTimeMinutes, isEndTime, startTime]);
+    return convertTimeToMinutes(currentTime);
+  }, [hour, minute, period]);
 
-  const isMinMinute = useMemo(() => {
-    const currentTime = buildTimeString(hour, minute, period);
-    const currentMinutes = convertTimeToMinutes(currentTime);
-    const effectiveMinTime = isEndTime && startTime ? 
-      Math.max(startTimeMinutes, minTimeMinutes) : 
-      minTimeMinutes;
-    
-    return isMinHour && (currentMinutes % 60) <= (effectiveMinTime % 60);
-  }, [hour, minute, period, minTimeMinutes, startTimeMinutes, isEndTime, startTime, isMinHour]);
+  const effectiveMinTime = useMemo(() => 
+    isEndTime && startTime ? Math.max(startTimeMinutes, minTimeMinutes) : minTimeMinutes, 
+    [isEndTime, startTime, startTimeMinutes, minTimeMinutes]
+  );
 
-  // Check if we're at the maximum allowed value
-  const isMaxHour = useMemo(() => {
-    const currentTime = buildTimeString(hour, minute, period);
-    const currentMinutes = convertTimeToMinutes(currentTime);
-    
-    return Math.floor(currentMinutes / 60) === Math.floor(maxTimeMinutes / 60);
-  }, [hour, minute, period, maxTimeMinutes]);
+  const isAtMinTime = useMemo(() => 
+    currentTimeMinutes <= effectiveMinTime, 
+    [currentTimeMinutes, effectiveMinTime]
+  );
 
-  const isMaxMinute = useMemo(() => {
-    const currentTime = buildTimeString(hour, minute, period);
-    const currentMinutes = convertTimeToMinutes(currentTime);
-    
-    return isMaxHour && (currentMinutes % 60) >= (maxTimeMinutes % 60);
-  }, [hour, minute, period, maxTimeMinutes, isMaxHour]);
+  const isAtMaxTime = useMemo(() => 
+    currentTimeMinutes >= maxTimeMinutes, 
+    [currentTimeMinutes, maxTimeMinutes]
+  );
 
-  // Time increment/decrement functions 
-  const incrementTime = useCallback((minutes: number) => {
+  // Time increment/decrement functions (in 15-minute intervals)
+  const adjustTime = useCallback((minutes: number) => {
     const currentTime = buildTimeString(hour, minute, period);
     const currentMinutes = convertTimeToMinutes(currentTime);
     const newTotalMinutes = currentMinutes + minutes;
     
-    // Don't go beyond max time
-    if (newTotalMinutes > maxTimeMinutes) {
+    // Check constraints
+    if (minutes > 0 && newTotalMinutes > maxTimeMinutes) {
       return;
+    }
+    
+    if (minutes < 0) {
+      const effectiveMinTime = isEndTime && startTime ? 
+        Math.max(startTimeMinutes, minTimeMinutes) : 
+        minTimeMinutes;
+        
+      if (newTotalMinutes < effectiveMinTime) {
+        return;
+      }
     }
     
     // Convert back to 12-hour format
@@ -111,55 +106,18 @@ export const useTimeSelector = ({
     setHour(newHours.toString());
     setMinute(newMinutes.toString().padStart(2, '0'));
     setPeriod(newPeriod);
-  }, [hour, minute, period, maxTimeMinutes]);
+  }, [hour, minute, period, maxTimeMinutes, minTimeMinutes, startTimeMinutes, isEndTime, startTime]);
 
-  const decrementTime = useCallback((minutes: number) => {
-    const currentTime = buildTimeString(hour, minute, period);
-    const currentMinutes = convertTimeToMinutes(currentTime);
-    const effectiveMinTime = isEndTime && startTime ? 
-      Math.max(startTimeMinutes, minTimeMinutes) : 
-      minTimeMinutes;
-    
-    const newTotalMinutes = currentMinutes - minutes;
-    
-    // Don't go below min time
-    if (newTotalMinutes < effectiveMinTime) {
-      return;
-    }
-    
-    // Convert back to 12-hour format
-    let newHours = Math.floor(newTotalMinutes / 60);
-    const newMinutes = newTotalMinutes % 60;
-    let newPeriod = newHours >= 12 ? "pm" : "am";
-    
-    if (newHours > 12) {
-      newHours -= 12;
-    } else if (newHours === 0) {
-      newHours = 12;
-    }
-    
-    setHour(newHours.toString());
-    setMinute(newMinutes.toString().padStart(2, '0'));
-    setPeriod(newPeriod);
-  }, [hour, minute, period, minTimeMinutes, startTimeMinutes, isEndTime, startTime]);
-
-  // Increment/decrement hour and minute
-  const incrementHour = useCallback(() => incrementTime(60), [incrementTime]);
-  const decrementHour = useCallback(() => decrementTime(60), [decrementTime]);
-  const incrementMinute = useCallback(() => incrementTime(15), [incrementTime]);
-  const decrementMinute = useCallback(() => decrementTime(15), [decrementTime]);
+  const incrementTime = useCallback(() => adjustTime(15), [adjustTime]);
+  const decrementTime = useCallback(() => adjustTime(-15), [adjustTime]);
 
   return {
     hour,
     minute,
     period,
-    incrementHour,
-    decrementHour,
-    incrementMinute,
-    decrementMinute,
-    isMinHour,
-    isMaxHour,
-    isMinMinute,
-    isMaxMinute
+    incrementTime,
+    decrementTime,
+    isAtMinTime,
+    isAtMaxTime
   };
 };
