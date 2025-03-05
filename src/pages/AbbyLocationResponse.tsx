@@ -15,7 +15,7 @@ const AbbyLocationResponse = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  // Demo data for Sam's location suggestions
+  // Demo data for Carrie's location suggestions
   const [locations] = useState<LocationWithNote[]>([
     { 
       name: "Central Cafe", 
@@ -27,9 +27,9 @@ const AbbyLocationResponse = () => {
     }
   ]);
   
-  // Display date and time hardcoded for the demo
-  const date = "Friday October 25";
-  const timeRange = "2 to 3 pm";
+  // Updated date and time for the demo
+  const date = "Saturday, March 2nd";
+  const timeRange = "8:00 a.m. to 9:00 a.m.";
   
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasDifferentIdea, setHasDifferentIdea] = useState(false);
@@ -80,7 +80,7 @@ const AbbyLocationResponse = () => {
         <p className="text-gray-700">{date} from {timeRange}</p>
       </div>
       
-      <p className="mb-4 text-gray-700">Sam suggests these spots. Which work for you?</p>
+      <p className="mb-4 text-gray-700">Carrie suggests these spots. Which work for you?</p>
       
       <div className="space-y-4 mb-6">
         {locations.map((loc, index) => (
