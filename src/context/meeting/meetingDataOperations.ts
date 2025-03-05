@@ -22,6 +22,8 @@ export const useMeetingDataOperations = (
   state: MeetingContextState,
   stateSetters: StateSetters
 ): MeetingDataOperations => {
+  console.log("Initializing meetingDataOperations");
+  
   // Get operations from each specialized hook
   const meetingOps = useMeetingOperations(state, stateSetters);
   const linkOps = useLinkOperations(state, stateSetters);

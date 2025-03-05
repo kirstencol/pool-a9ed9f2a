@@ -1,6 +1,6 @@
 
 // src/context/meeting/MeetingContext.tsx
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { User, TimeSlot, Location } from '@/types';
 import { MeetingContextType, MeetingContextState } from './types';
 import { useUserOperations } from './userOperations';
@@ -12,6 +12,8 @@ import { useMeetingDataOperations } from './meetingDataOperations';
 const MeetingContext = createContext<MeetingContextType | undefined>(undefined);
 
 export const MeetingProvider = ({ children }: { children: ReactNode }) => {
+  console.log("MeetingProvider initializing"); // Debug log
+  
   // Core state
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [participants, setParticipants] = useState<User[]>([]);
@@ -23,6 +25,12 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
   const [currentMeetingId, setCurrentMeetingId] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Log initialization for debugging
+  useEffect(() => {
+    console.log("MeetingProvider mounted");
+    return () => console.log("MeetingProvider unmounted");
+  }, []);
 
   // Core state object
   const state: MeetingContextState = {
@@ -77,6 +85,7 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
 export const useMeeting = () => {
   const context = useContext(MeetingContext);
   if (context === undefined) {
+    console.error("useMeeting must be used within a MeetingProvider");
     throw new Error('useMeeting must be used within a MeetingProvider');
   }
   return context;

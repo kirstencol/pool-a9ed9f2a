@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
@@ -13,9 +14,17 @@ const Welcome = () => {
   const [friend1, setFriend1] = useState("");
   const [friend2, setFriend2] = useState("");
   const [showDevTools, setShowDevTools] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    console.log("Welcome component mounted");
+    setIsLoaded(true);
+    return () => console.log("Welcome component unmounted");
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Form submitted with:", { name, friend1, friend2 });
     
     if (!name.trim() || !friend1.trim() || !friend2.trim()) return;
 
@@ -69,6 +78,15 @@ const Welcome = () => {
     console.log("Navigating to Burt Location Confirmation: /select-user?flow=burt-location-confirmation");
     navigate("/select-user?flow=burt-location-confirmation");
   };
+
+  // Show loading state while mounting
+  if (!isLoaded) {
+    return (
+      <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
+        <p className="text-center">Loading welcome screen...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
