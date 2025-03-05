@@ -2,7 +2,6 @@
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { parseTimeString, buildTimeString } from "@/utils/timeUtils";
 
 interface TimeSelectorProps {
   time: string;
@@ -21,137 +20,158 @@ const TimeSelector = ({
   minTime = "",
   maxTime = ""
 }: TimeSelectorProps) => {
-  console.log("TimeSelector rendering with:", { time, isEndTime, startTime, minTime, maxTime });
+  console.log("TimeSelector rendering with props:", { time, isEndTime, startTime, minTime, maxTime });
   
   // Parse the time string into components
-  const [timeComponents, setTimeComponents] = useState(() => parseTimeString(time));
-  
-  // Update local state when the time prop changes
-  useEffect(() => {
-    console.log(`TimeSelector: time prop changed to "${time}"`);
-    setTimeComponents(parseTimeString(time));
-  }, [time]);
-  
-  // Helper function to convert time to minutes for comparison
-  const timeToMinutes = (timeStr: string) => {
-    const { hour, minute, period } = parseTimeString(timeStr);
-    const hourNum = parseInt(hour);
-    const minuteNum = parseInt(minute);
+  const [hour, setHour] = useState<string>("12");
+  const [minute, setMinute] = useState<string>("00");
+  const [period, setPeriod] = useState<string>("pm");
+
+  // Helper function to convert time string to minutes for comparison
+  const timeToMinutes = (timeStr: string): number => {
+    if (!timeStr || timeStr === "--") return 0;
     
-    // Convert to 24-hour format
-    let hours24 = hourNum;
-    if (period === "pm" && hourNum < 12) {
-      hours24 += 12;
-    } else if (period === "am" && hourNum === 12) {
-      hours24 = 0;
+    const regex = /(\d+):(\d+)\s*(am|pm)/i;
+    const match = timeStr.trim().toLowerCase().match(regex);
+    
+    if (!match) {
+      console.warn(`Invalid time format: ${timeStr}`);
+      return 0;
     }
     
-    return hours24 * 60 + minuteNum;
+    let hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    const ampm = match[3].toLowerCase();
+    
+    // Convert to 24-hour format
+    if (ampm === "pm" && hours < 12) {
+      hours += 12;
+    } else if (ampm === "am" && hours === 12) {
+      hours = 0;
+    }
+    
+    return (hours * 60) + minutes;
   };
   
-  // Helper to check if we're at the min time
-  const isAtMinTime = () => {
-    const currentMinutes = timeToMinutes(time);
+  // Parse time string into components on mount and when props change
+  useEffect(() => {
+    console.log(`TimeSelector: Parsing time string "${time}"`);
+    const regex = /(\d+):(\d+)\s*(am|pm)/i;
+    const match = time.trim().toLowerCase().match(regex);
+    
+    if (match) {
+      const newHour = match[1];
+      const newMinute = match[2];
+      const newPeriod = match[3].toLowerCase();
+      
+      console.log(`TimeSelector: Parsed time - ${newHour}:${newMinute} ${newPeriod}`);
+      setHour(newHour);
+      setMinute(newMinute);
+      setPeriod(newPeriod);
+    } else {
+      console.warn(`TimeSelector: Could not parse time "${time}", using defaults`);
+      setHour("12");
+      setMinute("00");
+      setPeriod("pm");
+    }
+  }, [time]);
+  
+  // Build a time string from components
+  const buildTimeString = (): string => {
+    const formattedMinute = minute.padStart(2, '0');
+    return `${hour}:${formattedMinute} ${period}`;
+  };
+  
+  // Check if current time is at minimum allowed time
+  const isAtMinTime = (): boolean => {
+    const currentMinutes = timeToMinutes(buildTimeString());
     const minMinutes = minTime ? timeToMinutes(minTime) : 0;
     const effectiveMinMinutes = isEndTime && startTime ? 
       Math.max(timeToMinutes(startTime), minMinutes) : minMinutes;
     
-    console.log(`isAtMinTime check: ${currentMinutes} <= ${effectiveMinMinutes} = ${currentMinutes <= effectiveMinMinutes}`);
-    return currentMinutes <= effectiveMinMinutes;
+    const result = currentMinutes <= effectiveMinMinutes;
+    console.log(`isAtMinTime: ${buildTimeString()} <= ${timeToMinutes(startTime || "")} or ${minMinutes} = ${result}`);
+    return result;
   };
   
-  // Helper to check if we're at the max time
-  const isAtMaxTime = () => {
-    const currentMinutes = timeToMinutes(time);
+  // Check if current time is at maximum allowed time
+  const isAtMaxTime = (): boolean => {
+    const currentMinutes = timeToMinutes(buildTimeString());
     const maxMinutes = maxTime ? timeToMinutes(maxTime) : 24 * 60 - 1;
     
-    console.log(`isAtMaxTime check: ${currentMinutes} >= ${maxMinutes} = ${currentMinutes >= maxMinutes}`);
-    return currentMinutes >= maxMinutes;
+    const result = currentMinutes >= maxMinutes;
+    console.log(`isAtMaxTime: ${buildTimeString()} >= ${maxTime} (${maxMinutes} mins) = ${result}`);
+    return result;
   };
   
   // Increment time by 15 minutes
   const handleIncrement = () => {
-    console.log("Increment button clicked");
+    console.log("🔼 Increment button clicked");
     
-    // Get current time components
-    const { hour, minute, period } = timeComponents;
+    // Convert current time to minutes
+    let hours = parseInt(hour);
+    let minutes = parseInt(minute);
+    const currentPeriod = period;
     
-    // Convert to 24-hour format for calculation
-    let hourNum = parseInt(hour);
-    let minuteNum = parseInt(minute);
-    
-    let hours24 = hourNum;
-    if (period === "pm" && hourNum < 12) {
+    // Convert to 24-hour format
+    let hours24 = hours;
+    if (currentPeriod === "pm" && hours < 12) {
       hours24 += 12;
-    } else if (period === "am" && hourNum === 12) {
+    } else if (currentPeriod === "am" && hours === 12) {
       hours24 = 0;
     }
     
-    // Calculate new time (add 15 minutes)
-    let totalMinutes = hours24 * 60 + minuteNum + 15;
+    // Add 15 minutes
+    let totalMinutes = (hours24 * 60) + minutes + 15;
     
-    // Apply max constraint if needed
-    if (maxTime) {
-      const maxMinutes = timeToMinutes(maxTime);
-      if (totalMinutes > maxMinutes) {
-        console.log(`Cannot increment: ${totalMinutes} > ${maxMinutes}`);
-        return;
-      }
+    // Check if exceeding max time
+    const maxMinutes = maxTime ? timeToMinutes(maxTime) : 24 * 60 - 1;
+    if (totalMinutes > maxMinutes) {
+      console.log(`Cannot increment: ${totalMinutes} > ${maxMinutes}`);
+      return;
     }
     
     // Convert back to 12-hour format
-    hours24 = Math.floor(totalMinutes / 60) % 24;
-    minuteNum = totalMinutes % 60;
+    const newHours24 = Math.floor(totalMinutes / 60) % 24;
+    const newMinutes = totalMinutes % 60;
+    const newPeriod = newHours24 >= 12 ? "pm" : "am";
+    let newHours12 = newHours24 % 12;
+    if (newHours12 === 0) newHours12 = 12;
     
-    // Determine new period
-    const newPeriod = hours24 >= 12 ? "pm" : "am";
+    console.log(`Incrementing from ${hours}:${minutes} ${currentPeriod} to ${newHours12}:${newMinutes} ${newPeriod}`);
     
-    // Convert hours to 12-hour format
-    let hours12 = hours24 % 12;
-    if (hours12 === 0) hours12 = 12;
+    // Update state
+    setHour(newHours12.toString());
+    setMinute(newMinutes.toString().padStart(2, '0'));
+    setPeriod(newPeriod);
     
-    // Update state and notify parent
-    const newHour = hours12.toString();
-    const newMinute = minuteNum.toString().padStart(2, '0');
-    
-    console.log(`Incrementing to: ${newHour}:${newMinute} ${newPeriod}`);
-    
-    const newTimeComponents = {
-      hour: newHour,
-      minute: newMinute,
-      period: newPeriod
-    };
-    
-    setTimeComponents(newTimeComponents);
-    
-    // Notify parent component
-    const newTimeString = buildTimeString(newHour, newMinute, newPeriod);
+    // Notify parent with new time string
+    const newTimeString = `${newHours12}:${newMinutes.toString().padStart(2, '0')} ${newPeriod}`;
     console.log(`Calling onTimeChange with: "${newTimeString}"`);
     onTimeChange(newTimeString);
   };
   
   // Decrement time by 15 minutes
   const handleDecrement = () => {
-    console.log("Decrement button clicked");
+    console.log("🔽 Decrement button clicked");
     
-    // Get current time components
-    const { hour, minute, period } = timeComponents;
+    // Convert current time to minutes
+    let hours = parseInt(hour);
+    let minutes = parseInt(minute);
+    const currentPeriod = period;
     
-    // Convert to 24-hour format for calculation
-    let hourNum = parseInt(hour);
-    let minuteNum = parseInt(minute);
-    
-    let hours24 = hourNum;
-    if (period === "pm" && hourNum < 12) {
+    // Convert to 24-hour format
+    let hours24 = hours;
+    if (currentPeriod === "pm" && hours < 12) {
       hours24 += 12;
-    } else if (period === "am" && hourNum === 12) {
+    } else if (currentPeriod === "am" && hours === 12) {
       hours24 = 0;
     }
     
-    // Calculate new time (subtract 15 minutes)
-    let totalMinutes = hours24 * 60 + minuteNum - 15;
+    // Subtract 15 minutes
+    let totalMinutes = (hours24 * 60) + minutes - 15;
     
-    // Apply min constraint if needed
+    // Check if below min time
     const minMinutes = minTime ? timeToMinutes(minTime) : 0;
     const effectiveMinMinutes = isEndTime && startTime ? 
       Math.max(timeToMinutes(startTime), minMinutes) : minMinutes;
@@ -162,32 +182,21 @@ const TimeSelector = ({
     }
     
     // Convert back to 12-hour format
-    hours24 = Math.floor(totalMinutes / 60) % 24;
-    minuteNum = totalMinutes % 60;
+    const newHours24 = Math.floor(totalMinutes / 60) % 24;
+    const newMinutes = totalMinutes % 60;
+    const newPeriod = newHours24 >= 12 ? "pm" : "am";
+    let newHours12 = newHours24 % 12;
+    if (newHours12 === 0) newHours12 = 12;
     
-    // Determine new period
-    const newPeriod = hours24 >= 12 ? "pm" : "am";
+    console.log(`Decrementing from ${hours}:${minutes} ${currentPeriod} to ${newHours12}:${newMinutes} ${newPeriod}`);
     
-    // Convert hours to 12-hour format
-    let hours12 = hours24 % 12;
-    if (hours12 === 0) hours12 = 12;
+    // Update state
+    setHour(newHours12.toString());
+    setMinute(newMinutes.toString().padStart(2, '0'));
+    setPeriod(newPeriod);
     
-    // Update state and notify parent
-    const newHour = hours12.toString();
-    const newMinute = minuteNum.toString().padStart(2, '0');
-    
-    console.log(`Decrementing to: ${newHour}:${newMinute} ${newPeriod}`);
-    
-    const newTimeComponents = {
-      hour: newHour,
-      minute: newMinute,
-      period: newPeriod
-    };
-    
-    setTimeComponents(newTimeComponents);
-    
-    // Notify parent component
-    const newTimeString = buildTimeString(newHour, newMinute, newPeriod);
+    // Notify parent with new time string
+    const newTimeString = `${newHours12}:${newMinutes.toString().padStart(2, '0')} ${newPeriod}`;
     console.log(`Calling onTimeChange with: "${newTimeString}"`);
     onTimeChange(newTimeString);
   };
@@ -201,7 +210,7 @@ const TimeSelector = ({
             isAtMaxTime() ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
           onClick={() => {
-            console.log("Increment button clicked in UI");
+            console.log("🔼 Increment button clicked in UI");
             if (!isAtMaxTime()) {
               handleIncrement();
             }
@@ -216,11 +225,11 @@ const TimeSelector = ({
       
       <div className="flex-1 flex flex-col items-center justify-center">
         <div className="text-4xl font-medium flex items-baseline">
-          <span>{timeComponents.hour}</span>
+          <span>{hour}</span>
           <span className="mx-1">:</span>
-          <span>{timeComponents.minute}</span>
+          <span>{minute}</span>
         </div>
-        <div className="text-gray-500 mt-1">{timeComponents.period}</div>
+        <div className="text-gray-500 mt-1">{period}</div>
       </div>
       
       <div className="flex justify-center">
@@ -230,7 +239,7 @@ const TimeSelector = ({
             isAtMinTime() ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
           onClick={() => {
-            console.log("Decrement button clicked in UI");
+            console.log("🔽 Decrement button clicked in UI");
             if (!isAtMinTime()) {
               handleDecrement();
             }
