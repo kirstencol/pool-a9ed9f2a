@@ -47,4 +47,33 @@
   .celebration-animation {
     @apply w-16 h-16 rounded-full bg-purple/20 flex items-center justify-center mx-auto my-6;
   }
+  
+  /* Typography Hierarchy Classes */
+  .heading-1 {
+    @apply text-2xl font-semibold;
+  }
+  
+  .heading-2 {
+    @apply text-xl font-semibold;
+  }
+  
+  .heading-3 {
+    @apply text-lg font-medium;
+  }
+  
+  .subheading {
+    @apply text-gray-600;
+  }
+  
+  .body-text {
+    @apply text-gray-700;
+  }
+  
+  .body-text-bold {
+    @apply text-gray-700 font-medium;
+  }
+  
+  .small-text {
+    @apply text-sm text-gray-600;
+  }
 }

@@ -113,31 +113,31 @@ const Confirmation = () => {
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
       <div className="mb-10">
-        <h2 className="text-xl font-semibold mb-1">Getting together</h2>
-        <p className="text-gray-700">{getFormattedDate()} from {getFormattedTime()}</p>
+        <h2 className="heading-2 mb-1">Getting together</h2>
+        <p className="body-text">{getFormattedDate()} from {getFormattedTime()}</p>
       </div>
       
-      <p className="mb-6 text-gray-700 font-medium">You and Carrie like these spots</p>
+      <p className="mb-6 body-text-bold">You and Carrie like these spots</p>
       
       <div className="space-y-6 mb-10">
         {locationResponses.map((location, index) => (
           <div key={index} className="bg-purple-light rounded-xl p-4">
-            <h3 className="text-lg font-semibold mb-2">{location.name}</h3>
+            <h3 className="heading-3 mb-2">{location.name}</h3>
             {!isAbbySuggestion(location) && (
               <div className="flex items-start mb-3">
                 <Avatar initial="C" size="sm" position="third" className="mr-2 flex-shrink-0" />
-                <p className="text-gray-700 text-sm">{location.note}</p>
+                <p className="small-text">{location.note}</p>
               </div>
             )}
             <div className="flex items-start">
               <Avatar initial="A" size="sm" position="first" className="mr-2 flex-shrink-0" />
-              <p className="text-gray-700 text-sm">{location.userNote}</p>
+              <p className="small-text">{location.userNote}</p>
             </div>
           </div>
         ))}
       </div>
       
-      <p className="mb-4 text-center text-gray-700 font-medium">Does Burt need a nudge?</p>
+      <p className="mb-4 text-center body-text-bold">Does Burt need a nudge?</p>
       
       <button
         onClick={copyLink}
