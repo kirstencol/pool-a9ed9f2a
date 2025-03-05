@@ -1,6 +1,5 @@
-
 import React from "react";
-import { LocationWithComments } from "@/types";
+import type { LocationWithComments } from "@/types";
 import Avatar from "./Avatar";
 import { cn } from "@/lib/utils";
 

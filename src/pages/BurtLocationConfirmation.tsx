@@ -30,7 +30,10 @@ const BurtLocationConfirmation = () => {
     }
   ];
   
-  const locationSelection = useLocationSelection({ initialLocations });
+  const locationSelection = useLocationSelection({ 
+    initialLocations,
+    maxSelections: 1 // Ensure only one location can be selected
+  });
   
   // Updated date and time for the demo
   const date = "Saturday, March 2nd";
@@ -103,7 +106,7 @@ const BurtLocationConfirmation = () => {
         <p className="text-gray-700">{date} from {timeRange}</p>
       </div>
       
-      <p className="mb-4 text-gray-700">Abby and Carrie like these spots. You get to pick! <span className="text-sm text-gray-500">(Select one)</span></p>
+      <p className="mb-4 text-gray-700">Abby and Carrie like these spots. You get to pick!</p>
       
       <LocationSuggestionsList 
         locations={locationSelection.locations}
