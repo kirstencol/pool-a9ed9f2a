@@ -47,4 +47,9 @@
   .celebration-animation {
     @apply w-16 h-16 rounded-full bg-purple/20 flex items-center justify-center mx-auto my-6;
   }
+  
+  /* New utility for avatar profile icon positioning */
+  .avatar-profile {
+    @apply w-6 h-6 text-xs absolute top-4 right-4;
+  }
 }
