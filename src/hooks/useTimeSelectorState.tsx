@@ -72,7 +72,7 @@ export const useTimeSelectorState = ({
   
   // Increment time by 15 minutes
   const handleIncrement = useCallback(() => {
-    console.log("🔼 Increment button clicked in hook");
+    console.log("🔼 handleIncrement FUNCTION START");
     
     // Direct calculation approach
     const currentTimeString = buildTimeString(hour, minute, period);
@@ -92,7 +92,7 @@ export const useTimeSelectorState = ({
   
   // Decrement time by 15 minutes
   const handleDecrement = useCallback(() => {
-    console.log("🔽 Decrement button clicked in hook");
+    console.log("🔽 handleDecrement FUNCTION START");
     
     // Direct calculation approach
     const currentTimeString = buildTimeString(hour, minute, period);

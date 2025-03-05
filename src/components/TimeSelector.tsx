@@ -47,14 +47,20 @@ const TimeSelector = memo(({
   const handleIncrementClick = () => {
     console.log("⬆️ Increment button clicked");
     if (!isAtMaxTime) {
+      console.log("Calling handleIncrement() from click handler");
       handleIncrement();
+    } else {
+      console.log("Not calling handleIncrement() because isAtMaxTime:", isAtMaxTime);
     }
   };
 
   const handleDecrementClick = () => {
     console.log("⬇️ Decrement button clicked");
     if (!isAtMinTime) {
+      console.log("Calling handleDecrement() from click handler");
       handleDecrement();
+    } else {
+      console.log("Not calling handleDecrement() because isAtMinTime:", isAtMinTime);
     }
   };
 
