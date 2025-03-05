@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { 
   parseTimeString, 
@@ -7,7 +6,7 @@ import {
   decrementTime, 
   isAtMinTime, 
   isAtMaxTime 
-} from "@/utils/timeCalculations";
+} from "@/utils/time";
 
 interface UseTimeSelectorStateProps {
   time: string;
