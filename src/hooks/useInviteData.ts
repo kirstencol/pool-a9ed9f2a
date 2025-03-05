@@ -43,21 +43,26 @@ export const useInviteData = (inviteId: string, userName?: string) => {
           // Use default responder names if not specified
           const defaultResponders = ["Burt", "Carrie"];
           
-          // Get names that have already responded
-          const existingResponderNames = new Set();
-          meetingData.timeSlots?.forEach((slot: any) => {
-            if (slot.responses) {
-              slot.responses.forEach((response: any) => {
-                existingResponderNames.add(response.responderName);
-              });
-            }
-          });
-          
-          console.log("useInviteData - Existing responder names:", Array.from(existingResponderNames));
-          
-          // Find the first default responder who hasn't responded yet
-          const availableResponder = defaultResponders.find(name => !existingResponderNames.has(name));
-          setResponderName(availableResponder || defaultResponders[0]);
+          // Special case for carrie_demo flow
+          if (inviteId === "carrie_demo") {
+            setResponderName("Carrie");
+          } else {
+            // Get names that have already responded
+            const existingResponderNames = new Set();
+            meetingData.timeSlots?.forEach((slot: any) => {
+              if (slot.responses) {
+                slot.responses.forEach((response: any) => {
+                  existingResponderNames.add(response.responderName);
+                });
+              }
+            });
+            
+            console.log("useInviteData - Existing responder names:", Array.from(existingResponderNames));
+            
+            // Find the first default responder who hasn't responded yet
+            const availableResponder = defaultResponders.find(name => !existingResponderNames.has(name));
+            setResponderName(availableResponder || defaultResponders[0]);
+          }
         } else {
           // Use the provided username
           setResponderName(userName);

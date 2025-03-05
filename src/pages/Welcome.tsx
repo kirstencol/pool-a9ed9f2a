@@ -50,6 +50,13 @@ const Welcome = () => {
     navigate("/select-user?id=burt_demo");
   };
 
+  const goToRespondAsCarrie = () => {
+    // Make sure demo data is initialized before navigating
+    initializeDemoData();
+    console.log("Navigating to Carrie Selection Screen: /select-user?id=carrie_demo");
+    navigate("/select-user?id=carrie_demo");
+  };
+
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
       <h1 className="text-2xl font-semibold mb-8">Let's get together.</h1>
@@ -128,6 +135,13 @@ const Welcome = () => {
                 className="w-full justify-start"
               >
                 Test Burt's Response Flow
+              </Button>
+              <Button 
+                onClick={goToRespondAsCarrie}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                Test Carrie's Response Flow
               </Button>
             </div>
           </div>

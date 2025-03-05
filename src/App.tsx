@@ -18,6 +18,9 @@ const SelectLocation = lazy(() => import("./pages/SelectLocation"));
 const LocationConfirmation = lazy(() => import("./pages/LocationConfirmation"));
 const FinalConfirmation = lazy(() => import("./pages/FinalConfirmation"));
 const AddToCalendar = lazy(() => import("./pages/AddToCalendar"));
+const CarrieFlow = lazy(() => import("./pages/CarrieFlow"));
+const CarrieSelectLocation = lazy(() => import("./pages/CarrieSelectLocation"));
+const CarrieConfirmation = lazy(() => import("./pages/CarrieConfirmation"));
 
 // Create QueryClient outside component to prevent recreation on render
 const queryClient = new QueryClient({
@@ -50,6 +53,12 @@ const App = () => (
               <Route path="/location-confirmation" element={<LocationConfirmation />} />
               <Route path="/final-confirmation" element={<FinalConfirmation />} />
               <Route path="/add-to-calendar" element={<AddToCalendar />} />
+              
+              {/* Carrie's flow routes */}
+              <Route path="/carrie-flow" element={<CarrieFlow />} />
+              <Route path="/carrie-select-location" element={<CarrieSelectLocation />} />
+              <Route path="/carrie-confirmation" element={<CarrieConfirmation />} />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

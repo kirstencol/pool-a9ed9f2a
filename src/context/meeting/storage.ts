@@ -63,6 +63,40 @@ const DEMO_TIME_SLOTS = [
   }
 ];
 
+// Time slots for Carrie's demo showing overlapping availability between Abby and Burt
+const CARRIE_DEMO_TIME_SLOTS = [
+  {
+    id: "1",
+    date: "March 1",
+    startTime: "8:00 AM",
+    endTime: "12:00 PM",
+    responses: [
+      {
+        responderId: "burt-id",
+        responderName: "Burt",
+        available: true,
+        startTime: "8:00 AM",
+        endTime: "12:00 PM"
+      }
+    ]
+  },
+  {
+    id: "2",
+    date: "March 2",
+    startTime: "8:00 AM",
+    endTime: "9:30 AM",
+    responses: [
+      {
+        responderId: "burt-id",
+        responderName: "Burt",
+        available: true,
+        startTime: "8:00 AM",
+        endTime: "9:30 AM"
+      }
+    ]
+  }
+];
+
 // Initialize demo meeting data in localStorage
 export const initializeDemoData = (): boolean => {
   try {
@@ -71,6 +105,7 @@ export const initializeDemoData = (): boolean => {
     // Check if demo data already exists to prevent repeated initializations
     const existingDemoData = loadMeetingFromStorage("demo_invite");
     const existingBurtData = loadMeetingFromStorage("burt_demo");
+    const existingCarrieData = loadMeetingFromStorage("carrie_demo");
     
     // Create the default demo creator
     const demoCreator = {
@@ -84,16 +119,24 @@ export const initializeDemoData = (): boolean => {
       creator: demoCreator,
       timeSlots: DEMO_TIME_SLOTS,
     };
+
+    // Carrie's demo data - showing combined Abby/Burt availability
+    const carrieDemoData: StoredMeeting = {
+      creator: demoCreator,
+      timeSlots: CARRIE_DEMO_TIME_SLOTS,
+    };
     
     // Force store both sets of demo data
     const demoStored = storeMeetingInStorage("demo_invite", demoMeetingData);
     const burtStored = storeMeetingInStorage("burt_demo", demoMeetingData);
+    const carrieStored = storeMeetingInStorage("carrie_demo", carrieDemoData);
     
-    console.log("Demo data initialization complete. Success:", demoStored && burtStored);
+    console.log("Demo data initialization complete. Success:", demoStored && burtStored && carrieStored);
     
     // Verify data was stored properly
     const demoVerify = loadMeetingFromStorage("demo_invite");
     const burtVerify = loadMeetingFromStorage("burt_demo");
+    const carrieVerify = loadMeetingFromStorage("carrie_demo");
     
     // Log verification results
     if (demoVerify && demoVerify.timeSlots && demoVerify.timeSlots.length > 0) {
@@ -108,7 +151,13 @@ export const initializeDemoData = (): boolean => {
       console.error("Failed to verify Burt demo data");
     }
     
-    return demoStored && burtStored;
+    if (carrieVerify && carrieVerify.timeSlots && carrieVerify.timeSlots.length > 0) {
+      console.log("Carrie data verified with", carrieVerify.timeSlots.length, "time slots");
+    } else {
+      console.error("Failed to verify Carrie demo data");
+    }
+    
+    return demoStored && burtStored && carrieStored;
   } catch (error) {
     console.error("Error in initializeDemoData:", error);
     return false;
