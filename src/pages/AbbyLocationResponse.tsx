@@ -61,7 +61,24 @@ const AbbyLocationResponse = () => {
         title: "Response submitted!",
         description
       });
-      navigate("/confirmation");
+      
+      // Prepare the final selected locations to pass to the confirmation page
+      const finalLocations = [...selectedLocations];
+      
+      // Add the custom location if it was selected
+      if (hasCustomSelection && customLocation) {
+        finalLocations.push({
+          name: customLocation.name,
+          note: "Your suggestion",
+          selected: true,
+          userNote: customLocation.note || ""
+        });
+      }
+      
+      // Navigate to confirmation page with the selected locations in state
+      navigate("/confirmation", { 
+        state: { selectedLocations: finalLocations }
+      });
     } else {
       toast({
         title: "Please make a selection",

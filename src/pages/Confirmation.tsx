@@ -18,20 +18,7 @@ const Confirmation = () => {
   const [meetingData, setMeetingData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [locationResponses, setLocationResponses] = useState<LocationWithNote[]>([
-    { 
-      name: "Central Cafe", 
-      note: "Great coffee and shouldn't be too hard to get a table.",
-      selected: true,
-      userNote: "I like this place."
-    },
-    { 
-      name: "Starbucks on 5th", 
-      note: "Not the best vibes, but central to all three of us. Plus, PSLs.",
-      selected: true,
-      userNote: "Okay, if we must."
-    }
-  ]);
+  const [locationResponses, setLocationResponses] = useState<LocationWithNote[]>([]);
   
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -41,6 +28,28 @@ const Confirmation = () => {
       const data = loadMeetingFromStorage(inviteId);
       if (data) {
         setMeetingData(data);
+        
+        // Get location data from state if available (when coming from AbbyLocationResponse)
+        const stateLocations = location.state?.selectedLocations;
+        if (stateLocations && Array.isArray(stateLocations)) {
+          setLocationResponses(stateLocations);
+        } else {
+          // Fallback to demo data if no state was passed
+          setLocationResponses([
+            { 
+              name: "Central Cafe", 
+              note: "Great coffee and shouldn't be too hard to get a table.",
+              selected: true,
+              userNote: "I like this place."
+            },
+            { 
+              name: "Starbucks on 5th", 
+              note: "Not the best vibes, but central to all three of us. Plus, PSLs.",
+              selected: true,
+              userNote: "Okay, if we must."
+            }
+          ]);
+        }
         
         // Simulate loading state
         setTimeout(() => {
