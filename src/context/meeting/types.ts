@@ -15,33 +15,59 @@ export interface StoredMeeting {
   responses?: any[];
 }
 
-export interface MeetingContextType {
+// Core context state and operations
+export interface MeetingContextState {
   currentUser: User | null;
-  setCurrentUser: (user: User) => void;
   participants: User[];
-  addParticipant: (name: string) => void;
-  removeParticipant: (id: string) => void;
   timeSlots: TimeSlot[];
-  addTimeSlot: (timeSlot: TimeSlot) => void;
-  removeTimeSlot: (id: string) => void;
-  updateTimeSlot: (id: string, updates: Partial<TimeSlot>) => void;
   selectedTimeSlot: TimeSlot | null;
-  setSelectedTimeSlot: (timeSlot: TimeSlot | null) => void;
   locations: Location[];
-  addLocation: (location: Location) => void;
-  removeLocation: (id: string) => void;
   selectedLocation: Location | null;
-  setSelectedLocation: (location: Location | null) => void;
   meetingNotes: string;
-  setMeetingNotes: (notes: string) => void;
-  clearMeetingData: () => void;
-  clearTimeSlots: () => void;
-  getMeetingData: () => Partial<Meeting>;
-  generateShareableLink: () => Promise<{ id: string, url: string }>;
-  loadMeetingFromStorage: (id: string) => Promise<Meeting | null>;
-  respondToTimeSlot: (timeSlotId: string, responderName: string, startTime: string, endTime: string) => Promise<boolean>;
-  respondToLocation: (locationId: string, responderName: string, note?: string) => Promise<boolean>;
-  storeMeetingInStorage: (id: string, meeting: Partial<StoredMeeting>) => Promise<boolean>;
+  currentMeetingId: string;
   isLoading: boolean;
   error: string | null;
 }
+
+// User-related operations
+export interface UserOperations {
+  setCurrentUser: (user: User) => void;
+  addParticipant: (name: string) => void;
+  removeParticipant: (id: string) => void;
+}
+
+// Time slot operations
+export interface TimeSlotOperations {
+  addTimeSlot: (timeSlot: TimeSlot) => void;
+  removeTimeSlot: (id: string) => void;
+  updateTimeSlot: (id: string, updates: Partial<TimeSlot>) => void;
+  setSelectedTimeSlot: (timeSlot: TimeSlot | null) => void;
+  clearTimeSlots: () => void;
+  respondToTimeSlot: (timeSlotId: string, responderName: string, startTime: string, endTime: string) => Promise<boolean>;
+}
+
+// Location operations
+export interface LocationOperations {
+  addLocation: (location: Location) => void;
+  removeLocation: (id: string) => void;
+  setSelectedLocation: (location: Location | null) => void;
+  respondToLocation: (locationId: string, responderName: string, note?: string) => Promise<boolean>;
+}
+
+// Meeting data operations
+export interface MeetingDataOperations {
+  setMeetingNotes: (notes: string) => void;
+  clearMeetingData: () => void;
+  getMeetingData: () => Partial<Meeting>;
+  generateShareableLink: () => Promise<{ id: string, url: string }>;
+  loadMeetingFromStorage: (id: string) => Promise<Meeting | null>;
+  storeMeetingInStorage: (id: string, meeting: Partial<StoredMeeting>) => Promise<boolean>;
+}
+
+// Complete context type combining all operations
+export interface MeetingContextType extends 
+  MeetingContextState, 
+  UserOperations,
+  TimeSlotOperations,
+  LocationOperations,
+  MeetingDataOperations {}

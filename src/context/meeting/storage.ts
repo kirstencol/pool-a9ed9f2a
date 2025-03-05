@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 // Initialize demo data
 export const initializeDemoData = () => {
   // Initialize Abby's demo data
-  const abbyDemoData = {
+  const abbyDemoData: Partial<StoredMeeting> = {
     creator: {
       id: "abby-id",
       name: "Abby",
@@ -36,14 +36,14 @@ export const initializeDemoData = () => {
         responses: []
       }
     ],
-    status: "draft"
+    status: "draft" as const
   };
   
   // Store Abby's demo data
   storeMeetingInStorage("demo_invite", abbyDemoData);
   
   // Initialize Burt's demo data (with Abby as the creator)
-  const burtDemoData = {
+  const burtDemoData: Partial<StoredMeeting> = {
     creator: {
       id: "abby-id",
       name: "Abby",
@@ -72,14 +72,14 @@ export const initializeDemoData = () => {
         responses: []
       }
     ],
-    status: "draft"
+    status: "draft" as const
   };
   
   // Store Burt's demo data
   storeMeetingInStorage("burt_demo", burtDemoData);
   
   // Initialize Carrie's demo data
-  const carrieDemoData = {
+  const carrieDemoData: Partial<StoredMeeting> = {
     creator: {
       id: "abby-id",
       name: "Abby",
@@ -100,7 +100,7 @@ export const initializeDemoData = () => {
         ]
       }
     ],
-    status: "pending"
+    status: "pending" as const
   };
   
   // Store Carrie's demo data
