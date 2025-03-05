@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useInviteData } from "@/hooks/useInviteData";
 import { TimeSlot } from "@/types";
@@ -22,13 +22,13 @@ const CarrieFlow = () => {
   const { setCurrentUser } = useMeeting();
 
   // Set Carrie as the current user when component mounts
-  useState(() => {
+  useEffect(() => {
     setCurrentUser({
       id: "carrie-id",
       name: "Carrie",
       initial: "C"
     });
-  });
+  }, [setCurrentUser]);
 
   const handleSelectTimeSlot = (slot: TimeSlot) => {
     setSelectedTimeSlot(slot);
@@ -78,12 +78,16 @@ const CarrieFlow = () => {
           {inviteTimeSlots.map((slot) => (
             <TimeSlotCard
               key={slot.id}
-              timeSlot={slot}
+              timeSlot={{
+                ...slot,
+                // Override the rendering by adding a custom property
+                creatorDisplayName: "Abby and Burt"
+              }}
               selectedByUser={selectedTimeSlot?.id === slot.id}
               showTimeSelector={selectedTimeSlot?.id === slot.id}
               onSelectTime={handleTimeChange}
               creatorAvailable={true}
-              creatorName={`Abby and Burt`}
+              creatorName="Abby and Burt"
               onClick={() => handleSelectTimeSlot(slot)}
             />
           ))}

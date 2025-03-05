@@ -1,3 +1,4 @@
+
 import { TimeSlot } from "@/types";
 import { useState, useEffect, memo } from "react";
 import { cn } from "@/lib/utils";
@@ -5,7 +6,7 @@ import TimeSelector from "./TimeSelector";
 import { X } from "lucide-react";
 
 interface TimeSlotCardProps {
-  timeSlot: TimeSlot;
+  timeSlot: TimeSlot & { creatorDisplayName?: string };
   selectedByUser?: boolean;
   showTimeSelector?: boolean;
   onSelectTime?: (startTime: string, endTime: string) => void;
@@ -31,6 +32,9 @@ const TimeSlotCard = ({
 }: TimeSlotCardProps) => {
   const [startTime, setStartTime] = useState(timeSlot.startTime);
   const [endTime, setEndTime] = useState(timeSlot.endTime);
+
+  // Use either the custom display name from the timeSlot or the provided creatorName
+  const displayCreatorName = timeSlot.creatorDisplayName || creatorName;
 
   useEffect(() => {
     if (selectedByUser && showTimeSelector) {
@@ -116,8 +120,8 @@ const TimeSlotCard = ({
             selectedByUser && !showTimeSelector ? "text-purple-700" : "text-gray-600"
           )}>
             {selectedByUser && !showTimeSelector ? 
-              `You and ${creatorName} are free ${startTime} - ${endTime}` :
-              `${creatorName} is free ${timeSlot.startTime} - ${timeSlot.endTime}`}
+              `You and ${displayCreatorName} are free ${startTime} - ${endTime}` :
+              `${displayCreatorName} ${displayCreatorName.includes(' and ') ? 'are' : 'is'} free ${timeSlot.startTime} - ${timeSlot.endTime}`}
           </div>
         )}
       </div>
