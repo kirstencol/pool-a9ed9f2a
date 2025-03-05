@@ -6,6 +6,7 @@ import { ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
 import LocationCard from "@/components/LocationCard";
+import { Location } from "@/types";
 
 type LocationWithNote = {
   name: string;
@@ -109,14 +110,25 @@ const AbbyLocationResponse = () => {
             className={`bg-white rounded-lg border ${loc.selected ? 'border-purple' : 'border-gray-200'} p-4 transition-all cursor-pointer`}
             onClick={() => handleSelectLocation(index)}
           >
-            <p className="font-medium text-gray-800">{loc.name}</p>
-            <p className="text-sm text-gray-600">{loc.note}</p>
+            <div className="flex items-start">
+              <div className="flex-grow">
+                <p className="font-medium text-gray-800">{loc.name}</p>
+                <div className="flex items-center mt-1 mb-1">
+                  <Avatar initial="C" size="sm" position="third" className="mr-2" />
+                  <p className="text-sm text-gray-600">{loc.note}</p>
+                </div>
+              </div>
+            </div>
             
             {loc.selected && (
               <div className="mt-3">
+                <div className="flex items-center mb-1">
+                  <Avatar initial="A" size="sm" position="first" className="mr-2" />
+                  <p className="text-sm text-gray-600 font-medium">Your note:</p>
+                </div>
                 <textarea
                   placeholder="Add a note (optional)"
-                  className="w-full p-2 mt-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple"
+                  className="w-full p-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple"
                   value={loc.userNote || ""}
                   onChange={(e) => handleNoteChange(index, e.target.value)}
                   onClick={(e) => e.stopPropagation()}
@@ -130,6 +142,10 @@ const AbbyLocationResponse = () => {
       
       {hasDifferentIdea ? (
         <div className="mb-6">
+          <div className="flex items-center mb-2">
+            <Avatar initial="A" size="sm" position="first" className="mr-2" />
+            <p className="text-sm text-gray-600 font-medium">Your suggestion:</p>
+          </div>
           <textarea
             value={differentIdeaText}
             onChange={(e) => setDifferentIdeaText(e.target.value)}
