@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { parseTimeString, buildTimeString, isTimeWithinBounds, convertTimeToMinutes } from "@/utils/timeUtils";
+import { parseTimeString, buildTimeString, convertTimeToMinutes } from "@/utils/timeUtils";
 
 interface UseTimeSelectorProps {
   time: string;
@@ -62,23 +62,31 @@ export const useTimeSelector = ({
   );
 
   const isAtMinTime = useMemo(() => 
-    currentTimeMinutes <= effectiveMinTime, 
-    [currentTimeMinutes, effectiveMinTime]
+    minTimeMinutes > 0 && currentTimeMinutes <= effectiveMinTime, 
+    [currentTimeMinutes, effectiveMinTime, minTimeMinutes]
   );
 
   const isAtMaxTime = useMemo(() => 
-    currentTimeMinutes >= maxTimeMinutes, 
+    maxTimeMinutes > 0 && currentTimeMinutes >= maxTimeMinutes, 
     [currentTimeMinutes, maxTimeMinutes]
   );
 
   // Time increment/decrement functions (in 15-minute intervals)
   const adjustTime = useCallback((minutes: number) => {
+    console.log("Adjusting time by minutes:", minutes);
     const currentTime = buildTimeString(hour, minute, period);
+    console.log("Current time before adjustment:", currentTime);
     const currentMinutes = convertTimeToMinutes(currentTime);
     const newTotalMinutes = currentMinutes + minutes;
     
+    console.log("Current minutes:", currentMinutes);
+    console.log("New total minutes:", newTotalMinutes);
+    console.log("Min time minutes:", minTimeMinutes);
+    console.log("Max time minutes:", maxTimeMinutes);
+    
     // Check constraints
-    if (minutes > 0 && newTotalMinutes > maxTimeMinutes) {
+    if (minutes > 0 && maxTimeMinutes > 0 && newTotalMinutes > maxTimeMinutes) {
+      console.log("Cannot increment: would exceed max time");
       return;
     }
     
@@ -87,7 +95,8 @@ export const useTimeSelector = ({
         Math.max(startTimeMinutes, minTimeMinutes) : 
         minTimeMinutes;
         
-      if (newTotalMinutes < effectiveMinTime) {
+      if (effectiveMinTime > 0 && newTotalMinutes < effectiveMinTime) {
+        console.log("Cannot decrement: would go below min time");
         return;
       }
     }
@@ -103,13 +112,22 @@ export const useTimeSelector = ({
       newHours = 12;
     }
     
+    console.log("Setting new time:", newHours, newMinutes, newPeriod);
+    
     setHour(newHours.toString());
     setMinute(newMinutes.toString().padStart(2, '0'));
     setPeriod(newPeriod);
   }, [hour, minute, period, maxTimeMinutes, minTimeMinutes, startTimeMinutes, isEndTime, startTime]);
 
-  const incrementTime = useCallback(() => adjustTime(15), [adjustTime]);
-  const decrementTime = useCallback(() => adjustTime(-15), [adjustTime]);
+  const incrementTime = useCallback(() => {
+    console.log("Increment time called");
+    adjustTime(15);
+  }, [adjustTime]);
+  
+  const decrementTime = useCallback(() => {
+    console.log("Decrement time called");
+    adjustTime(-15);
+  }, [adjustTime]);
 
   return {
     hour,

@@ -46,9 +46,10 @@ const TimeSelector = ({
             "flex items-center justify-center py-2 w-full",
             isAtMaxTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
-          onClick={incrementTime}
+          onClick={() => incrementTime()}
           disabled={isAtMaxTime}
           aria-label="Increase time"
+          type="button"
         >
           <ChevronUp size={24} />
         </button>
@@ -69,9 +70,10 @@ const TimeSelector = ({
             "flex items-center justify-center py-2 w-full",
             isAtMinTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
-          onClick={decrementTime}
+          onClick={() => decrementTime()}
           disabled={isAtMinTime}
           aria-label="Decrease time"
+          type="button"
         >
           <ChevronDown size={24} />
         </button>
