@@ -30,7 +30,7 @@ export const useResponseSubmitter = ({
     storeMeetingInStorage
   } = useMeeting();
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     if (currentSelectedSlot) {
       // Add the responder as a participant
       addParticipant(responderName);
@@ -43,37 +43,21 @@ export const useResponseSubmitter = ({
       });
       
       // If we have a valid inviteId, record this response in localStorage
-      if (inviteId && storeMeetingInStorage) {
-        try {
-          // Load existing meeting data first
-          const existingMeeting = await loadMeetingFromStorage(inviteId);
-          if (existingMeeting) {
-            // Create a storable meeting object
-            const meetingToStore = {
-              id: existingMeeting.id,
-              creator: existingMeeting.creator,
-              timeSlots: existingMeeting.timeSlots,
-              selectedTimeSlot: existingMeeting.selectedTimeSlot,
-              locations: existingMeeting.locations,
-              selectedLocation: existingMeeting.selectedLocation,
-              notes: existingMeeting.notes,
-              responses: []
-            };
-            
-            // Add this response to the meeting data
-            if (!meetingToStore.responses) meetingToStore.responses = [];
-            meetingToStore.responses.push({
-              responderName: responderName,
-              timeSlotId: currentSelectedSlot.id,
-              startTime: currentStartTime,
-              endTime: currentEndTime
-            });
-            
-            // Save the updated meeting data back to localStorage
-            storeMeetingInStorage(inviteId, meetingToStore);
-          }
-        } catch (error) {
-          console.error("Error updating meeting data:", error);
+      if (inviteId) {
+        // Load existing meeting data first
+        const existingMeeting = loadMeetingFromStorage(inviteId);
+        if (existingMeeting) {
+          // Add this response to the meeting data
+          if (!existingMeeting.responses) existingMeeting.responses = [];
+          existingMeeting.responses.push({
+            responderName: responderName, // Changed from 'name' to 'responderName'
+            timeSlotId: currentSelectedSlot.id,
+            startTime: currentStartTime,
+            endTime: currentEndTime
+          });
+          
+          // Save the updated meeting data back to localStorage
+          storeMeetingInStorage(inviteId, existingMeeting);
         }
       }
       

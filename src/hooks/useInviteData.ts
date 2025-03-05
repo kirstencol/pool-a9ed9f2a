@@ -23,7 +23,7 @@ export const useInviteData = (inviteId: string, userName?: string) => {
       setInviteError(null);
       
       try {
-        const meetingData = await loadMeetingFromStorage(inviteId);
+        const meetingData = loadMeetingFromStorage(inviteId);
         console.log("useInviteData - Loaded meeting data:", meetingData);
         
         if (!meetingData || !meetingData.timeSlots || meetingData.timeSlots.length === 0) {

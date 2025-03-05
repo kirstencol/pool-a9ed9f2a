@@ -10,7 +10,7 @@ export interface StoredMeeting {
   selectedLocation?: Location | null;
   notes?: string;
   responses?: {
-    responderName: string;
+    responderName: string;  // Changed from 'name' to 'responderName' for consistency
     timeSlotId: string;
     startTime: string;
     endTime: string;
@@ -39,11 +39,7 @@ export interface MeetingContextType {
   clearMeetingData: () => void;
   clearTimeSlots: () => void;
   getMeetingData: () => Partial<Meeting>;
-  generateShareableLink: () => Promise<{ id: string, url: string }>;
-  loadMeetingFromStorage: (id: string) => Promise<Meeting | null>;
-  respondToTimeSlot?: (timeSlotId: string, responderName: string, startTime: string, endTime: string) => Promise<boolean>;
-  respondToLocation?: (locationId: string, responderName: string, note?: string) => Promise<boolean>;
-  isLoading?: boolean;
-  error?: string | null;
-  storeMeetingInStorage?: (id: string, meeting: Partial<StoredMeeting>) => void;
+  generateShareableLink: () => { id: string, url: string };
+  storeMeetingInStorage: (id: string, meeting: StoredMeeting) => void;
+  loadMeetingFromStorage: (id: string) => StoredMeeting | null;
 }
