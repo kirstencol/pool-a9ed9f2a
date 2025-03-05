@@ -61,44 +61,57 @@ export const useTimeSelector = ({
     [isEndTime, startTime, startTimeMinutes, minTimeMinutes]
   );
 
-  const isAtMinTime = useMemo(() => 
-    minTimeMinutes > 0 && currentTimeMinutes <= effectiveMinTime, 
-    [currentTimeMinutes, effectiveMinTime, minTimeMinutes]
-  );
+  const isAtMinTime = useMemo(() => {
+    // Only apply constraints if min time is actually set
+    if (minTimeMinutes <= 0 && (!isEndTime || startTimeMinutes <= 0)) {
+      return false;
+    }
+    return currentTimeMinutes <= effectiveMinTime;
+  }, [currentTimeMinutes, effectiveMinTime, minTimeMinutes, isEndTime, startTimeMinutes]);
 
-  const isAtMaxTime = useMemo(() => 
-    maxTimeMinutes > 0 && currentTimeMinutes >= maxTimeMinutes, 
-    [currentTimeMinutes, maxTimeMinutes]
-  );
+  const isAtMaxTime = useMemo(() => {
+    // Only apply max constraint if max time is actually set
+    if (maxTimeMinutes <= 0) {
+      return false;
+    }
+    return currentTimeMinutes >= maxTimeMinutes;
+  }, [currentTimeMinutes, maxTimeMinutes]);
 
   // Time increment/decrement functions (in 15-minute intervals)
   const adjustTime = useCallback((minutes: number) => {
     console.log("Adjusting time by minutes:", minutes);
-    const currentTime = buildTimeString(hour, minute, period);
-    console.log("Current time before adjustment:", currentTime);
-    const currentMinutes = convertTimeToMinutes(currentTime);
-    const newTotalMinutes = currentMinutes + minutes;
     
-    console.log("Current minutes:", currentMinutes);
-    console.log("New total minutes:", newTotalMinutes);
-    console.log("Min time minutes:", minTimeMinutes);
-    console.log("Max time minutes:", maxTimeMinutes);
+    // Calculate new time in minutes
+    let hourNum = parseInt(hour);
+    let minuteNum = parseInt(minute);
+    
+    // Convert to 24-hour format for calculation
+    if (period === "pm" && hourNum < 12) {
+      hourNum += 12;
+    } else if (period === "am" && hourNum === 12) {
+      hourNum = 0;
+    }
+    
+    // Total minutes in 24-hour format
+    let totalMinutes = hourNum * 60 + minuteNum;
+    let newTotalMinutes = totalMinutes + minutes;
+    
+    console.log("Current time (24h format):", `${hourNum}:${minuteNum}`);
+    console.log("Current minutes since midnight:", totalMinutes);
+    console.log("New minutes since midnight:", newTotalMinutes);
     
     // Check constraints
+    const effectiveMinMinutes = isEndTime && startTime ? Math.max(startTimeMinutes, minTimeMinutes) : minTimeMinutes;
+    
+    // Apply constraints but only if they are actually set
     if (minutes > 0 && maxTimeMinutes > 0 && newTotalMinutes > maxTimeMinutes) {
-      console.log("Cannot increment: would exceed max time");
+      console.log("Cannot increment: would exceed max time limit of", maxTimeMinutes);
       return;
     }
     
-    if (minutes < 0) {
-      const effectiveMinTime = isEndTime && startTime ? 
-        Math.max(startTimeMinutes, minTimeMinutes) : 
-        minTimeMinutes;
-        
-      if (effectiveMinTime > 0 && newTotalMinutes < effectiveMinTime) {
-        console.log("Cannot decrement: would go below min time");
-        return;
-      }
+    if (minutes < 0 && effectiveMinMinutes > 0 && newTotalMinutes < effectiveMinMinutes) {
+      console.log("Cannot decrement: would go below min time limit of", effectiveMinMinutes);
+      return;
     }
     
     // Convert back to 12-hour format
@@ -112,8 +125,9 @@ export const useTimeSelector = ({
       newHours = 12;
     }
     
-    console.log("Setting new time:", newHours, newMinutes, newPeriod);
+    console.log(`Setting new time: ${newHours}:${newMinutes.toString().padStart(2, '0')} ${newPeriod}`);
     
+    // Update state
     setHour(newHours.toString());
     setMinute(newMinutes.toString().padStart(2, '0'));
     setPeriod(newPeriod);
