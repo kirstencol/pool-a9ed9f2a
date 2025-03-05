@@ -46,6 +46,8 @@ const SelectUser = () => {
   // Determine the header text based on the flow type
   const headerText = flowType === 'abby-location-response' 
     ? "Hi!\n\nLet's nail down a spot to meet."
+    : flowType === 'burt-location-confirmation'
+    ? "Hi!\n\nLet's nail down a spot to meet."
     : "Hi! Let's find a time to get together.";
   
   const handleContinue = () => {
@@ -70,6 +72,21 @@ const SelectUser = () => {
         toast({
           title: "This flow is for Abby",
           description: "Please select Abby to continue with this demo flow",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
+    
+    // Special case for the Burt location confirmation flow
+    if (flowType === 'burt-location-confirmation') {
+      // Only allow Burt to proceed to the location confirmation page
+      if (selectedUser === "Burt") {
+        navigate('/burt-location-confirmation');
+      } else {
+        toast({
+          title: "This flow is for Burt",
+          description: "Please select Burt to continue with this demo flow",
           variant: "destructive"
         });
       }
