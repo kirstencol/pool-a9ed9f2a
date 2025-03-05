@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -28,13 +27,11 @@ const CarrieConfirmation = () => {
   const [locations, setLocations] = useState<LocationWithNote[]>([]);
   
   useEffect(() => {
-    // Try to parse the location data JSON
     if (locDataParam) {
       try {
         const decodedData = JSON.parse(decodeURIComponent(locDataParam));
         setLocations(decodedData);
       } catch (e) {
-        // Fallback to simple locations if JSON parsing fails
         const basicLocations = locationParam.split(",").map((loc, index) => ({ 
           name: loc.trim(),
           note: ""
@@ -42,7 +39,6 @@ const CarrieConfirmation = () => {
         setLocations(basicLocations);
       }
     } else {
-      // Fallback to simple locations if no JSON data
       const basicLocations = locationParam.split(",").map((loc, index) => ({ 
         name: loc.trim(),
         note: ""
@@ -51,7 +47,6 @@ const CarrieConfirmation = () => {
     }
   }, [locDataParam, locationParam]);
   
-  // Format the date for display
   const formatDate = (dateString: string) => {
     if (!dateString) return "";
     
@@ -74,7 +69,6 @@ const CarrieConfirmation = () => {
   };
 
   const handleCopyLink = () => {
-    // Create a shareable link with the meetup details
     const baseUrl = window.location.origin;
     const shareableUrl = `${baseUrl}/respond?date=${date}&startTime=${startTime}&endTime=${endTime}&locations=${encodeURIComponent(locationParam)}`;
     
@@ -85,7 +79,6 @@ const CarrieConfirmation = () => {
         description: "Share it with Abby and Burt to get their input"
       });
       
-      // Reset the copied state after 3 seconds
       setTimeout(() => setCopied(false), 3000);
     });
   };
@@ -104,8 +97,7 @@ const CarrieConfirmation = () => {
         <Avatar initial="C" size="lg" position="third" />
       </div>
 
-      <h1 className="text-xl font-semibold text-center mb-2">Almost done!</h1>
-      <p className="text-gray-600 text-center mb-4">Suggest a spot to meet:</p>
+      <h1 className="text-xl font-semibold text-center mb-6">Almost done!</h1>
       
       <div className="bg-purple-50 rounded-lg p-4 mb-6 text-center">
         <p className="text-gray-700">
