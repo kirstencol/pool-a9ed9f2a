@@ -57,6 +57,8 @@ const CarrieFlow = () => {
     return <div className="p-6">Error: Invalid or expired invitation</div>;
   }
 
+  // Force "Abby and Burt" as the creators' names for this specific flow
+  const combinedCreatorName = "Abby and Burt";
   const availabilityText = `Showing availability when both Abby and Burt are free`;
 
   return (
@@ -80,14 +82,15 @@ const CarrieFlow = () => {
               key={slot.id}
               timeSlot={{
                 ...slot,
-                // Override the rendering by adding a custom property
-                creatorDisplayName: "Abby and Burt"
+                // Override the creator display name explicitly
+                creatorDisplayName: combinedCreatorName
               }}
               selectedByUser={selectedTimeSlot?.id === slot.id}
               showTimeSelector={selectedTimeSlot?.id === slot.id}
               onSelectTime={handleTimeChange}
               creatorAvailable={true}
-              creatorName="Abby and Burt"
+              // Set this explicitly to ensure it's used if creatorDisplayName is not processed
+              creatorName={combinedCreatorName}
               onClick={() => handleSelectTimeSlot(slot)}
             />
           ))}

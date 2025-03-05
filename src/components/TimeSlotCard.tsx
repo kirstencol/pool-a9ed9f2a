@@ -39,6 +39,12 @@ const TimeSlotCard = ({
   // Determine verb form based on whether the name includes "and"
   const verbForm = displayCreatorName.includes(" and ") ? "are" : "is";
 
+  // Debug logs to help diagnose the issue
+  console.log("TimeSlotCard - Display Creator Name:", displayCreatorName);
+  console.log("TimeSlotCard - Verb Form:", verbForm);
+  console.log("TimeSlotCard - CreatorDisplayName from timeSlot:", timeSlot.creatorDisplayName);
+  console.log("TimeSlotCard - CreatorName prop:", creatorName);
+
   useEffect(() => {
     if (selectedByUser && showTimeSelector) {
       setStartTime(timeSlot.startTime);

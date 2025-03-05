@@ -67,7 +67,7 @@ const DEMO_TIME_SLOTS = [
 const CARRIE_DEMO_TIME_SLOTS = [
   {
     id: "1",
-    date: "March 1",
+    date: "2024-03-01",
     startTime: "8:00 AM",
     endTime: "12:00 PM",
     responses: [
@@ -82,7 +82,7 @@ const CARRIE_DEMO_TIME_SLOTS = [
   },
   {
     id: "2",
-    date: "March 2",
+    date: "2024-03-02",
     startTime: "8:00 AM",
     endTime: "9:30 AM",
     responses: [
@@ -122,7 +122,10 @@ export const initializeDemoData = (): boolean => {
 
     // Carrie's demo data - showing combined Abby/Burt availability
     const carrieDemoData: StoredMeeting = {
-      creator: demoCreator,
+      creator: {
+        ...demoCreator,
+        name: "Abby and Burt" // Make sure creator name is correct in storage
+      },
       timeSlots: CARRIE_DEMO_TIME_SLOTS,
     };
     
