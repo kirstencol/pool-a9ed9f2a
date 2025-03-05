@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
 import LocationCard from "@/components/LocationCard";
@@ -41,6 +41,7 @@ const AbbyLocationResponse = () => {
   
   const [hasDifferentIdea, setHasDifferentIdea] = useState(false);
   const [differentIdeaText, setDifferentIdeaText] = useState("");
+  const [differentIdeaName, setDifferentIdeaName] = useState("");
   
   const handleSelectLocation = (index: number) => {
     const updatedLocations = [...locations];
@@ -74,10 +75,10 @@ const AbbyLocationResponse = () => {
         description: `You selected: ${locationNames}`
       });
       navigate("/confirmation");
-    } else if (hasDifferentIdea && differentIdeaText) {
+    } else if (hasDifferentIdea && differentIdeaName) {
       toast({
         title: "Response submitted!",
-        description: `You suggested: ${differentIdeaText}`
+        description: `You suggested: ${differentIdeaName} - ${differentIdeaText}`
       });
       navigate("/confirmation");
     } else {
@@ -127,17 +128,24 @@ const AbbyLocationResponse = () => {
       </div>
       
       {hasDifferentIdea ? (
-        <div className="mb-6">
-          <div className="flex items-start">
-            <Avatar initial="A" size="sm" position="first" className="mr-2 mt-2" />
-            <textarea
-              value={differentIdeaText}
-              onChange={(e) => setDifferentIdeaText(e.target.value)}
-              placeholder="Suggest a different location..."
-              className="flex-grow p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple"
-              rows={3}
+        <div className="mb-6 bg-white rounded-lg border border-gray-200 p-4 animate-fade-in">
+          <div className="flex items-center gap-2 mb-3">
+            <MapPin size={18} className="text-gray-400" />
+            <input
+              type="text"
+              value={differentIdeaName}
+              onChange={(e) => setDifferentIdeaName(e.target.value)}
+              placeholder="Enter place name"
+              className="w-full border-none focus:outline-none focus:ring-0 p-0"
             />
           </div>
+          <textarea
+            value={differentIdeaText}
+            onChange={(e) => setDifferentIdeaText(e.target.value)}
+            placeholder="Add a note (optional)"
+            className="w-full text-sm text-gray-500 border-none focus:outline-none focus:ring-0 resize-none p-0"
+            rows={2}
+          />
         </div>
       ) : (
         <button
