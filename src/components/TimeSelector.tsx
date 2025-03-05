@@ -1,4 +1,5 @@
 
+import React, { memo, useCallback } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTimeSelectorState } from "@/hooks/useTimeSelectorState";
@@ -13,7 +14,7 @@ interface TimeSelectorProps {
   maxTime?: string;
 }
 
-const TimeSelector = ({ 
+const TimeSelector = memo(({ 
   time, 
   onTimeChange, 
   isEndTime = false, 
@@ -42,6 +43,16 @@ const TimeSelector = ({
 
   console.log("TimeSelector render state:", { hour, minute, period, isAtMinTime, isAtMaxTime });
 
+  const handleIncrementClick = useCallback(() => {
+    console.log("⬆️ Increment button clicked");
+    if (!isAtMaxTime) handleIncrement();
+  }, [isAtMaxTime, handleIncrement]);
+
+  const handleDecrementClick = useCallback(() => {
+    console.log("⬇️ Decrement button clicked");
+    if (!isAtMinTime) handleDecrement();
+  }, [isAtMinTime, handleDecrement]);
+
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-sm w-36 h-40">
       <div className="flex justify-center">
@@ -50,10 +61,7 @@ const TimeSelector = ({
             "flex items-center justify-center py-2 w-full",
             isAtMaxTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
-          onClick={() => {
-            console.log("⬆️ Increment button clicked");
-            if (!isAtMaxTime) handleIncrement();
-          }}
+          onClick={handleIncrementClick}
           disabled={isAtMaxTime}
           aria-label="Increase time"
           type="button"
@@ -74,10 +82,7 @@ const TimeSelector = ({
             "flex items-center justify-center py-2 w-full",
             isAtMinTime ? "text-gray-300 cursor-not-allowed" : "text-gray-600 hover:text-gray-800"
           )}
-          onClick={() => {
-            console.log("⬇️ Decrement button clicked");
-            if (!isAtMinTime) handleDecrement();
-          }}
+          onClick={handleDecrementClick}
           disabled={isAtMinTime}
           aria-label="Decrease time"
           type="button"
@@ -87,6 +92,8 @@ const TimeSelector = ({
       </div>
     </div>
   );
-};
+});
+
+TimeSelector.displayName = "TimeSelector";
 
 export default TimeSelector;
