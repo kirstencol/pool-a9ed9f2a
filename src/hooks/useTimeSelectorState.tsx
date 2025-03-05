@@ -58,6 +58,7 @@ export const useTimeSelectorState = ({
   // Update state and notify parent - simplified for direct updates
   const updateTimeValues = useCallback((newHour: string, newMinute: string, newPeriod: string) => {
     console.log(`🔄 updateTimeValues called with: ${newHour}:${newMinute} ${newPeriod}`);
+    console.log(`🔄 Previous state was: ${hour}:${minute} ${period}`);
     
     // Update internal state
     setHour(newHour);
@@ -68,7 +69,15 @@ export const useTimeSelectorState = ({
     const newTimeString = buildTimeString(newHour, newMinute, newPeriod);
     console.log(`Calling onTimeChange with: "${newTimeString}"`);
     onTimeChange(newTimeString);
-  }, [onTimeChange]);
+    
+    // This log won't reflect the new state yet due to React's state batching
+    console.log(`🔄 State after update call (but before render): ${hour}:${minute} ${period}`);
+    
+    // Schedule a log after the next render cycle
+    setTimeout(() => {
+      console.log(`🔄 State should be updated in next render to: ${newHour}:${newMinute} ${newPeriod}`);
+    }, 0);
+  }, [hour, minute, period, onTimeChange]);
   
   // Increment time by 15 minutes
   const handleIncrement = useCallback(() => {
@@ -109,6 +118,9 @@ export const useTimeSelectorState = ({
       console.log("Decrement returned null - at min limit");
     }
   }, [hour, minute, period, minTime, isEndTime, startTime, updateTimeValues]);
+
+  // Add a render counter to track re-renders
+  console.log(`🔄 useTimeSelectorState rendering with time: ${hour}:${minute} ${period}`);
 
   return {
     hour,
