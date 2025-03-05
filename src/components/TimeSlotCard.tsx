@@ -99,14 +99,18 @@ const TimeSlotCard = ({
     >
       <div className="mb-2">
         <div className="font-medium">{formatDate(timeSlot.date)}</div>
-        {creatorAvailable && !selectedByUser && (
+        
+        {/* Always show creator's availability regardless of selection state */}
+        {creatorAvailable && (
           <div className="text-sm text-gray-600">
             {`${creatorName} is free ${timeSlot.startTime} - ${timeSlot.endTime}`}
           </div>
         )}
-        {creatorAvailable && selectedByUser && !showTimeSelector && (
-          <div className="text-sm text-purple-700 font-medium">
-            You and {creatorName} are free {startTime} - {endTime}
+        
+        {/* Show user's selection only when they've made one */}
+        {selectedByUser && !showTimeSelector && (
+          <div className="text-sm text-purple-700 font-medium mt-1">
+            You selected {startTime} - {endTime}
           </div>
         )}
       </div>
