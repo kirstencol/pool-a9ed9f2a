@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 const Welcome = lazy(() => import("./pages/Welcome"));
 const ProposeTime = lazy(() => import("./pages/ProposeTime"));
 const TimeConfirmation = lazy(() => import("./pages/TimeConfirmation"));
+const SelectUser = lazy(() => import("./pages/SelectUser")); // New component
 const RespondToInvite = lazy(() => import("./pages/RespondToInvite"));
 const Confirmation = lazy(() => import("./pages/Confirmation"));
 const SelectLocation = lazy(() => import("./pages/SelectLocation"));
@@ -40,10 +41,11 @@ const App = () => (
               <Route path="/" element={<Welcome />} />
               <Route path="/propose-time" element={<ProposeTime />} />
               <Route path="/time-confirmation" element={<TimeConfirmation />} />
+              <Route path="/select-user" element={<SelectUser />} />
               <Route path="/respond/:inviteId" element={<RespondToInvite />} />
               <Route path="/confirmation" element={<Confirmation />} />
               {/* Add a redirect for the broken "respond" route with no ID */}
-              <Route path="/respond" element={<Navigate to="/" replace />} />
+              <Route path="/respond" element={<Navigate to="/select-user" replace />} />
               <Route path="/select-location" element={<SelectLocation />} />
               <Route path="/location-confirmation" element={<LocationConfirmation />} />
               <Route path="/final-confirmation" element={<FinalConfirmation />} />

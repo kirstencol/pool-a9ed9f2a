@@ -1,127 +1,79 @@
 
 import { useState, useEffect } from "react";
-import { useMeeting } from "@/context/meeting";
 import { TimeSlot } from "@/types";
+import { useMeeting } from "@/context/meeting";
 import { initializeDemoData } from "@/context/meeting/storage";
 
-export const useInviteData = (inviteId: string | undefined): {
-  isLoading: boolean;
-  inviteError: 'invalid' | 'expired' | null;
-  creatorName: string;
-  responderName: string;
-  inviteTimeSlots: TimeSlot[];
-} => {
-  const { 
-    addTimeSlot, 
-    clearTimeSlots,
-    loadMeetingFromStorage,
-  } = useMeeting();
-  
+export const useInviteData = (inviteId: string, userName?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const [inviteError, setInviteError] = useState<'invalid' | 'expired' | null>(null);
   const [creatorName, setCreatorName] = useState("Abby");
-  const [responderName, setResponderName] = useState("Friend");
+  const [responderName, setResponderName] = useState(userName || "");
   const [inviteTimeSlots, setInviteTimeSlots] = useState<TimeSlot[]>([]);
+  
+  const { loadMeetingFromStorage } = useMeeting();
 
   useEffect(() => {
-    let isMounted = true;
-    console.log("useInviteData - Loading invite data for ID:", inviteId);
-    
-    // IMPORTANT: Always initialize demo data first
+    // Initialize demo data to ensure it's available
     initializeDemoData();
     
-    // Reset states but don't call setIsLoading(true) if it's already true
-    // This helps prevent flickering
-    setInviteError(null);
-    
-    // Add a global safety timeout to prevent infinite loading
-    const safetyTimer = setTimeout(() => {
-      if (isMounted && isLoading) {
-        console.log("useInviteData - Safety timeout reached, forcing load completion");
-        setIsLoading(false);
+    const fetchInviteData = async () => {
+      console.log("useInviteData - Fetching data for invite:", inviteId);
+      setIsLoading(true);
+      setInviteError(null);
+      
+      try {
+        const meetingData = loadMeetingFromStorage(inviteId);
+        console.log("useInviteData - Loaded meeting data:", meetingData);
         
-        // Only set error if we truly have no data
-        if (!inviteTimeSlots || inviteTimeSlots.length === 0) {
+        if (!meetingData || !meetingData.timeSlots || meetingData.timeSlots.length === 0) {
+          console.error("useInviteData - Invalid meeting data for invite:", inviteId);
           setInviteError('invalid');
+          setIsLoading(false);
+          return;
         }
-      }
-    }, 7000); // 7 second maximum wait time
-    
-    const loadDataWithRetry = async (id: string, retries = 3) => {
-      console.log(`useInviteData - Loading data for ${id}, attempts left: ${retries}`);
-      
-      if (!isMounted) return;
-      
-      // First attempt to load
-      let normalizedId = id.toLowerCase();
-      let meetingData = loadMeetingFromStorage(normalizedId);
-      
-      // If no data and we have retries left, initialize again and retry
-      if ((!meetingData || !meetingData.timeSlots || meetingData.timeSlots.length === 0) && retries > 0) {
-        console.log("useInviteData - Data not found, initializing demo data again");
-        initializeDemoData();
         
-        // Short delay before retry
-        await new Promise(resolve => setTimeout(resolve, 500));
-        if (!isMounted) return;
-        return loadDataWithRetry(id, retries - 1);
-      }
-      
-      if (!isMounted) return;
-      
-      if (!meetingData || !meetingData.timeSlots || meetingData.timeSlots.length === 0) {
-        console.log("useInviteData - Failed to load data after retries");
+        // Set the creator name
+        if (meetingData.creator?.name) {
+          setCreatorName(meetingData.creator.name);
+        }
         
-        // Don't set error immediately if we're still loading
-        // This prevents premature error display
-        setInviteTimeSlots([]);
+        // If userName wasn't provided, determine respondent based on existing responses
+        if (!userName) {
+          // Use default responder names if not specified
+          const defaultResponders = ["Burt", "Carrie"];
+          
+          // Get names that have already responded
+          const existingResponderNames = new Set();
+          meetingData.timeSlots?.forEach((slot: any) => {
+            if (slot.responses) {
+              slot.responses.forEach((response: any) => {
+                existingResponderNames.add(response.responderName);
+              });
+            }
+          });
+          
+          console.log("useInviteData - Existing responder names:", Array.from(existingResponderNames));
+          
+          // Find the first default responder who hasn't responded yet
+          const availableResponder = defaultResponders.find(name => !existingResponderNames.has(name));
+          setResponderName(availableResponder || defaultResponders[0]);
+        } else {
+          // Use the provided username
+          setResponderName(userName);
+        }
         
-        // Set loading to false to ensure we don't hang
+        setInviteTimeSlots(meetingData.timeSlots);
         setIsLoading(false);
-        return;
+      } catch (error) {
+        console.error("useInviteData - Error loading invite data:", error);
+        setInviteError('invalid');
+        setIsLoading(false);
       }
-      
-      // Successfully loaded data
-      console.log("useInviteData - Successfully loaded data:", meetingData);
-      
-      if (!isMounted) return;
-      
-      // Set creator name
-      if (meetingData.creator && meetingData.creator.name) {
-        setCreatorName(meetingData.creator.name);
-      }
-      
-      // Set responder name based on ID
-      if (normalizedId === "burt_demo") {
-        setResponderName("Burt");
-      }
-      
-      // Clear existing time slots
-      clearTimeSlots();
-      
-      // Set time slots in state and context
-      setInviteTimeSlots(meetingData.timeSlots);
-      meetingData.timeSlots.forEach(slot => {
-        addTimeSlot(slot);
-      });
-      
-      // Set loading to false to show data
-      setIsLoading(false);
     };
-    
-    // Start loading process with short delay to ensure consistent timing
-    const timer = setTimeout(() => {
-      const idToLoad = inviteId || "demo_invite";
-      loadDataWithRetry(idToLoad);
-    }, 500);
-    
-    return () => {
-      isMounted = false;
-      clearTimeout(timer);
-      clearTimeout(safetyTimer);
-      console.log("useInviteData - Effect cleanup ran");
-    };
-  }, [inviteId, clearTimeSlots, addTimeSlot, loadMeetingFromStorage]);
+
+    fetchInviteData();
+  }, [inviteId, loadMeetingFromStorage, userName]);
 
   return {
     isLoading,

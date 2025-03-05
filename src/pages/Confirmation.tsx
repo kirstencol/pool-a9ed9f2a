@@ -33,7 +33,7 @@ const Confirmation = () => {
   const copyLink = () => {
     // Generate a shareable link
     const baseUrl = window.location.origin;
-    const shareableUrl = `${baseUrl}/respond/${meetingData?.id || 'demo_invite'}`;
+    const shareableUrl = `${baseUrl}/select-user?id=${meetingData?.id || 'demo_invite'}`;
     
     navigator.clipboard.writeText(shareableUrl);
     setCopied(true);

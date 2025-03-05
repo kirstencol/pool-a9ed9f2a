@@ -1,5 +1,5 @@
 
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
 import { useInviteData } from "@/hooks/useInviteData";
 import { useEffect, useRef, useState } from "react";
@@ -11,6 +11,10 @@ import Loading from "@/components/Loading";
 
 const RespondToInvite = () => {
   const { inviteId: rawInviteId } = useParams();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const userName = searchParams.get('name') || ""; // Get the selected user name
+  
   const inviteId = rawInviteId || "demo_invite"; // Fallback to demo_invite if no ID provided
   const { timeSlots: contextTimeSlots } = useMeeting();
   const initialLoadComplete = useRef(false);
@@ -39,6 +43,7 @@ const RespondToInvite = () => {
   }, []);
   
   console.log("RespondToInvite - Received inviteId param:", rawInviteId);
+  console.log("RespondToInvite - Selected user name:", userName);
   console.log("RespondToInvite - Using inviteId:", inviteId);
   console.log("RespondToInvite - Initial contextTimeSlots:", contextTimeSlots);
   
@@ -48,7 +53,7 @@ const RespondToInvite = () => {
     creatorName,
     responderName,
     inviteTimeSlots
-  } = useInviteData(inviteId);
+  } = useInviteData(inviteId, userName); // Pass the userName to the hook
 
   console.log("RespondToInvite - Data from hook:", {
     isLoading,
@@ -90,12 +95,12 @@ const RespondToInvite = () => {
     <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
       <InvitationHeader 
         creatorName={creatorName} 
-        responderName={responderName} 
+        responderName={userName || responderName} 
       />
 
       <ResponseForm
         creatorName={creatorName}
-        responderName={responderName}
+        responderName={userName || responderName}
         inviteId={inviteId}
       />
     </div>
