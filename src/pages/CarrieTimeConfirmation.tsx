@@ -23,8 +23,6 @@ const CarrieTimeConfirmation = () => {
   // Use the hook to get invite data
   const { isLoading } = useInviteData(inviteId, "Carrie");
   
-  // For duration selection
-  const [meetingDuration, setMeetingDuration] = useState("60"); // Default 60 minutes
   const [adjustedStartTime, setAdjustedStartTime] = useState(startTime);
   const [adjustedEndTime, setAdjustedEndTime] = useState(endTime);
 
@@ -47,9 +45,24 @@ const CarrieTimeConfirmation = () => {
     console.log("CarrieTimeConfirmation - Params:", { inviteId, date, startTime, endTime });
   }, [startTime, endTime, currentUser, setCurrentUser, location.pathname]);
 
-  const handleTimeChange = (start: string, end: string) => {
-    setAdjustedStartTime(start);
-    setAdjustedEndTime(end);
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    
+    const dateParts = dateString.split('-');
+    if (dateParts.length !== 3) return dateString;
+    
+    const year = parseInt(dateParts[0]);
+    const month = parseInt(dateParts[1]) - 1;
+    const day = parseInt(dateParts[2]);
+    
+    const dateObj = new Date(year, month, day, 12, 0, 0);
+    
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    return dateObj.toLocaleDateString('en-US', options);
   };
 
   const handleContinue = () => {
@@ -65,6 +78,8 @@ const CarrieTimeConfirmation = () => {
     return <div className="p-6">Loading...</div>;
   }
 
+  const formattedDate = formatDate(date);
+
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
       <button 
@@ -75,51 +90,26 @@ const CarrieTimeConfirmation = () => {
         Back
       </button>
 
-      <h1 className="text-2xl font-semibold mb-2">Good news!</h1>
-      <p className="text-gray-600 mb-6">This day works for everyone!</p>
+      <h1 className="text-2xl font-semibold mb-6">It's Happening!</h1>
+      <p className="text-gray-600 mb-6">
+        Abby, Burt, and Carrie are getting together on {formattedDate} {adjustedStartTime} to {adjustedEndTime}
+      </p>
 
       <div className="bg-purple-50 rounded-lg p-6 mb-8 border border-purple-100">
         <div className="space-y-3">
-          <div>
-            <p className="text-sm text-gray-500">Date</p>
-            <p className="font-medium">{date}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm text-gray-500">Time</p>
-            <p className="font-medium">{adjustedStartTime} - {adjustedEndTime}</p>
-          </div>
-          
-          <div>
-            <p className="text-sm text-gray-500">Attendees</p>
-            <p className="font-medium">Abby, Burt, and Carrie</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-6">
-        <h2 className="font-medium mb-3">Meeting duration:</h2>
-        <div className="flex space-x-2">
-          {["30", "45", "60", "90"].map((duration) => (
-            <Button
-              key={duration}
-              variant={meetingDuration === duration ? "default" : "outline"}
-              onClick={() => setMeetingDuration(duration)}
-              className="flex-1"
-            >
-              {duration} min
-            </Button>
-          ))}
+          <p className="font-medium">{formattedDate}</p>
+          <p className="font-medium">{adjustedStartTime} - {adjustedEndTime}</p>
+          <p className="font-medium">Abby, Burt, and Carrie</p>
         </div>
       </div>
 
       <div className="flex justify-end mt-8">
         <Button 
           onClick={handleContinue}
-          className="flex items-center"
+          size="icon"
+          className="rounded-full h-10 w-10"
         >
-          Continue
-          <ArrowRight size={16} className="ml-2" />
+          <ArrowRight size={18} />
         </Button>
       </div>
     </div>
