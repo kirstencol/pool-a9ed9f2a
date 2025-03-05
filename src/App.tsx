@@ -45,6 +45,7 @@ const App = () => (
         <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
           <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
             <Routes>
+              {/* Make sure the index route is properly configured */}
               <Route path="/" element={<Welcome />} />
               <Route path="/propose-time" element={<ProposeTime />} />
               <Route path="/time-confirmation" element={<TimeConfirmation />} />

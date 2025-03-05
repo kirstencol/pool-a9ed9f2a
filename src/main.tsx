@@ -5,7 +5,11 @@ import App from './App.tsx';
 import './styles/index.css';
 import { MeetingProvider } from './context/meeting';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Initialize the root and render the app
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Root element not found');
+
+ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <MeetingProvider>
       <App />
