@@ -52,14 +52,26 @@ const SelectUser = () => {
       return;
     }
     
+    // Store the selected user in localStorage
+    localStorage.setItem('currentUser', selectedUser);
+    
     // For Carrie, navigate directly to CarrieFlow
     if (selectedUser === "Carrie") {
-      localStorage.setItem('currentUser', 'Carrie');
       navigate(`/carrie-flow?id=${inviteId || 'carrie_demo'}`);
       return;
     }
     
-    // For other users, navigate to the response page
+    // For Burt, navigate to the specific demo or the provided invite
+    if (selectedUser === "Burt") {
+      if (inviteId) {
+        navigate(`/respond/${inviteId}?name=${selectedUser}`);
+      } else {
+        navigate(`/respond/burt_demo?name=${selectedUser}`);
+      }
+      return;
+    }
+    
+    // For Abby or any other user, navigate to the response page with the provided invite or demo
     if (inviteId) {
       navigate(`/respond/${inviteId}?name=${selectedUser}`);
     } else {

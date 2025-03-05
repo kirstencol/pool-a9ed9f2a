@@ -15,6 +15,7 @@ const RespondToInvite = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const userName = searchParams.get('name') || ""; // Get the selected user name
+  const currentUserFromStorage = localStorage.getItem('currentUser');
   
   const inviteId = rawInviteId || "demo_invite"; // Fallback to demo_invite if no ID provided
   const { timeSlots: contextTimeSlots } = useMeeting();
@@ -29,13 +30,14 @@ const RespondToInvite = () => {
       console.log("RespondToInvite - Initialized demo data on mount");
       initialLoadComplete.current = true;
       
-      // Redirect Carrie to CarrieFlow
-      if (userName === "Carrie" || localStorage.getItem('currentUser') === 'Carrie') {
+      // Only redirect Carrie to CarrieFlow, not Burt
+      const effectiveUserName = userName || currentUserFromStorage;
+      if (effectiveUserName === "Carrie") {
         console.log("RespondToInvite - Redirecting Carrie to CarrieFlow");
         navigate(`/carrie-flow?id=${inviteId}`, { replace: true });
       }
     }
-  }, [navigate, inviteId, userName]);
+  }, [navigate, inviteId, userName, currentUserFromStorage]);
   
   // Add a safety timeout to prevent infinite loading
   useEffect(() => {
@@ -62,13 +64,14 @@ const RespondToInvite = () => {
     inviteTimeSlots
   } = useInviteData(inviteId, userName); // Pass the userName to the hook
 
-  // If this is Carrie, redirect to CarrieFlow
+  // Only redirect Carrie, not Burt
   useEffect(() => {
-    if ((userName === "Carrie" || localStorage.getItem('currentUser') === 'Carrie') && !isLoading) {
+    const effectiveUserName = userName || currentUserFromStorage;
+    if (effectiveUserName === "Carrie" && !isLoading) {
       console.log("RespondToInvite - Redirecting Carrie to CarrieFlow after loading");
       navigate(`/carrie-flow?id=${inviteId}`, { replace: true });
     }
-  }, [isLoading, userName, navigate, inviteId]);
+  }, [isLoading, userName, navigate, inviteId, currentUserFromStorage]);
 
   // Handle loading state with better feedback
   if (isLoading && !forcedError) {
