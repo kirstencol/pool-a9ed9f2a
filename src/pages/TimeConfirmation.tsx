@@ -13,7 +13,6 @@ const TimeConfirmation = () => {
     currentUser, 
     participants, 
     timeSlots, 
-    addTimeSlot,
     generateShareableLink,
     storeMeetingInStorage
   } = useMeeting();
@@ -74,12 +73,14 @@ const TimeConfirmation = () => {
     };
 
     setupMeetingData();
-  }, [currentUser, navigate, participants, timeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage]);
+  }, [currentUser, navigate, participants, timeSlots, generateShareableLink, storeMeetingInStorage]);
 
-  if (!currentUser) {
-    navigate("/");
-    return null;
-  }
+  // Redirect if no user - must be in useEffect to avoid React warning
+  useEffect(() => {
+    if (!currentUser) {
+      navigate("/");
+    }
+  }, [currentUser, navigate]);
 
   if (isLoading) {
     return <Loading message="Preparing your meeting" subtitle="Creating your shareable link..." />;
@@ -91,7 +92,7 @@ const TimeConfirmation = () => {
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
       <TimeConfirmationHeader currentUser={currentUser} />
-      <ConfirmedTimeSlots timeSlots={timeSlots} currentUserName={currentUser.name} />
+      {currentUser && <ConfirmedTimeSlots timeSlots={timeSlots} currentUserName={currentUser.name} />}
       <ShareableLinks 
         shareableLink={shareableLink} 
         burtDirectLink={burtDirectLink}

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -104,7 +103,7 @@ const ProposeTime = () => {
       setIsSubmitting(true);
       console.log("ProposeTime: Adding time slots to context...");
       
-      // Clear existing time slots first
+      // IMPORTANT: Clear existing time slots first - this is key to fixing the issue
       await clearTimeSlots();
       console.log("ProposeTime: Cleared existing time slots");
       
