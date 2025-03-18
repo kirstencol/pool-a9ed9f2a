@@ -1,6 +1,8 @@
+
 // src/context/meeting/operations/meetingOperations.ts
 import { Meeting } from '@/types';
 import { MeetingContextState } from '../types';
+import { loadMeetingFromStorage as loadMeetingFromLocalStorage } from '../storage';
 import { setMeetingNotes as dbSetMeetingNotes, getMeetingById } from '@/integrations/supabase/api';
 
 type StateSetters = {
@@ -52,31 +54,84 @@ export const useMeetingOperations = (
     setError(null);
 
     try {
-      const meeting = await getMeetingById(id);
-      
-      if (!meeting) {
-        throw new Error('Meeting not found');
+      // First check if this is a demo ID
+      if (id === "demo_invite" || id === "burt_demo" || id === "carrie_demo") {
+        console.log("Loading demo meeting:", id);
+        const meeting = await loadMeetingFromLocalStorage(id);
+        
+        if (meeting) {
+          if (meeting.creator) {
+            setCurrentUser(meeting.creator);
+          }
+          
+          setParticipants(meeting.participants || []);
+          setTimeSlots(meeting.timeSlots || []);
+          setSelectedTimeSlot(meeting.selectedTimeSlot);
+          setLocations(meeting.locations || []);
+          setSelectedLocation(meeting.selectedLocation);
+          setMeetingNotes(meeting.notes || '');
+          setCurrentMeetingId(id);
+          
+          setIsLoading(false);
+          return meeting;
+        }
       }
+      
+      // For non-demo IDs, try to load from Supabase
+      if (id !== "demo_invite" && id !== "burt_demo" && id !== "carrie_demo") {
+        try {
+          const meeting = await getMeetingById(id);
+          
+          if (!meeting) {
+            throw new Error('Meeting not found');
+          }
 
-      if (meeting.creator) {
-        setCurrentUser(meeting.creator);
+          if (meeting.creator) {
+            setCurrentUser(meeting.creator);
+          }
+          
+          setParticipants(meeting.participants || []);
+          setTimeSlots(meeting.timeSlots || []);
+          setSelectedTimeSlot(meeting.selectedTimeSlot);
+          setLocations(meeting.locations || []);
+          setSelectedLocation(meeting.selectedLocation);
+          setMeetingNotes(meeting.notes || '');
+          setCurrentMeetingId(meeting.id);
+          
+          setIsLoading(false);
+          return meeting;
+        } catch (supabaseError) {
+          console.error('Error loading meeting from Supabase:', supabaseError);
+          // Fall through to try localStorage
+        }
       }
       
-      setParticipants(meeting.participants || []);
-      setTimeSlots(meeting.timeSlots || []);
-      setSelectedTimeSlot(meeting.selectedTimeSlot);
-      setLocations(meeting.locations || []);
-      setSelectedLocation(meeting.selectedLocation);
-      setMeetingNotes(meeting.notes || '');
-      setCurrentMeetingId(meeting.id);
-
-      return meeting;
+      // Final fallback for any ID: try localStorage
+      const localMeeting = await loadMeetingFromLocalStorage(id);
+      
+      if (localMeeting) {
+        if (localMeeting.creator) {
+          setCurrentUser(localMeeting.creator);
+        }
+        
+        setParticipants(localMeeting.participants || []);
+        setTimeSlots(localMeeting.timeSlots || []);
+        setSelectedTimeSlot(localMeeting.selectedTimeSlot);
+        setLocations(localMeeting.locations || []);
+        setSelectedLocation(localMeeting.selectedLocation);
+        setMeetingNotes(localMeeting.notes || '');
+        setCurrentMeetingId(id);
+        
+        setIsLoading(false);
+        return localMeeting;
+      }
+      
+      throw new Error('Meeting not found');
     } catch (err) {
       console.error('Error loading meeting:', err);
       setError(err instanceof Error ? err.message : 'Failed to load meeting');
-      return null;
-    } finally {
       setIsLoading(false);
+      return null;
     }
   };
 

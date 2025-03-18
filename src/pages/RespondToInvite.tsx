@@ -1,3 +1,4 @@
+
 // src/pages/RespondToInvite.tsx
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
@@ -6,7 +7,7 @@ import InvitationHeader from "@/components/respond/InvitationHeader";
 import ResponseForm from "@/components/respond/ResponseForm";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
 import Loading from "@/components/Loading";
-import { initializeDemoData, getDemoMeetingId } from "@/utils/demo-data";
+import { initializeDemoData } from "@/context/meeting/storage";
 
 const RespondToInvite = () => {
   const navigate = useNavigate();
@@ -16,45 +17,65 @@ const RespondToInvite = () => {
   const userName = searchParams.get('name') || ""; 
   const currentUserFromStorage = localStorage.getItem('currentUser');
   
-  const { loadMeetingFromStorage, timeSlots, isLoading, error } = useMeeting();
+  const { loadMeetingFromStorage, setTimeSlots, timeSlots, isLoading, error } = useMeeting();
   const [responderName, setResponderName] = useState<string>("");
   const [creatorName, setCreatorName] = useState<string>("");
   const [loadingState, setLoadingState] = useState<'loading'|'loaded'|'error'>('loading');
-  const [meetingId, setMeetingId] = useState<string>("");
+  const [inviteId, setInviteId] = useState<string>("");
 
   // Initialize data and load meeting
   useEffect(() => {
     const initData = async () => {
-      // First ensure demo data exists in Supabase
-      await initializeDemoData();
+      // Initialize demo data
+      initializeDemoData();
       
       // Process the invite ID
-      const inviteId = rawInviteId || "demo_invite";
-      
-      // For demo scenarios, translate the link ID to an actual meeting ID
-      if (inviteId === "demo_invite" || inviteId === "burt_demo" || inviteId === "carrie_demo") {
-        const demoId = await getDemoMeetingId(inviteId);
-        if (demoId) {
-          setMeetingId(demoId);
-        } else {
-          setLoadingState('error');
-          return;
-        }
-      } else {
-        // For real invites, use the ID directly
-        setMeetingId(inviteId);
-      }
+      const effectiveInviteId = rawInviteId || "demo_invite";
+      setInviteId(effectiveInviteId);
       
       // Only redirect Carrie to CarrieFlow, not Burt
       const effectiveUserName = userName || currentUserFromStorage;
       if (effectiveUserName === "Carrie") {
-        navigate(`/carrie-flow?id=${inviteId}`, { replace: true });
+        console.log("Redirecting Carrie to CarrieFlow");
+        navigate(`/carrie-flow?id=${effectiveInviteId}`, { replace: true });
         return;
       }
       
       // Load the meeting data
       try {
-        const meeting = await loadMeetingFromStorage(meetingId || inviteId);
+        const meeting = await loadMeetingFromStorage(effectiveInviteId);
+        console.log("RespondToInvite - Loaded meeting data:", meeting);
+        
+        if (!meeting && ["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+          // For demo IDs, create mock data if loading failed
+          console.log("Creating mock meeting data for demo:", effectiveInviteId);
+          
+          // Set mock time slots in context
+          const mockTimeSlots = [
+            {
+              id: "mock1",
+              date: "March 15",
+              startTime: "3:00 PM",
+              endTime: "5:00 PM",
+              responses: []
+            },
+            {
+              id: "mock2",
+              date: "March 16",
+              startTime: "2:00 PM",
+              endTime: "4:00 PM",
+              responses: []
+            }
+          ];
+          
+          setTimeSlots(mockTimeSlots);
+          setCreatorName("Abby");
+          setResponderName(userName || currentUserFromStorage || 
+                         (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
+          setLoadingState('loaded');
+          return;
+        }
+        
         if (!meeting) {
           setLoadingState('error');
           return;
@@ -66,12 +87,43 @@ const RespondToInvite = () => {
         setLoadingState('loaded');
       } catch (err) {
         console.error("Error loading meeting:", err);
+        
+        // For demo IDs, create mock data if loading failed
+        if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+          console.log("Creating mock data after error for demo:", effectiveInviteId);
+          
+          // Set mock time slots in context
+          const mockTimeSlots = [
+            {
+              id: "mock1",
+              date: "March 15",
+              startTime: "3:00 PM",
+              endTime: "5:00 PM",
+              responses: []
+            },
+            {
+              id: "mock2",
+              date: "March 16",
+              startTime: "2:00 PM",
+              endTime: "4:00 PM",
+              responses: []
+            }
+          ];
+          
+          setTimeSlots(mockTimeSlots);
+          setCreatorName("Abby");
+          setResponderName(userName || currentUserFromStorage || 
+                         (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
+          setLoadingState('loaded');
+          return;
+        }
+        
         setLoadingState('error');
       }
     };
     
     initData();
-  }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate]);
+  }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate, setTimeSlots]);
 
   // Show loading state
   if (loadingState === 'loading' || isLoading) {
@@ -79,7 +131,7 @@ const RespondToInvite = () => {
   }
 
   // Show error state
-  if (loadingState === 'error' || error || !meetingId) {
+  if (loadingState === 'error' || error) {
     return <InvalidInvitation reason="invalid" />;
   }
 
@@ -98,7 +150,7 @@ const RespondToInvite = () => {
       <ResponseForm
         creatorName={creatorName}
         responderName={responderName}
-        inviteId={meetingId}
+        inviteId={inviteId}
       />
     </div>
   );

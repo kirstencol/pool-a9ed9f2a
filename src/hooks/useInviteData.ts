@@ -23,11 +23,58 @@ export const useInviteData = (inviteId: string, userName?: string) => {
       setInviteError(null);
       
       try {
+        // Load meeting data from storage (either localStorage for demos or Supabase for real data)
         const meetingData = await loadMeetingFromStorage(inviteId);
         console.log("useInviteData - Loaded meeting data:", meetingData);
         
         if (!meetingData || !meetingData.timeSlots || meetingData.timeSlots.length === 0) {
           console.error("useInviteData - Invalid meeting data for invite:", inviteId);
+          
+          // For demo IDs, let's create some mock time slots to prevent errors
+          if (inviteId === "carrie_demo" || inviteId === "burt_demo" || inviteId === "demo_invite") {
+            console.log("Creating mock time slots for demo ID:", inviteId);
+            
+            // Create demo time slots
+            const mockTimeSlots: TimeSlot[] = [
+              {
+                id: "1",
+                date: "March 15",
+                startTime: "3:00 PM",
+                endTime: "5:00 PM",
+                responses: []
+              },
+              {
+                id: "2",
+                date: "March 16",
+                startTime: "2:00 PM",
+                endTime: "4:00 PM",
+                responses: []
+              }
+            ];
+            
+            if (inviteId === "carrie_demo") {
+              // Add Burt's response for Carrie's demo
+              mockTimeSlots[0].responses = [
+                {
+                  responderName: "Burt",
+                  startTime: "3:30 PM",
+                  endTime: "5:00 PM"
+                }
+              ];
+            }
+            
+            setInviteTimeSlots(mockTimeSlots);
+            setCreatorName("Abby");
+            
+            if (!userName) {
+              setResponderName(inviteId === "burt_demo" ? "Burt" : 
+                              inviteId === "carrie_demo" ? "Carrie" : "Burt");
+            }
+            
+            setIsLoading(false);
+            return;
+          }
+          
           setInviteError('invalid');
           setIsLoading(false);
           return;
@@ -72,6 +119,36 @@ export const useInviteData = (inviteId: string, userName?: string) => {
         setIsLoading(false);
       } catch (error) {
         console.error("useInviteData - Error loading invite data:", error);
+        
+        // For demo flows, create mock data instead of showing an error
+        if (inviteId === "carrie_demo" || inviteId === "burt_demo" || inviteId === "demo_invite") {
+          console.log("Creating fallback mock data for demo ID:", inviteId);
+          
+          const mockTimeSlots: TimeSlot[] = [
+            {
+              id: "1",
+              date: "March 15",
+              startTime: "3:00 PM",
+              endTime: "5:00 PM",
+              responses: []
+            },
+            {
+              id: "2",
+              date: "March 16",
+              startTime: "2:00 PM",
+              endTime: "4:00 PM",
+              responses: []
+            }
+          ];
+          
+          setInviteTimeSlots(mockTimeSlots);
+          setResponderName(inviteId === "burt_demo" ? "Burt" : 
+                          inviteId === "carrie_demo" ? "Carrie" : 
+                          userName || "Burt");
+          setIsLoading(false);
+          return;
+        }
+        
         setInviteError('invalid');
         setIsLoading(false);
       }

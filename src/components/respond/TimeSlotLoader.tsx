@@ -46,6 +46,39 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
             console.log("TimeSlotLoader - Loaded time slots from storage:", meeting.timeSlots);
             setLocalTimeSlots(meeting.timeSlots);
             onTimeSlotsLoaded();
+          } else if (inviteId === "carrie_demo" || inviteId === "burt_demo" || inviteId === "demo_invite") {
+            // Create fallback mock data for demo flows
+            console.log("TimeSlotLoader - Creating mock time slots for demo");
+            const mockTimeSlots: TimeSlot[] = [
+              {
+                id: "mock1",
+                date: "March 15",
+                startTime: "3:00 PM",
+                endTime: "5:00 PM",
+                responses: []
+              },
+              {
+                id: "mock2",
+                date: "March 16",
+                startTime: "2:00 PM",
+                endTime: "4:00 PM",
+                responses: []
+              }
+            ];
+            
+            if (inviteId === "carrie_demo") {
+              // Add Burt's response for Carrie's demo
+              mockTimeSlots[0].responses = [
+                {
+                  responderName: "Burt",
+                  startTime: "3:30 PM",
+                  endTime: "5:00 PM"
+                }
+              ];
+            }
+            
+            setLocalTimeSlots(mockTimeSlots);
+            onTimeSlotsLoaded();
           } else {
             console.error("TimeSlotLoader - No time slots found in meeting");
             onTimeSlotsLoaded(); // Still mark as loaded, but with empty slots
