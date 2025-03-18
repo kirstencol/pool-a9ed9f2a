@@ -22,7 +22,7 @@ export const useMeetingDataOperations = (
   state: MeetingContextState,
   stateSetters: StateSetters
 ): MeetingDataOperations => {
-  console.log("Initializing meetingDataOperations");
+  console.log("Initializing meetingDataOperations with time slots:", state.timeSlots.length);
   
   // Get operations from each specialized hook
   const meetingOps = useMeetingOperations(state, stateSetters);

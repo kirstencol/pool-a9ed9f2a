@@ -8,6 +8,8 @@ interface ConfirmedTimeSlotsProps {
 }
 
 const ConfirmedTimeSlots = ({ timeSlots, currentUserName }: ConfirmedTimeSlotsProps) => {
+  console.log("ConfirmedTimeSlots received timeSlots:", timeSlots);
+  
   if (!timeSlots || timeSlots.length === 0) {
     return (
       <div className="mb-8 p-4 bg-gray-50 rounded-xl text-center">

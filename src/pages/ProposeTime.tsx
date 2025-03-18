@@ -9,7 +9,7 @@ import { TimeSlot } from "@/types";
 
 const ProposeTime = () => {
   const navigate = useNavigate();
-  const { currentUser, addTimeSlot, timeSlots: existingTimeSlots } = useMeeting();
+  const { currentUser, addTimeSlot, timeSlots: existingTimeSlots, clearTimeSlots } = useMeeting();
   const [timeSlots, setTimeSlots] = useState<{
     date: string;
     startTime: string;
@@ -19,7 +19,10 @@ const ProposeTime = () => {
 
   useEffect(() => {
     console.log("Existing time slots in context:", existingTimeSlots);
-  }, [existingTimeSlots]);
+    
+    // Clear existing time slots when component mounts to avoid duplicates
+    clearTimeSlots();
+  }, [clearTimeSlots]);
 
   useEffect(() => {
     if (timeSlots.length === 0) {
@@ -102,17 +105,21 @@ const ProposeTime = () => {
     console.log("Adding time slots to context...");
     
     let validSlotsAdded = 0;
-    timeSlots.forEach(slot => {
-      if (slot.date && slot.startTime !== "--" && slot.endTime !== "--" && slot.isValid) {
-        addTimeSlot({
-          id: crypto.randomUUID(),
-          date: slot.date,
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-          responses: [],
-        });
-        validSlotsAdded++;
-      }
+    const validSlots = timeSlots.filter(slot => 
+      slot.date && slot.startTime !== "--" && slot.endTime !== "--" && slot.isValid
+    );
+    
+    console.log(`Found ${validSlots.length} valid time slots to add`);
+    
+    validSlots.forEach(slot => {
+      addTimeSlot({
+        id: crypto.randomUUID(),
+        date: slot.date,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        responses: [],
+      });
+      validSlotsAdded++;
     });
     
     console.log(`Added ${validSlotsAdded} valid time slots`);

@@ -27,6 +27,8 @@ const TimeConfirmation = () => {
   // Set up data when the component loads
   useEffect(() => {
     const setupMeetingData = async () => {
+      console.log("Setting up meeting data, time slots:", timeSlots);
+      
       if (!currentUser) {
         console.log("Setting up Abby's data");
         
@@ -71,6 +73,7 @@ const TimeConfirmation = () => {
       // For debugging
       console.log("Current user:", currentUser);
       console.log("Current time slots:", timeSlots);
+      console.log("Number of time slots:", timeSlots.length);
       console.log("Current participants:", participants);
       
       // Generate shareable link for this meeting
