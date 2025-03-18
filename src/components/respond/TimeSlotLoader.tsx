@@ -20,6 +20,7 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
   const { 
     timeSlots,
     loadMeetingFromStorage,
+    addTimeSlotsBatch
   } = useMeeting();
 
   // Get timeSlots from context to ensure we're using the most up-to-date data
@@ -94,7 +95,7 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     };
     
     loadTimeSlots();
-  }, [timeSlots, inviteId, loadMeetingFromStorage, setLocalTimeSlots, onTimeSlotsLoaded]);
+  }, [timeSlots, inviteId, loadMeetingFromStorage, setLocalTimeSlots, onTimeSlotsLoaded, addTimeSlotsBatch]);
 
   return null; // This is a logic-only component, no UI
 };

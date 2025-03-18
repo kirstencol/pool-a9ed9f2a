@@ -17,7 +17,7 @@ const RespondToInvite = () => {
   const userName = searchParams.get('name') || ""; 
   const currentUserFromStorage = localStorage.getItem('currentUser');
   
-  const { loadMeetingFromStorage, setTimeSlots, timeSlots, isLoading, error } = useMeeting();
+  const { loadMeetingFromStorage, timeSlots, isLoading, error, addTimeSlotsBatch } = useMeeting();
   const [responderName, setResponderName] = useState<string>("");
   const [creatorName, setCreatorName] = useState<string>("");
   const [loadingState, setLoadingState] = useState<'loading'|'loaded'|'error'>('loading');
@@ -50,7 +50,7 @@ const RespondToInvite = () => {
           // For demo IDs, create mock data if loading failed
           console.log("Creating mock meeting data for demo:", effectiveInviteId);
           
-          // Set mock time slots in context
+          // Set mock time slots using addTimeSlotsBatch
           const mockTimeSlots = [
             {
               id: "mock1",
@@ -68,7 +68,7 @@ const RespondToInvite = () => {
             }
           ];
           
-          setTimeSlots(mockTimeSlots);
+          // We'll add the time slots to the local state in the ResponseForm component
           setCreatorName("Abby");
           setResponderName(userName || currentUserFromStorage || 
                          (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
@@ -92,25 +92,7 @@ const RespondToInvite = () => {
         if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
           console.log("Creating mock data after error for demo:", effectiveInviteId);
           
-          // Set mock time slots in context
-          const mockTimeSlots = [
-            {
-              id: "mock1",
-              date: "March 15",
-              startTime: "3:00 PM",
-              endTime: "5:00 PM",
-              responses: []
-            },
-            {
-              id: "mock2",
-              date: "March 16",
-              startTime: "2:00 PM",
-              endTime: "4:00 PM",
-              responses: []
-            }
-          ];
-          
-          setTimeSlots(mockTimeSlots);
+          // We'll add the mock time slots to local state in ResponseForm instead
           setCreatorName("Abby");
           setResponderName(userName || currentUserFromStorage || 
                          (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
@@ -123,7 +105,7 @@ const RespondToInvite = () => {
     };
     
     initData();
-  }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate, setTimeSlots]);
+  }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate, addTimeSlotsBatch]);
 
   // Show loading state
   if (loadingState === 'loading' || isLoading) {
@@ -132,11 +114,6 @@ const RespondToInvite = () => {
 
   // Show error state
   if (loadingState === 'error' || error) {
-    return <InvalidInvitation reason="invalid" />;
-  }
-
-  // Make sure we have time slots loaded
-  if (!timeSlots || timeSlots.length === 0) {
     return <InvalidInvitation reason="invalid" />;
   }
 
