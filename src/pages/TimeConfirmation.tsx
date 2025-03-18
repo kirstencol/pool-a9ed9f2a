@@ -19,7 +19,6 @@ const TimeConfirmation = () => {
   
   const [shareableLink, setShareableLink] = useState("");
   const [inviteId, setInviteId] = useState("");
-  const [burtDirectLink, setBurtDirectLink] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // Set up data when the component loads
@@ -47,10 +46,6 @@ const TimeConfirmation = () => {
           const shareableData = await generateShareableLink();
           setShareableLink(shareableData.url);
           setInviteId(shareableData.id);
-          
-          // For demo/testing, maintain the burt_demo link
-          const baseUrl = window.location.origin;
-          setBurtDirectLink(`${baseUrl}/respond/burt_demo`);
           
           // For demo purposes, also store the demo_invite data
           const demoMeetingData = {
@@ -95,7 +90,8 @@ const TimeConfirmation = () => {
       {currentUser && <ConfirmedTimeSlots timeSlots={timeSlots} currentUserName={currentUser.name} />}
       <ShareableLinks 
         shareableLink={shareableLink} 
-        burtDirectLink={burtDirectLink}
+        // We're still passing these props to maintain the interface, but they won't be used
+        burtDirectLink=""
         inviteId={inviteId}
       />
     </div>
