@@ -30,6 +30,11 @@ const InvalidInvitation: React.FC<InvalidInvitationProps> = memo(({
     return reason === 'loading' ? 'Loading Invitation' : 'Invalid Invitation';
   };
   
+  const handleGoHome = () => {
+    console.log("Navigating to homepage");
+    navigate("/");
+  };
+  
   return (
     <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
       <div className="text-center">
@@ -38,7 +43,7 @@ const InvalidInvitation: React.FC<InvalidInvitationProps> = memo(({
         </h1>
         <p className="text-gray-600 mb-6">{getMessage()}</p>
         <Button 
-          onClick={() => navigate("/")} 
+          onClick={handleGoHome} 
           className="flex items-center"
           variant={reason === 'loading' ? "secondary" : "default"}
         >

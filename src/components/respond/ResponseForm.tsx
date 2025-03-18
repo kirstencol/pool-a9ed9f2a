@@ -25,14 +25,18 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   
   // Use a longer minimum loading time to ensure all data is loaded
   const { isLoading, finishLoading } = useLoadingState({
-    minimumLoadingTime: 1500,
-    safetyTimeoutDuration: 5000
+    minimumLoadingTime: 800,
+    safetyTimeoutDuration: 3000
   });
   
   // Initialize demo data on component mount
   useEffect(() => {
-    initializeDemoData();
-    console.log("ResponseForm - Initialized demo data on mount");
+    const init = async () => {
+      await initializeDemoData();
+      console.log("ResponseForm - Initialized demo data on mount");
+    };
+    
+    init();
   }, []);
 
   // Get response handlers from the submitter hook
