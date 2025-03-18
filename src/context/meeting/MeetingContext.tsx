@@ -32,6 +32,11 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
     return () => console.log("MeetingProvider unmounted");
   }, []);
 
+  // Log timeSlots changes
+  useEffect(() => {
+    console.log("MeetingProvider: timeSlots updated:", timeSlots.length, "items");
+  }, [timeSlots]);
+
   // Core state object
   const state: MeetingContextState = {
     currentUser,

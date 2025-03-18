@@ -26,8 +26,13 @@ export const useTimeSlotOperations = (
   const { timeSlots, currentMeetingId } = state;
 
   const addTimeSlot = async (timeSlot: TimeSlot) => {
+    console.log("addTimeSlot: Adding time slot:", timeSlot);
+    console.log("addTimeSlot: Current time slots:", timeSlots.length, "items");
+
     if (!currentMeetingId) {
-      setTimeSlots([...timeSlots, { ...timeSlot, id: timeSlot.id || crypto.randomUUID() }]);
+      const updatedTimeSlots = [...timeSlots, { ...timeSlot, id: timeSlot.id || crypto.randomUUID() }];
+      console.log("addTimeSlot: Setting updated time slots:", updatedTimeSlots.length, "items");
+      setTimeSlots(updatedTimeSlots);
       return;
     }
 
@@ -43,7 +48,9 @@ export const useTimeSlotOperations = (
         throw new Error('Failed to add time slot');
       }
 
-      setTimeSlots([...timeSlots, { ...timeSlot, id: timeSlotId[0] }]);
+      const updatedTimeSlots = [...timeSlots, { ...timeSlot, id: timeSlotId[0] }];
+      console.log("addTimeSlot: Setting updated time slots with DB ID:", updatedTimeSlots.length, "items");
+      setTimeSlots(updatedTimeSlots);
     } catch (err) {
       console.error('Error adding time slot:', err);
       setError(err instanceof Error ? err.message : 'Failed to add time slot');
@@ -55,6 +62,7 @@ export const useTimeSlotOperations = (
   };
 
   const clearTimeSlots = () => {
+    console.log("clearTimeSlots: Clearing all time slots");
     setTimeSlots([]);
   };
 

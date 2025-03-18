@@ -27,7 +27,7 @@ const TimeConfirmation = () => {
   // Set up data when the component loads
   useEffect(() => {
     const setupMeetingData = async () => {
-      console.log("Setting up meeting data, time slots:", timeSlots);
+      console.log("TimeConfirmation: Setting up meeting data, time slots:", timeSlots);
       
       if (!currentUser) {
         console.log("Setting up Abby's data");
@@ -72,8 +72,7 @@ const TimeConfirmation = () => {
       
       // For debugging
       console.log("Current user:", currentUser);
-      console.log("Current time slots:", timeSlots);
-      console.log("Number of time slots:", timeSlots.length);
+      console.log("TimeConfirmation: Current time slots:", timeSlots.length, "items:", timeSlots);
       console.log("Current participants:", participants);
       
       // Generate shareable link for this meeting
@@ -108,7 +107,7 @@ const TimeConfirmation = () => {
     };
 
     setupMeetingData();
-  }, [currentUser, timeSlots, navigate, participants, clearTimeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage]);
+  }, [currentUser, navigate, participants, clearTimeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage]);
 
   if (!currentUser) {
     return null;
@@ -119,7 +118,7 @@ const TimeConfirmation = () => {
   }
 
   // Make sure we display ALL time slots
-  console.log("Displaying time slots:", timeSlots);
+  console.log("TimeConfirmation: Rendering with time slots:", timeSlots);
 
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">

@@ -18,7 +18,7 @@ const ProposeTime = () => {
   }[]>([]);
 
   useEffect(() => {
-    console.log("Existing time slots in context:", existingTimeSlots);
+    console.log("ProposeTime: Existing time slots in context:", existingTimeSlots);
     
     // Clear existing time slots when component mounts to avoid duplicates
     clearTimeSlots();
@@ -102,27 +102,32 @@ const ProposeTime = () => {
   };
 
   const handleSendToFriends = () => {
-    console.log("Adding time slots to context...");
+    console.log("ProposeTime: Adding time slots to context...");
     
-    let validSlotsAdded = 0;
+    // Filter valid time slots first
     const validSlots = timeSlots.filter(slot => 
       slot.date && slot.startTime !== "--" && slot.endTime !== "--" && slot.isValid
     );
     
-    console.log(`Found ${validSlots.length} valid time slots to add`);
+    console.log(`ProposeTime: Found ${validSlots.length} valid time slots to add:`, validSlots);
     
+    // Clear any existing time slots before adding new ones
+    clearTimeSlots();
+    
+    // Add each valid time slot to the context
     validSlots.forEach(slot => {
-      addTimeSlot({
+      const newTimeSlot = {
         id: crypto.randomUUID(),
         date: slot.date,
         startTime: slot.startTime,
         endTime: slot.endTime,
         responses: [],
-      });
-      validSlotsAdded++;
+      };
+      console.log("ProposeTime: Adding time slot:", newTimeSlot);
+      addTimeSlot(newTimeSlot);
     });
     
-    console.log(`Added ${validSlotsAdded} valid time slots`);
+    console.log(`ProposeTime: Added ${validSlots.length} valid time slots`);
     
     navigate("/time-confirmation");
   };
