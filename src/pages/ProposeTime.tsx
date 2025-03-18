@@ -1,12 +1,11 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import DateTimePicker from "@/components/DateTimePicker";
 import { TimeSlot } from "@/types";
-import { toast } from "sonner";
 
 const ProposeTime = () => {
   const navigate = useNavigate();
@@ -30,12 +29,30 @@ const ProposeTime = () => {
         { date: "", startTime: "--", endTime: "--", isValid: true }
       ]);
     }
-  }, []);
 
-  const addNewTimeSlot = () => {
-    if (timeSlots.length < 5) {
-      setTimeSlots([...timeSlots, { date: "", startTime: "--", endTime: "--", isValid: true }]);
+    // Use this effect to redirect if no current user
+    if (!currentUser) {
+      navigate("/");
     }
+  }, [timeSlots.length, navigate, currentUser]);
+
+  const updateTimeSlot = (index: number, field: keyof Omit<TimeSlot, "id" | "responses">, value: string) => {
+    const updatedSlots = [...timeSlots];
+    updatedSlots[index] = { 
+      ...updatedSlots[index], 
+      [field]: value 
+    };
+    
+    if (field === "startTime" || field === "endTime") {
+      const startTime = field === "startTime" ? value : updatedSlots[index].startTime;
+      const endTime = field === "endTime" ? value : updatedSlots[index].endTime;
+      
+      if (startTime !== "--" && endTime !== "--") {
+        updatedSlots[index].isValid = validateTimeRange(startTime, endTime);
+      }
+    }
+    
+    setTimeSlots(updatedSlots);
   };
 
   const validateTimeRange = (startTime: string, endTime: string): boolean => {
@@ -69,25 +86,6 @@ const ProposeTime = () => {
     return true;
   };
 
-  const updateTimeSlot = (index: number, field: keyof Omit<TimeSlot, "id" | "responses">, value: string) => {
-    const updatedSlots = [...timeSlots];
-    updatedSlots[index] = { 
-      ...updatedSlots[index], 
-      [field]: value 
-    };
-    
-    if (field === "startTime" || field === "endTime") {
-      const startTime = field === "startTime" ? value : updatedSlots[index].startTime;
-      const endTime = field === "endTime" ? value : updatedSlots[index].endTime;
-      
-      if (startTime !== "--" && endTime !== "--") {
-        updatedSlots[index].isValid = validateTimeRange(startTime, endTime);
-      }
-    }
-    
-    setTimeSlots(updatedSlots);
-  };
-
   const clearTimeSlot = (index: number) => {
     const updatedSlots = [...timeSlots];
     updatedSlots[index] = { 
@@ -118,7 +116,6 @@ const ProposeTime = () => {
       console.log(`ProposeTime: Found ${validSlots.length} valid time slots to add:`, validSlots);
       
       if (validSlots.length === 0) {
-        toast.error("Please add at least one valid time slot");
         setIsSubmitting(false);
         return;
       }
@@ -137,13 +134,11 @@ const ProposeTime = () => {
       }
       
       console.log(`ProposeTime: Added ${validSlots.length} valid time slots`);
-      toast.success(`Added ${validSlots.length} time slot${validSlots.length > 1 ? 's' : ''}`);
       
       // Navigate to confirmation page
       navigate("/time-confirmation");
     } catch (error) {
       console.error("Error adding time slots:", error);
-      toast.error("Error saving time slots");
       setIsSubmitting(false);
     }
   };
@@ -154,8 +149,8 @@ const ProposeTime = () => {
     );
   };
 
+  // Return null if no current user as the useEffect will handle redirection
   if (!currentUser) {
-    navigate("/");
     return null;
   }
 
@@ -183,16 +178,6 @@ const ProposeTime = () => {
             />
           </div>
         ))}
-
-        {timeSlots.length < 5 && (
-          <button
-            onClick={addNewTimeSlot}
-            className="action-button bg-white text-purple-500 border-2 border-purple-500 hover:bg-purple-50 flex items-center justify-center"
-          >
-            <Plus size={18} className="mr-2" />
-            Add another time option
-          </button>
-        )}
 
         <button
           onClick={handleSendToFriends}

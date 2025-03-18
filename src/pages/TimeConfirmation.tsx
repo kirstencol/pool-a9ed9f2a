@@ -6,7 +6,6 @@ import Loading from "@/components/Loading";
 import TimeConfirmationHeader from "@/components/TimeConfirmation/TimeConfirmationHeader";
 import ConfirmedTimeSlots from "@/components/TimeConfirmation/ConfirmedTimeSlots";
 import ShareableLinks from "@/components/TimeConfirmation/ShareableLinks";
-import { toast } from "sonner";
 
 const TimeConfirmation = () => {
   const navigate = useNavigate();
@@ -62,23 +61,14 @@ const TimeConfirmation = () => {
           
           await storeMeetingInStorage("demo_invite", demoMeetingData);
           console.log("Stored demo_invite data with time slots:", timeSlots);
-
-          // Show success toast
-          toast.success("Your meeting has been created!", {
-            description: `${timeSlots.length} time slots ready to share`
-          });
           
         } catch (error) {
           console.error("Error generating link:", error);
-          toast.error("Could not generate shareable link");
         } finally {
           setIsLoading(false);
         }
       } else {
         console.log("No time slots found. Redirecting to propose time page");
-        toast.error("No time slots found", {
-          description: "Please add at least one time slot"
-        });
         navigate("/propose-time");
       }
     };

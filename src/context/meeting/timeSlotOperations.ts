@@ -3,7 +3,6 @@
 import { TimeSlot } from '@/types';
 import { MeetingContextState, TimeSlotOperations } from './types';
 import { addTimeSlots, addTimeResponse, setSelectedTimeSlot as dbSetSelectedTimeSlot, updateMeetingStatus } from '@/integrations/supabase/api';
-import { toast } from 'sonner';
 
 type StateSetters = {
   setTimeSlots: (timeSlots: TimeSlot[]) => void;
