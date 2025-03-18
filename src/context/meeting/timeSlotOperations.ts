@@ -27,11 +27,23 @@ export const useTimeSlotOperations = (
 
   const addTimeSlot = async (timeSlot: TimeSlot) => {
     console.log("addTimeSlot: Adding time slot:", timeSlot);
-    console.log("addTimeSlot: Current time slots:", timeSlots.length, "items");
+    console.log("addTimeSlot: Current time slots:", timeSlots);
+
+    // Prevent adding duplicate time slots (based on date and time)
+    const isDuplicate = timeSlots.some(
+      slot => slot.date === timeSlot.date && 
+             slot.startTime === timeSlot.startTime && 
+             slot.endTime === timeSlot.endTime
+    );
+
+    if (isDuplicate) {
+      console.log("addTimeSlot: Duplicate time slot detected, skipping");
+      return;
+    }
 
     if (!currentMeetingId) {
       const updatedTimeSlots = [...timeSlots, { ...timeSlot, id: timeSlot.id || crypto.randomUUID() }];
-      console.log("addTimeSlot: Setting updated time slots:", updatedTimeSlots.length, "items");
+      console.log("addTimeSlot: Setting updated time slots without DB:", updatedTimeSlots.length, "items");
       setTimeSlots(updatedTimeSlots);
       return;
     }
@@ -49,7 +61,7 @@ export const useTimeSlotOperations = (
       }
 
       const updatedTimeSlots = [...timeSlots, { ...timeSlot, id: timeSlotId[0] }];
-      console.log("addTimeSlot: Setting updated time slots with DB ID:", updatedTimeSlots.length, "items");
+      console.log("addTimeSlot: Setting updated time slots with DB ID:", updatedTimeSlots);
       setTimeSlots(updatedTimeSlots);
     } catch (err) {
       console.error('Error adding time slot:', err);
@@ -120,7 +132,6 @@ export const useTimeSlotOperations = (
       });
       
       setTimeSlots(updatedTimeSlots);
-
       return true;
     } catch (err) {
       console.error('Error responding to time slot:', err);

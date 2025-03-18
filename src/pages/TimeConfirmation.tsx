@@ -23,6 +23,7 @@ const TimeConfirmation = () => {
   const [inviteId, setInviteId] = useState("");
   const [burtDirectLink, setBurtDirectLink] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [timeSlotsLoaded, setTimeSlotsLoaded] = useState(false);
 
   // Set up data when the component loads
   useEffect(() => {
@@ -35,7 +36,7 @@ const TimeConfirmation = () => {
         // Clear any existing time slots
         clearTimeSlots();
         
-        // Add Abby's availability time slots
+        // Add Abby's availability time slots (for demo only)
         const abbyTimeSlots = [
           {
             id: "1",
@@ -60,9 +61,13 @@ const TimeConfirmation = () => {
           }
         ];
         
-        abbyTimeSlots.forEach(slot => {
-          addTimeSlot(slot);
-        });
+        // This is just for demo, don't add them in the actual flow
+        if (timeSlots.length === 0) {
+          console.log("No time slots found, adding demo slots");
+          for (const slot of abbyTimeSlots) {
+            await addTimeSlot(slot);
+          }
+        }
         
         // Setup Abby as current user if not set
         if (!currentUser) {
@@ -74,6 +79,8 @@ const TimeConfirmation = () => {
       console.log("Current user:", currentUser);
       console.log("TimeConfirmation: Current time slots:", timeSlots.length, "items:", timeSlots);
       console.log("Current participants:", participants);
+      
+      setTimeSlotsLoaded(true);
       
       // Generate shareable link for this meeting
       if (currentUser && timeSlots.length > 0) {

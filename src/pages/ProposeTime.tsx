@@ -17,13 +17,14 @@ const ProposeTime = () => {
     isValid: boolean;
   }[]>([]);
 
+  // Clear existing time slots when component mounts to avoid duplicates
   useEffect(() => {
     console.log("ProposeTime: Existing time slots in context:", existingTimeSlots);
-    
-    // Clear existing time slots when component mounts to avoid duplicates
     clearTimeSlots();
+    console.log("ProposeTime: Cleared existing time slots");
   }, [clearTimeSlots]);
 
+  // Initialize with empty time slots if none exist
   useEffect(() => {
     if (timeSlots.length === 0) {
       setTimeSlots([
@@ -101,7 +102,7 @@ const ProposeTime = () => {
     setTimeSlots(updatedSlots);
   };
 
-  const handleSendToFriends = () => {
+  const handleSendToFriends = async () => {
     console.log("ProposeTime: Adding time slots to context...");
     
     // Filter valid time slots first
@@ -111,11 +112,8 @@ const ProposeTime = () => {
     
     console.log(`ProposeTime: Found ${validSlots.length} valid time slots to add:`, validSlots);
     
-    // Clear any existing time slots before adding new ones
-    clearTimeSlots();
-    
-    // Add each valid time slot to the context
-    validSlots.forEach(slot => {
+    // Add each valid time slot to the context one by one
+    for (const slot of validSlots) {
       const newTimeSlot = {
         id: crypto.randomUUID(),
         date: slot.date,
@@ -124,8 +122,8 @@ const ProposeTime = () => {
         responses: [],
       };
       console.log("ProposeTime: Adding time slot:", newTimeSlot);
-      addTimeSlot(newTimeSlot);
-    });
+      await addTimeSlot(newTimeSlot);
+    }
     
     console.log(`ProposeTime: Added ${validSlots.length} valid time slots`);
     
