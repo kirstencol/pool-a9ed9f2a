@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -46,12 +47,6 @@ const Welcome = () => {
 
   const toggleDevTools = () => {
     setShowDevTools(!showDevTools);
-  };
-
-  const goToRespondAsFriend = () => {
-    initializeDemoData();
-    console.log("Navigating to Friend Selection Screen: /select-user?id=demo_invite");
-    navigate("/select-user?id=demo_invite");
   };
 
   const goToRespondAsBurt = () => {
@@ -150,13 +145,6 @@ const Welcome = () => {
           <div className="mt-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
             <h2 className="text-sm font-medium mb-3">Developer Quick Access</h2>
             <div className="space-y-2">
-              <Button 
-                onClick={goToRespondAsFriend}
-                variant="outline"
-                className="w-full justify-start"
-              >
-                Test Friend's Response Flow
-              </Button>
               <Button 
                 onClick={goToRespondAsBurt}
                 variant="outline"
