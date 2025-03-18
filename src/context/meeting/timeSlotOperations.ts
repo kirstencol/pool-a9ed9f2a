@@ -3,6 +3,7 @@
 import { TimeSlot } from '@/types';
 import { MeetingContextState, TimeSlotOperations } from './types';
 import { addTimeSlots, addTimeResponse, setSelectedTimeSlot as dbSetSelectedTimeSlot, updateMeetingStatus } from '@/integrations/supabase/api';
+import { toast } from 'sonner';
 
 type StateSetters = {
   setTimeSlots: (timeSlots: TimeSlot[]) => void;
@@ -41,35 +42,34 @@ export const useTimeSlotOperations = (
       return;
     }
 
-    if (!currentMeetingId) {
-      const updatedTimeSlots = [...timeSlots, { ...timeSlot, id: timeSlot.id || crypto.randomUUID() }];
-      console.log("addTimeSlot: Setting updated time slots without DB:", updatedTimeSlots.length, "items");
-      setTimeSlots(updatedTimeSlots);
-      return;
-    }
+    // Always add the time slot to local state first
+    const newSlot = { ...timeSlot, id: timeSlot.id || crypto.randomUUID() };
+    const updatedTimeSlots = [...timeSlots, newSlot];
+    console.log("addTimeSlot: Setting updated time slots:", updatedTimeSlots);
+    setTimeSlots(updatedTimeSlots);
 
-    try {
-      const timeSlotId = await addTimeSlots([{
-        meeting_id: currentMeetingId,
-        date: timeSlot.date,
-        start_time: timeSlot.startTime,
-        end_time: timeSlot.endTime
-      }]);
+    // If there's a meeting ID, also add to the database
+    if (currentMeetingId) {
+      try {
+        const timeSlotId = await addTimeSlots([{
+          meeting_id: currentMeetingId,
+          date: timeSlot.date,
+          start_time: timeSlot.startTime,
+          end_time: timeSlot.endTime
+        }]);
 
-      if (!timeSlotId || timeSlotId.length === 0) {
-        throw new Error('Failed to add time slot');
+        if (!timeSlotId || timeSlotId.length === 0) {
+          console.warn('Failed to add time slot to database, but it was added to local state');
+        }
+      } catch (err) {
+        console.error('Error adding time slot to database:', err);
+        setError(err instanceof Error ? err.message : 'Failed to add time slot to database');
       }
-
-      const updatedTimeSlots = [...timeSlots, { ...timeSlot, id: timeSlotId[0] }];
-      console.log("addTimeSlot: Setting updated time slots with DB ID:", updatedTimeSlots);
-      setTimeSlots(updatedTimeSlots);
-    } catch (err) {
-      console.error('Error adding time slot:', err);
-      setError(err instanceof Error ? err.message : 'Failed to add time slot');
     }
   };
 
   const removeTimeSlot = (id: string) => {
+    console.log("removeTimeSlot: Removing time slot with ID:", id);
     setTimeSlots(timeSlots.filter(ts => ts.id !== id));
   };
 
@@ -79,12 +79,14 @@ export const useTimeSlotOperations = (
   };
 
   const updateTimeSlot = (id: string, updates: Partial<TimeSlot>) => {
+    console.log("updateTimeSlot: Updating time slot with ID:", id, "Updates:", updates);
     setTimeSlots(timeSlots.map(ts => 
       ts.id === id ? { ...ts, ...updates } : ts
     ));
   };
 
   const setSelectedTimeSlotWithDB = async (timeSlot: TimeSlot | null) => {
+    console.log("setSelectedTimeSlotWithDB: Setting selected time slot:", timeSlot);
     setSelectedTimeSlot(timeSlot);
     
     if (currentMeetingId && timeSlot) {
@@ -100,6 +102,7 @@ export const useTimeSlotOperations = (
   const respondToTimeSlot = async (timeSlotId: string, responderName: string, startTime: string, endTime: string): Promise<boolean> => {
     try {
       setIsLoading(true);
+      console.log("respondToTimeSlot: Responding to time slot:", timeSlotId, responderName, startTime, endTime);
       
       const success = await addTimeResponse({
         time_slot_id: timeSlotId,
@@ -131,6 +134,7 @@ export const useTimeSlotOperations = (
         return slot;
       });
       
+      console.log("respondToTimeSlot: Updated time slots with response:", updatedTimeSlots);
       setTimeSlots(updatedTimeSlots);
       return true;
     } catch (err) {

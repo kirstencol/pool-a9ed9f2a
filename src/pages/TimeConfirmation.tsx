@@ -6,6 +6,7 @@ import Loading from "@/components/Loading";
 import TimeConfirmationHeader from "@/components/TimeConfirmation/TimeConfirmationHeader";
 import ConfirmedTimeSlots from "@/components/TimeConfirmation/ConfirmedTimeSlots";
 import ShareableLinks from "@/components/TimeConfirmation/ShareableLinks";
+import { toast } from "sonner";
 
 const TimeConfirmation = () => {
   const navigate = useNavigate();
@@ -13,7 +14,6 @@ const TimeConfirmation = () => {
     currentUser, 
     participants, 
     timeSlots, 
-    clearTimeSlots, 
     addTimeSlot,
     generateShareableLink,
     storeMeetingInStorage
@@ -23,7 +23,6 @@ const TimeConfirmation = () => {
   const [inviteId, setInviteId] = useState("");
   const [burtDirectLink, setBurtDirectLink] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [timeSlotsLoaded, setTimeSlotsLoaded] = useState(false);
 
   // Set up data when the component loads
   useEffect(() => {
@@ -31,48 +30,9 @@ const TimeConfirmation = () => {
       console.log("TimeConfirmation: Setting up meeting data, time slots:", timeSlots);
       
       if (!currentUser) {
-        console.log("Setting up Abby's data");
-        
-        // Clear any existing time slots
-        clearTimeSlots();
-        
-        // Add Abby's availability time slots (for demo only)
-        const abbyTimeSlots = [
-          {
-            id: "1",
-            date: "March 1",
-            startTime: "8:00 AM",
-            endTime: "1:30 PM",
-            responses: []
-          },
-          {
-            id: "2",
-            date: "March 2",
-            startTime: "7:00 AM",
-            endTime: "10:00 AM",
-            responses: []
-          },
-          {
-            id: "3",
-            date: "March 3",
-            startTime: "9:00 AM",
-            endTime: "9:00 PM",
-            responses: []
-          }
-        ];
-        
-        // This is just for demo, don't add them in the actual flow
-        if (timeSlots.length === 0) {
-          console.log("No time slots found, adding demo slots");
-          for (const slot of abbyTimeSlots) {
-            await addTimeSlot(slot);
-          }
-        }
-        
-        // Setup Abby as current user if not set
-        if (!currentUser) {
-          navigate("/");
-        }
+        console.log("No current user, redirecting to home");
+        navigate("/");
+        return;
       }
       
       // For debugging
@@ -80,10 +40,8 @@ const TimeConfirmation = () => {
       console.log("TimeConfirmation: Current time slots:", timeSlots.length, "items:", timeSlots);
       console.log("Current participants:", participants);
       
-      setTimeSlotsLoaded(true);
-      
-      // Generate shareable link for this meeting
-      if (currentUser && timeSlots.length > 0) {
+      // If we have time slots, generate shareable link
+      if (timeSlots.length > 0) {
         try {
           setIsLoading(true);
           
@@ -104,19 +62,32 @@ const TimeConfirmation = () => {
           
           await storeMeetingInStorage("demo_invite", demoMeetingData);
           console.log("Stored demo_invite data with time slots:", timeSlots);
+
+          // Show success toast
+          toast.success("Your meeting has been created!", {
+            description: `${timeSlots.length} time slots ready to share`
+          });
           
         } catch (error) {
           console.error("Error generating link:", error);
+          toast.error("Could not generate shareable link");
         } finally {
           setIsLoading(false);
         }
+      } else {
+        console.log("No time slots found. Redirecting to propose time page");
+        toast.error("No time slots found", {
+          description: "Please add at least one time slot"
+        });
+        navigate("/propose-time");
       }
     };
 
     setupMeetingData();
-  }, [currentUser, navigate, participants, clearTimeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage]);
+  }, [currentUser, navigate, participants, timeSlots, addTimeSlot, generateShareableLink, storeMeetingInStorage]);
 
   if (!currentUser) {
+    navigate("/");
     return null;
   }
 

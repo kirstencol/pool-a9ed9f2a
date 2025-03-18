@@ -34,7 +34,7 @@ export const MeetingProvider = ({ children }: { children: ReactNode }) => {
 
   // Log timeSlots changes
   useEffect(() => {
-    console.log("MeetingProvider: timeSlots updated:", timeSlots.length, "items");
+    console.log("MeetingProvider: timeSlots updated:", timeSlots.length, "items:", timeSlots);
   }, [timeSlots]);
 
   // Core state object
