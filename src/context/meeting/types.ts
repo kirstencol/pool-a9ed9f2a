@@ -39,6 +39,7 @@ export interface UserOperations {
 // Time slot operations
 export interface TimeSlotOperations {
   addTimeSlot: (timeSlot: TimeSlot) => void;
+  addTimeSlotsBatch: (timeSlots: TimeSlot[]) => Promise<TimeSlot[]>;
   removeTimeSlot: (id: string) => void;
   updateTimeSlot: (id: string, updates: Partial<TimeSlot>) => void;
   setSelectedTimeSlot: (timeSlot: TimeSlot | null) => void;

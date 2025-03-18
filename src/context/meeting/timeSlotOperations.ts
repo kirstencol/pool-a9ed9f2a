@@ -67,6 +67,60 @@ export const useTimeSlotOperations = (
     }
   };
 
+  // New method to add multiple time slots at once
+  const addTimeSlotsBatch = async (newTimeSlots: TimeSlot[]) => {
+    console.log("addTimeSlotsBatch: Adding batch of time slots:", newTimeSlots);
+    
+    if (!newTimeSlots || newTimeSlots.length === 0) {
+      console.log("addTimeSlotsBatch: No time slots to add");
+      return [];
+    }
+    
+    // Filter out duplicates
+    const uniqueNewSlots = newTimeSlots.filter(newSlot => 
+      !timeSlots.some(existingSlot => 
+        existingSlot.date === newSlot.date && 
+        existingSlot.startTime === newSlot.startTime && 
+        existingSlot.endTime === newSlot.endTime
+      )
+    );
+    
+    if (uniqueNewSlots.length === 0) {
+      console.log("addTimeSlotsBatch: All slots are duplicates, skipping");
+      return [];
+    }
+    
+    // Ensure all slots have IDs
+    const slotsWithIds = uniqueNewSlots.map(slot => ({
+      ...slot,
+      id: slot.id || crypto.randomUUID()
+    }));
+    
+    // Update state in a single operation
+    const updatedTimeSlots = [...timeSlots, ...slotsWithIds];
+    console.log("addTimeSlotsBatch: Setting updated time slots:", updatedTimeSlots);
+    setTimeSlots(updatedTimeSlots);
+    
+    // If there's a meeting ID, also add to the database
+    if (currentMeetingId) {
+      try {
+        const dbSlots = slotsWithIds.map(slot => ({
+          meeting_id: currentMeetingId,
+          date: slot.date,
+          start_time: slot.startTime,
+          end_time: slot.endTime
+        }));
+        
+        await addTimeSlots(dbSlots);
+      } catch (err) {
+        console.error('Error adding time slots to database:', err);
+        setError(err instanceof Error ? err.message : 'Failed to add time slots to database');
+      }
+    }
+    
+    return slotsWithIds;
+  };
+
   const removeTimeSlot = (id: string) => {
     console.log("removeTimeSlot: Removing time slot with ID:", id);
     setTimeSlots(timeSlots.filter(ts => ts.id !== id));
@@ -147,6 +201,7 @@ export const useTimeSlotOperations = (
 
   return {
     addTimeSlot,
+    addTimeSlotsBatch,
     removeTimeSlot,
     clearTimeSlots,
     updateTimeSlot,

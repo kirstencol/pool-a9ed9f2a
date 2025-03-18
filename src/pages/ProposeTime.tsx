@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
@@ -8,7 +9,13 @@ import { TimeSlot } from "@/types";
 
 const ProposeTime = () => {
   const navigate = useNavigate();
-  const { currentUser, addTimeSlot, timeSlots: existingTimeSlots, clearTimeSlots } = useMeeting();
+  const { 
+    currentUser, 
+    addTimeSlotsBatch, 
+    clearTimeSlots, 
+    timeSlots: existingTimeSlots 
+  } = useMeeting();
+  
   const [timeSlots, setTimeSlots] = useState<{
     date: string;
     startTime: string;
@@ -103,7 +110,7 @@ const ProposeTime = () => {
       setIsSubmitting(true);
       console.log("ProposeTime: Adding time slots to context...");
       
-      // IMPORTANT: Clear existing time slots first - this is key to fixing the issue
+      // Clear existing time slots first - this is key to fixing the issue
       await clearTimeSlots();
       console.log("ProposeTime: Cleared existing time slots");
       
@@ -119,23 +126,27 @@ const ProposeTime = () => {
         return;
       }
       
-      // Add each valid time slot to the context one by one
-      for (const slot of validSlots) {
-        const newTimeSlot = {
-          id: crypto.randomUUID(),
-          date: slot.date,
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-          responses: [],
-        };
-        console.log("ProposeTime: Adding time slot:", newTimeSlot);
-        await addTimeSlot(newTimeSlot);
+      // Convert to TimeSlot format with IDs
+      const timeSlotsToAdd = validSlots.map(slot => ({
+        id: crypto.randomUUID(),
+        date: slot.date,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        responses: [],
+      }));
+      
+      // Add all time slots at once using the new batch method
+      const addedSlots = await addTimeSlotsBatch(timeSlotsToAdd);
+      console.log("ProposeTime: Successfully added time slots in batch:", addedSlots);
+      
+      // Double-check that slots were added before navigating
+      if (addedSlots.length > 0) {
+        console.log(`ProposeTime: Successfully added ${addedSlots.length} time slots. Navigating to confirmation page.`);
+        navigate("/time-confirmation");
+      } else {
+        console.error("ProposeTime: No time slots were added. Staying on propose time page.");
+        setIsSubmitting(false);
       }
-      
-      console.log(`ProposeTime: Added ${validSlots.length} valid time slots`);
-      
-      // Navigate to confirmation page
-      navigate("/time-confirmation");
     } catch (error) {
       console.error("Error adding time slots:", error);
       setIsSubmitting(false);
