@@ -15,7 +15,7 @@ export const loadMeetingFromSupabase = async (id: string): Promise<Meeting | nul
       
     if (data && !error) {
       console.log(`Loaded meeting data for ID: ${id} from Supabase`);
-      // Transform Supabase data to Meeting type
+      // Transform Supabase data to Meeting type with the correct status type
       return {
         id: data.id,
         creator: {
@@ -24,7 +24,8 @@ export const loadMeetingFromSupabase = async (id: string): Promise<Meeting | nul
           initial: data.creator_initial
         },
         timeSlots: [], // You would load these from related tables
-        status: data.status
+        participants: [],
+        status: data.status as 'draft' | 'pending' | 'confirmed'
       } as Meeting;
     }
     
