@@ -5,7 +5,22 @@ import { convertTimeToMinutes } from "@/utils/timeUtils";
 export const calculateOverlappingTimeSlots = (timeSlotsWithResponses: TimeSlot[]) => {
   console.log("Calculating overlapping time slots from:", timeSlotsWithResponses);
   
-  return timeSlotsWithResponses.map((slot: TimeSlot) => {
+  // Filter out time slots without responses
+  const slotsWithValidResponses = timeSlotsWithResponses.filter(slot => 
+    slot.responses && slot.responses.length > 0
+  );
+  
+  if (slotsWithValidResponses.length === 0) {
+    // If there are no valid responses, just return the original time slots
+    // This ensures we show something even if there are no explicit responses
+    return timeSlotsWithResponses.map(slot => ({
+      ...slot,
+      overlapStartTime: slot.startTime,
+      overlapEndTime: slot.endTime
+    }));
+  }
+  
+  return slotsWithValidResponses.map((slot: TimeSlot) => {
     console.log("Processing time slot:", slot);
     
     // Start with creator's full availability
@@ -17,8 +32,8 @@ export const calculateOverlappingTimeSlots = (timeSlotsWithResponses: TimeSlot[]
     // Adjust based on each response
     slot.responses?.forEach(response => {
       console.log("Processing response:", response);
-      const responseStartMinutes = convertTimeToMinutes(response.startTime || "");
-      const responseEndMinutes = convertTimeToMinutes(response.endTime || "");
+      const responseStartMinutes = convertTimeToMinutes(response.startTime || slot.startTime);
+      const responseEndMinutes = convertTimeToMinutes(response.endTime || slot.endTime);
       
       if (responseStartMinutes && responseEndMinutes) {
         // Update overlap to be the later start time

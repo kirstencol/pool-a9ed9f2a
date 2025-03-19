@@ -70,15 +70,11 @@ const Confirmation = () => {
   }
 
   // Find time slots with responses
-  const timeSlotsWithResponses = meetingData.timeSlots?.filter((slot: TimeSlot) => 
-    slot.responses && slot.responses.length > 0
-  ) || [];
-
+  const timeSlotsWithResponses = meetingData.timeSlots || [];
   console.log("Time slots with responses:", timeSlotsWithResponses);
 
   // Calculate overlapping availability for each time slot
   const overlappingTimeSlots = calculateOverlappingTimeSlots(timeSlotsWithResponses);
-  
   console.log("Overlapping time slots:", overlappingTimeSlots);
 
   // Format names for display - fixing the type issue here
