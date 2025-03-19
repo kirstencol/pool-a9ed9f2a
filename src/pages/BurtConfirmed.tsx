@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import { Check } from "lucide-react";
+import Loading from "@/components/Loading";
 
 const BurtConfirmed = () => {
   const navigate = useNavigate();
@@ -16,11 +17,16 @@ const BurtConfirmed = () => {
   const [meetingStartTime, setMeetingStartTime] = useState("");
   const [meetingEndTime, setMeetingEndTime] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingAttempted, setLoadingAttempted] = useState(false);
 
   useEffect(() => {
     const loadMeetingData = async () => {
+      if (loadingAttempted) return;
+      setLoadingAttempted(true);
+      
       try {
         setIsLoading(true);
+        console.log("BurtConfirmed: Loading meeting data for:", inviteId);
         const meetingData = await loadMeetingFromStorage(inviteId);
         
         if (meetingData && meetingData.timeSlots && meetingData.timeSlots.length > 0) {
@@ -29,7 +35,9 @@ const BurtConfirmed = () => {
           setMeetingDate(timeSlot.date);
           setMeetingStartTime(timeSlot.startTime);
           setMeetingEndTime(timeSlot.endTime);
+          console.log("BurtConfirmed: Successfully loaded time slot data");
         } else {
+          console.log("BurtConfirmed: No time slots found, using fallback data");
           // Fallback values if no data is found
           setMeetingDate("March 1");
           setMeetingStartTime("9:00 AM");
@@ -42,17 +50,35 @@ const BurtConfirmed = () => {
         setMeetingStartTime("9:00 AM");
         setMeetingEndTime("10:30 AM");
       } finally {
-        setIsLoading(false);
+        // Add a small delay to prevent flickering
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 100);
       }
     };
     
     loadMeetingData();
-  }, [inviteId, loadMeetingFromStorage]);
+    
+    // Safety timeout to prevent perpetual loading
+    const safetyTimeout = setTimeout(() => {
+      if (isLoading) {
+        console.log("BurtConfirmed: Safety timeout reached, ending loading state");
+        setIsLoading(false);
+        
+        // Set fallback data if needed
+        if (!meetingDate) {
+          setMeetingDate("March 1");
+          setMeetingStartTime("9:00 AM");
+          setMeetingEndTime("10:30 AM");
+        }
+      }
+    }, 2000);
+    
+    return () => clearTimeout(safetyTimeout);
+  }, [inviteId, loadMeetingFromStorage, isLoading, loadingAttempted, meetingDate]);
 
   if (isLoading) {
-    return <div className="max-w-md mx-auto px-6 py-12">
-      <p className="text-center text-gray-500">Loading...</p>
-    </div>;
+    return <Loading message="Loading confirmation" subtitle="Just a moment..." />;
   }
 
   return (
