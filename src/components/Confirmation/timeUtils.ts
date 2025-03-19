@@ -5,9 +5,23 @@ import { convertTimeToMinutes } from "@/utils/timeUtils";
 export const calculateOverlappingTimeSlots = (timeSlotsWithResponses: TimeSlot[]) => {
   console.log("Calculating overlapping time slots from:", timeSlotsWithResponses);
   
-  // We need to process all time slots regardless of responses, otherwise 
-  // Burt's selections won't show correctly in the demo flow
-  return timeSlotsWithResponses.map((slot: TimeSlot) => {
+  // Filter time slots to only include those with responses
+  // In the demo flow, we need to check if a slot has been "selected by Burt"
+  // which is indicated by having responses
+  const filteredTimeSlots = timeSlotsWithResponses.filter(slot => 
+    slot.responses && slot.responses.length > 0
+  );
+  
+  console.log("Filtered time slots with responses:", filteredTimeSlots);
+  
+  // If no slots have responses (for demo situation), return empty array
+  if (filteredTimeSlots.length === 0) {
+    console.log("No time slots with responses found");
+    return [];
+  }
+  
+  // Process only slots with responses
+  return filteredTimeSlots.map((slot: TimeSlot) => {
     console.log("Processing time slot:", slot);
     
     // Start with creator's full availability

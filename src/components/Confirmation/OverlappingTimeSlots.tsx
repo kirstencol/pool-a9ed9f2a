@@ -7,6 +7,8 @@ interface OverlappingTimeSlotsProps {
 }
 
 const OverlappingTimeSlots = ({ overlappingTimeSlots }: OverlappingTimeSlotsProps) => {
+  console.log("Rendering OverlappingTimeSlots with:", overlappingTimeSlots);
+  
   return (
     <div className="space-y-6 mb-10">
       {overlappingTimeSlots && overlappingTimeSlots.length > 0 ? (
@@ -22,7 +24,7 @@ const OverlappingTimeSlots = ({ overlappingTimeSlots }: OverlappingTimeSlotsProp
         ))
       ) : (
         <div className="space-y-1 bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm text-center">
-          <p className="text-gray-500">No overlapping time slots found</p>
+          <p className="text-gray-500">Please select at least one time slot to see overlapping availability</p>
         </div>
       )}
     </div>
