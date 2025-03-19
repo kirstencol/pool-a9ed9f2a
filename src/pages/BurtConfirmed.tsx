@@ -3,20 +3,28 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
-import { Check } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useLoadingState } from "@/hooks/useLoadingState";
+import ConfirmationHeader from "@/components/Confirmation/ConfirmationHeader";
+import ConfirmationLinks from "@/components/Confirmation/ConfirmationLinks";
 import Loading from "@/components/Loading";
 
 const BurtConfirmed = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const inviteId = searchParams.get('id') || 'burt_demo';
   
   const { loadMeetingFromStorage } = useMeeting();
+  const { isLoading, startLoading, finishLoading } = useLoadingState({
+    minimumLoadingTime: 300,
+    safetyTimeoutDuration: 1500
+  });
   
   const [meetingDate, setMeetingDate] = useState("");
   const [meetingStartTime, setMeetingStartTime] = useState("");
   const [meetingEndTime, setMeetingEndTime] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [loadingAttempted, setLoadingAttempted] = useState(false);
 
   useEffect(() => {
@@ -25,7 +33,7 @@ const BurtConfirmed = () => {
       setLoadingAttempted(true);
       
       try {
-        setIsLoading(true);
+        startLoading();
         console.log("BurtConfirmed: Loading meeting data for:", inviteId);
         const meetingData = await loadMeetingFromStorage(inviteId);
         
@@ -43,39 +51,19 @@ const BurtConfirmed = () => {
           setMeetingStartTime("9:00 AM");
           setMeetingEndTime("10:30 AM");
         }
+        finishLoading();
       } catch (error) {
         console.error("Error loading meeting data:", error);
         // Fallback values if error occurs
         setMeetingDate("March 1");
         setMeetingStartTime("9:00 AM");
         setMeetingEndTime("10:30 AM");
-      } finally {
-        // Add a small delay to prevent flickering
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 100);
+        finishLoading();
       }
     };
     
     loadMeetingData();
-    
-    // Safety timeout to prevent perpetual loading
-    const safetyTimeout = setTimeout(() => {
-      if (isLoading) {
-        console.log("BurtConfirmed: Safety timeout reached, ending loading state");
-        setIsLoading(false);
-        
-        // Set fallback data if needed
-        if (!meetingDate) {
-          setMeetingDate("March 1");
-          setMeetingStartTime("9:00 AM");
-          setMeetingEndTime("10:30 AM");
-        }
-      }
-    }, 2000);
-    
-    return () => clearTimeout(safetyTimeout);
-  }, [inviteId, loadMeetingFromStorage, isLoading, loadingAttempted, meetingDate]);
+  }, [inviteId, loadMeetingFromStorage, startLoading, finishLoading, loadingAttempted]);
 
   if (isLoading) {
     return <Loading message="Loading confirmation" subtitle="Just a moment..." />;
@@ -83,14 +71,9 @@ const BurtConfirmed = () => {
 
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
-      <div className="flex items-center mb-8">
-        <div className="celebration-animation">
-          <Check className="text-white" size={32} />
-        </div>
-        <div className="ml-4">
-          <h1 className="text-2xl font-semibold">Thanks, Burt!</h1>
-          <p className="text-gray-600">Your availability is confirmed.</p>
-        </div>
+      <div className="flex flex-col items-center mb-8">
+        <ConfirmationHeader displayNames="Abby and Burt" />
+        <p className="text-gray-600 text-center">You and Abby are both free!</p>
       </div>
 
       <div className="bg-gray-50 p-4 rounded-xl mb-8">
@@ -119,12 +102,11 @@ const BurtConfirmed = () => {
         <p className="text-gray-600">Abby will share location options soon!</p>
       </div>
 
-      <button
-        onClick={() => navigate("/")}
-        className="secondary-button"
-      >
-        Back to home
-      </button>
+      <ConfirmationLinks 
+        meetingId={inviteId}
+        onGoBack={() => navigate("/")}
+        responderNames={["Burt"]}
+      />
     </div>
   );
 };

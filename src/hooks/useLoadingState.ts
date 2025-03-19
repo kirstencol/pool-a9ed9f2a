@@ -29,11 +29,11 @@ export function useLoadingState({
     };
   }, []);
 
-  // Always set a safety timeout on mount - but don't reset loading state
+  // Set a safety timeout on mount - but don't reset loading state immediately for demo IDs
   useEffect(() => {
     safetyTimerRef.current = setTimeout(() => {
       if (isLoading) {
-        console.log("Global safety timeout reached, forcing load completion");
+        console.log("Safety timeout reached, forcing load completion");
         setIsLoading(false);
         hasFinishedRef.current = true;
         safetyTimerRef.current = null;

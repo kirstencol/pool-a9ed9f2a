@@ -9,8 +9,8 @@ interface ConfirmationHeaderProps {
 const ConfirmationHeader = ({ displayNames }: ConfirmationHeaderProps) => {
   return (
     <>
-      <div className="celebration-animation">
-        <Sparkles className="text-purple" size={32} />
+      <div className="celebration-animation bg-purple-100">
+        <Sparkles className="text-purple-500" size={32} />
       </div>
       
       <h1 className="text-2xl font-semibold text-center mb-6">
