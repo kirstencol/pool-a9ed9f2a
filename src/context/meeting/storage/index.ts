@@ -14,7 +14,7 @@ import {
 import { loadMeetingFromSupabase } from './supabaseStorage';
 
 // Re-export demo data initialization
-export { initializeDemoData } from './demoData';
+export { initializeDemoData, isDemoId } from './demoData';
 
 // Re-export the storage function for external use
 export const storeMeetingInStorage = storeInLocalStorage;
@@ -28,7 +28,7 @@ export const loadMeetingFromStorage = async (id: string): Promise<Meeting | null
       
       if (storedMeeting) {
         console.log(`Loaded demo meeting data for ID: ${id} from localStorage`);
-        return storedMeeting as Meeting;
+        return storedMeeting;
       }
       
       // If not found in localStorage but is a demo ID, 
@@ -39,7 +39,7 @@ export const loadMeetingFromStorage = async (id: string): Promise<Meeting | null
       
       if (freshStoredMeeting) {
         console.log(`Loaded fresh demo meeting data for ID: ${id}`);
-        return freshStoredMeeting as Meeting;
+        return freshStoredMeeting;
       }
       
       // Create fallback data for demo IDs if still not found
@@ -57,7 +57,7 @@ export const loadMeetingFromStorage = async (id: string): Promise<Meeting | null
       // Try localStorage as fallback for non-demo IDs
       const localMeeting = await loadMeetingFromLocalStorage(id);
       if (localMeeting) {
-        return localMeeting as Meeting;
+        return localMeeting;
       }
     }
     

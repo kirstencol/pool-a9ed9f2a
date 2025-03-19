@@ -1,5 +1,6 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { isDemoId } from '@/context/meeting/storage/demoData';
 
 interface UseLoadingStateOptions {
   minimumLoadingTime?: number;

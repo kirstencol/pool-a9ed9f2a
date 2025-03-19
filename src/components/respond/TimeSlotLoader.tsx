@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { TimeSlot } from "@/types";
 import { useMeeting } from "@/context/meeting";
+import { isDemoId } from "@/context/meeting/storage/demoData";
 
 interface TimeSlotLoaderProps {
   inviteId: string | undefined;
@@ -33,36 +34,70 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     
     console.log("TimeSlotLoader - CREATING FALLBACK TIME SLOTS");
     
-    // Create mock time slots for demo flows
-    const mockTimeSlots: TimeSlot[] = [
-      {
-        id: "mock1",
-        date: "March 15",
-        startTime: "3:00 PM",
-        endTime: "5:00 PM",
-        responses: []
-      },
-      {
-        id: "mock2",
-        date: "March 16",
-        startTime: "2:00 PM",
-        endTime: "4:00 PM",
-        responses: []
-      }
-    ];
-    
-    if (inviteId === "carrie_demo") {
-      // Add Burt's response for Carrie's demo
-      mockTimeSlots[0].responses = [
+    // Create mock time slots specific for each demo ID
+    if (inviteId === "burt_demo") {
+      const burtTimeSlots: TimeSlot[] = [
         {
-          responderName: "Burt",
-          startTime: "3:30 PM",
-          endTime: "5:00 PM"
+          id: "1",
+          date: "March 1",
+          startTime: "8:00 AM",
+          endTime: "1:30 PM",
+          responses: []
+        },
+        {
+          id: "2",
+          date: "March 2",
+          startTime: "7:00 AM",
+          endTime: "10:00 AM",
+          responses: []
+        },
+        {
+          id: "3",
+          date: "March 3",
+          startTime: "9:00 AM",
+          endTime: "9:00 PM",
+          responses: []
         }
       ];
+      setLocalTimeSlots(burtTimeSlots);
+    } else if (inviteId === "carrie_demo") {
+      // Specific time slots for Carrie's demo
+      const carrieTimeSlots: TimeSlot[] = [
+        {
+          id: "1",
+          date: "March 15",
+          startTime: "3:00 PM",
+          endTime: "5:00 PM",
+          responses: [
+            {
+              responderName: "Burt",
+              startTime: "3:30 PM",
+              endTime: "5:00 PM"
+            }
+          ]
+        }
+      ];
+      setLocalTimeSlots(carrieTimeSlots);
+    } else {
+      // Default mock time slots for other demos
+      const mockTimeSlots: TimeSlot[] = [
+        {
+          id: "mock1",
+          date: "March 15",
+          startTime: "3:00 PM",
+          endTime: "5:00 PM",
+          responses: []
+        },
+        {
+          id: "mock2",
+          date: "March 16",
+          startTime: "2:00 PM",
+          endTime: "4:00 PM",
+          responses: []
+        }
+      ];
+      setLocalTimeSlots(mockTimeSlots);
     }
-    
-    setLocalTimeSlots(mockTimeSlots);
     
     if (!hasCalledLoadedCallback.current) {
       console.log("TimeSlotLoader - Signaling fallback time slots loaded");
@@ -111,9 +146,9 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
         return;
       }
       
-      // Immediately create fallback slots for known demo IDs
-      if (inviteId === "burt_demo" || inviteId === "carrie_demo" || inviteId === "demo_invite") {
-        console.log("TimeSlotLoader - Known demo ID, creating fallback time slots");
+      // Immediately create fallback slots for known demo IDs to avoid loading delays
+      if (isDemoId(inviteId)) {
+        console.log("TimeSlotLoader - Known demo ID, creating fallback time slots immediately");
         createFallbackTimeSlots();
         return;
       }
@@ -141,9 +176,15 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     }
   }, [inviteId, loadMeetingFromStorage, onTimeSlotsLoaded, setLocalTimeSlots, timeSlots, loadAttempted, localTimeSlots, createFallbackTimeSlots]);
 
-  // Run once on mount
+  // Run once on mount with no delay for demo IDs
   useEffect(() => {
-    // Add a slight delay before loading to prevent rapid state changes
+    // For demo IDs, load immediately without delay
+    if (inviteId && isDemoId(inviteId)) {
+      loadTimeSlots();
+      return;
+    }
+    
+    // For non-demo IDs, add a slight delay
     const timer = setTimeout(() => {
       loadTimeSlots();
     }, 50);
@@ -154,13 +195,13 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
         console.log("TimeSlotLoader - Safety timeout reached, forcing completion");
         createFallbackTimeSlots();
       }
-    }, 1000); // Reduced from 2000ms for faster fallback
+    }, 500); // Reduced timeout for faster fallback
     
     return () => {
       clearTimeout(timer);
       clearTimeout(safetyTimer);
     };
-  }, [loadTimeSlots, createFallbackTimeSlots]);
+  }, [loadTimeSlots, createFallbackTimeSlots, inviteId]);
 
   return null;
 };

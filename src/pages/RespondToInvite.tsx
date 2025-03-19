@@ -8,6 +8,7 @@ import ResponseForm from "@/components/respond/ResponseForm";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
 import Loading from "@/components/Loading";
 import { initializeDemoData } from "@/context/meeting/storage";
+import { isDemoId } from "@/context/meeting/storage/demoData";
 
 const RespondToInvite = () => {
   const navigate = useNavigate();
@@ -25,9 +26,8 @@ const RespondToInvite = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const initAttemptedRef = useRef(false);
   const didMountRef = useRef(false);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Initialize demo data first
+  
+  // Initialize demo data and process invite ID immediately on mount
   useEffect(() => {
     if (didMountRef.current) return;
     didMountRef.current = true;
@@ -41,14 +41,19 @@ const RespondToInvite = () => {
         const effectiveInviteId = rawInviteId || "demo_invite";
         setInviteId(effectiveInviteId);
         
-        // For demo invites, set up creator/responder names immediately 
-        if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+        // For demo invites, set up creator/responder names immediately
+        if (isDemoId(effectiveInviteId)) {
           setCreatorName("Abby");
           
-          // Use passed name parameter or the stored name
-          const effectiveUserName = userName || currentUserFromStorage;
-          setResponderName(effectiveUserName || 
-                         (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
+          // Override responder name for specific demo IDs
+          if (effectiveInviteId === "burt_demo") {
+            setResponderName("Burt");
+          } else if (effectiveInviteId === "carrie_demo") {
+            setResponderName("Carrie");
+          } else {
+            // Use passed name parameter or the stored name
+            setResponderName(userName || currentUserFromStorage || "Burt");
+          }
         }
         
         await initializeDemoData();
@@ -56,7 +61,7 @@ const RespondToInvite = () => {
         setIsInitialized(true);
         
         // For demo IDs, move to loaded state immediately
-        if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+        if (isDemoId(effectiveInviteId)) {
           console.log("RespondToInvite - Demo ID, moving to loaded state immediately");
           setLoadingState('loaded');
         }
@@ -71,18 +76,14 @@ const RespondToInvite = () => {
     // Start initialization immediately
     initialize();
     
-    // Set a safety timeout to force completion after 1.5 seconds
-    loadingTimeoutRef.current = setTimeout(() => {
+    // Set a safety timeout to force completion after 800ms
+    const loadingTimeoutRef = setTimeout(() => {
       console.log("RespondToInvite - Safety timeout reached, forcing completion");
       setIsInitialized(true);
       setLoadingState('loaded');
-    }, 1500);
+    }, 800);
     
-    return () => {
-      if (loadingTimeoutRef.current) {
-        clearTimeout(loadingTimeoutRef.current);
-      }
-    };
+    return () => clearTimeout(loadingTimeoutRef);
   }, [rawInviteId, userName, currentUserFromStorage]);
 
   // Define loadData function with useCallback to prevent recreation
@@ -93,21 +94,26 @@ const RespondToInvite = () => {
     const effectiveInviteId = inviteId || rawInviteId || "demo_invite";
     
     // Only redirect Carrie to CarrieFlow, not Burt
-    const effectiveUserName = userName || currentUserFromStorage;
-    if (effectiveUserName === "Carrie") {
+    if (responderName === "Carrie" || userName === "Carrie") {
       console.log("Redirecting Carrie to CarrieFlow");
       navigate(`/carrie-flow?id=${effectiveInviteId}`, { replace: true });
       return;
     }
     
     // For demo IDs, create mock data immediately if not already done
-    if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId) && 
-        loadingState === 'loading') {
+    if (isDemoId(effectiveInviteId) && loadingState === 'loading') {
       console.log("Creating immediate mock data for demo:", effectiveInviteId);
       
+      // Set creator and responder names based on demo ID
       setCreatorName("Abby");
-      setResponderName(userName || currentUserFromStorage || 
-                     (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
+      
+      if (effectiveInviteId === "burt_demo") {
+        setResponderName("Burt");
+      } else if (effectiveInviteId === "carrie_demo") {
+        setResponderName("Carrie");
+      } else {
+        setResponderName(userName || currentUserFromStorage || "Burt");
+      }
       
       // Move to loaded state
       setLoadingState('loaded');
@@ -115,8 +121,7 @@ const RespondToInvite = () => {
     }
     
     // For non-demo IDs, load the meeting data
-    if (loadingState === 'loading' && 
-        !["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+    if (loadingState === 'loading' && !isDemoId(effectiveInviteId)) {
       try {
         console.log("RespondToInvite - Loading meeting data for:", effectiveInviteId);
         const meeting = await loadMeetingFromStorage(effectiveInviteId);
@@ -135,7 +140,7 @@ const RespondToInvite = () => {
         setLoadingState('error');
       }
     }
-  }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate, isInitialized, inviteId, loadingState]);
+  }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate, isInitialized, inviteId, loadingState, responderName]);
 
   // After initialization, load meeting data
   useEffect(() => {
@@ -144,14 +149,14 @@ const RespondToInvite = () => {
     }
   }, [isInitialized, loadData]);
 
-  // Final safety timeout
+  // Final safety timeout - shorter for better UX
   useEffect(() => {
     const finalTimeout = setTimeout(() => {
       if (loadingState === 'loading') {
         console.log("Final safety timeout reached, forcing loaded state");
         setLoadingState('loaded');
       }
-    }, 2000);
+    }, 1000);
     
     return () => clearTimeout(finalTimeout);
   }, [loadingState]);

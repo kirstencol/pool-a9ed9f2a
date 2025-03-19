@@ -129,6 +129,65 @@ export const isDemoId = (id: string): boolean => {
 // Create fallback demo meeting when needed
 export const createFallbackDemoMeeting = (id: string): Meeting => {
   console.log(`Creating fallback meeting data for demo ID: ${id}`);
+  
+  const fallbackTimeSlots = [
+    {
+      id: "fallback1",
+      date: "March 15",
+      startTime: "3:00 PM",
+      endTime: "5:00 PM",
+      responses: []
+    },
+    {
+      id: "fallback2",
+      date: "March 16",
+      startTime: "2:00 PM",
+      endTime: "4:00 PM",
+      responses: []
+    }
+  ];
+  
+  // Different demo meetings can have customized data
+  if (id === "burt_demo") {
+    return {
+      id,
+      creator: {
+        id: "abby-id",
+        name: "Abby",
+        initial: "A"
+      },
+      timeSlots: [
+        {
+          id: "1",
+          date: "March 1",
+          startTime: "8:00 AM",
+          endTime: "1:30 PM",
+          responses: []
+        },
+        {
+          id: "2",
+          date: "March 2",
+          startTime: "7:00 AM",
+          endTime: "10:00 AM",
+          responses: []
+        },
+        {
+          id: "3",
+          date: "March 3",
+          startTime: "9:00 AM",
+          endTime: "9:00 PM",
+          responses: []
+        }
+      ],
+      participants: [],
+      locations: [],
+      selectedTimeSlot: null,
+      selectedLocation: null,
+      notes: "",
+      status: "draft" as const
+    };
+  }
+  
   return {
     id,
     creator: {
@@ -136,22 +195,7 @@ export const createFallbackDemoMeeting = (id: string): Meeting => {
       name: "Abby",
       initial: "A"
     },
-    timeSlots: [
-      {
-        id: "1",
-        date: "March 15",
-        startTime: "3:00 PM",
-        endTime: "5:00 PM",
-        responses: []
-      },
-      {
-        id: "2",
-        date: "March 16",
-        startTime: "2:00 PM",
-        endTime: "4:00 PM",
-        responses: []
-      }
-    ],
+    timeSlots: fallbackTimeSlots,
     participants: [],
     locations: [],
     selectedTimeSlot: null,
