@@ -81,11 +81,12 @@ const Confirmation = () => {
     (slot.responses || []).map((r: UserResponse) => r.responderName || "")
   ))].filter(Boolean) as string[];
   
-  // Display names without the friend labels
-  const displayNames = [
-    meetingData.creator?.name || "Abby", 
-    ...responderNames
-  ].filter(Boolean).join(" and ");
+  // Display names with proper formatting
+  let displayNames = meetingData.creator?.name || "Abby";
+  
+  if (responderNames.length > 0) {
+    displayNames = `${displayNames} and ${responderNames.join(" and ")}`;
+  }
 
   return (
     <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">

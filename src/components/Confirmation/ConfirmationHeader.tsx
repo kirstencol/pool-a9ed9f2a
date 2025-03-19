@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Sparkles } from "lucide-react";
 
 interface ConfirmationHeaderProps {
   displayNames: string;
@@ -8,15 +7,9 @@ interface ConfirmationHeaderProps {
 
 const ConfirmationHeader = ({ displayNames }: ConfirmationHeaderProps) => {
   return (
-    <>
-      <div className="celebration-animation">
-        <Sparkles className="text-white" size={32} />
-      </div>
-      
-      <h1 className="text-2xl font-semibold text-center mb-6">
-        {displayNames} are both free...
-      </h1>
-    </>
+    <h1 className="text-2xl font-semibold text-center mb-6">
+      {displayNames} are both free...
+    </h1>
   );
 };
 

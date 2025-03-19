@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 interface ConfirmationLinksProps {
   meetingId: string;
   onGoBack: () => void;
-  responderNames: string[];  // Change to string[] to match the correct type
+  responderNames: string[];
 }
 
 const ConfirmationLinks = ({ meetingId, onGoBack, responderNames }: ConfirmationLinksProps) => {
@@ -39,17 +39,10 @@ const ConfirmationLinks = ({ meetingId, onGoBack, responderNames }: Confirmation
           </h2>
         </div>
       )}
-
-      <div className="p-4 bg-green-50 rounded-xl mb-4 text-center">
-        <p className="text-green-700 font-medium">Your meeting data is saved!</p>
-        <p className="text-green-600 text-sm">
-          Your unique link ID: <span className="font-mono bg-white px-2 py-1 rounded">{meetingId || 'demo_invite'}</span>
-        </p>
-      </div>
       
       <button
         onClick={copyLink}
-        className="action-button w-full py-4 bg-purple-light text-purple-700 rounded-xl flex items-center justify-center"
+        className="action-button w-full py-4 bg-purple-600 text-white rounded-xl flex items-center justify-center"
       >
         Copy link to send to friends
         {copied ? <Check className="w-5 h-5 ml-2" /> : <Link className="w-5 h-5 ml-2" />}
