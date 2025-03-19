@@ -15,6 +15,14 @@ export const loadMeetingFromSupabase = async (id: string): Promise<Meeting | nul
       
     if (data && !error) {
       console.log(`Loaded meeting data for ID: ${id} from Supabase`);
+      
+      // Validate the status to ensure it matches the expected values
+      const status = data.status as 'draft' | 'pending' | 'confirmed';
+      if (status !== 'draft' && status !== 'pending' && status !== 'confirmed') {
+        console.error(`Invalid status value from Supabase: ${data.status}`);
+        return null;
+      }
+      
       // Transform Supabase data to Meeting type with the correct status type
       return {
         id: data.id,
@@ -25,7 +33,7 @@ export const loadMeetingFromSupabase = async (id: string): Promise<Meeting | nul
         },
         timeSlots: [], // You would load these from related tables
         participants: [],
-        status: data.status as 'draft' | 'pending' | 'confirmed'
+        status: status
       } as Meeting;
     }
     

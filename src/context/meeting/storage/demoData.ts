@@ -1,6 +1,7 @@
 
 // src/context/meeting/storage/demoData.ts
 import { StoredMeeting } from '../types';
+import { Meeting } from '@/types';
 import { storeMeetingInStorage } from './localStorage';
 
 // Flag to track if demo data has been initialized
@@ -126,7 +127,7 @@ export const isDemoId = (id: string): boolean => {
 };
 
 // Create fallback demo meeting when needed
-export const createFallbackDemoMeeting = (id: string) => {
+export const createFallbackDemoMeeting = (id: string): Meeting => {
   console.log(`Creating fallback meeting data for demo ID: ${id}`);
   return {
     id,
@@ -153,6 +154,6 @@ export const createFallbackDemoMeeting = (id: string) => {
     ],
     participants: [],
     locations: [],
-    status: "draft"
+    status: "draft" as const
   };
 };
