@@ -73,7 +73,7 @@ export const useMeetingOperations = (
           setCurrentMeetingId(id);
           
           setIsLoading(false);
-          return meeting;
+          return meeting as Meeting;
         }
       }
       
@@ -123,7 +123,7 @@ export const useMeetingOperations = (
         setCurrentMeetingId(id);
         
         setIsLoading(false);
-        return localMeeting;
+        return localMeeting as Meeting;
       }
       
       throw new Error('Meeting not found');
