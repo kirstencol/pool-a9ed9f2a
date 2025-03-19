@@ -9,4 +9,8 @@ export type {
   LocationOperations,
   MeetingDataOperations
 } from './types';
-export { storeMeetingInStorage, loadMeetingFromStorage, initializeDemoData } from './storage';
+export { 
+  storeMeetingInStorage, 
+  loadMeetingFromStorage, 
+  initializeDemoData 
+} from './storage';
