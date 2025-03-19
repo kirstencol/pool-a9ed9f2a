@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Check, Sparkles, Copy, Link, ChevronLeft } from "lucide-react";
@@ -20,7 +19,6 @@ const Confirmation = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Try to get the inviteId from location state
     const searchParams = new URLSearchParams(location.search);
     const inviteId = searchParams.get('id') || 'demo_invite';
     
@@ -38,7 +36,6 @@ const Confirmation = () => {
   }, [location, loadMeetingFromStorage]);
 
   const copyLink = () => {
-    // Generate a shareable link
     const baseUrl = window.location.origin;
     const shareableUrl = `${baseUrl}/select-user?id=${meetingData?.id || 'demo_invite'}`;
     
@@ -52,7 +49,6 @@ const Confirmation = () => {
   };
 
   const handleGoBack = () => {
-    // Navigate back to the respond page with the same invitation ID
     const searchParams = new URLSearchParams(location.search);
     const inviteId = searchParams.get('id') || 'demo_invite';
     navigate(`/respond/${inviteId}`);
@@ -70,7 +66,6 @@ const Confirmation = () => {
     );
   }
 
-  // If no meeting data is available, show a fallback
   if (!meetingData) {
     return (
       <div className="max-w-md mx-auto px-4 py-8">
@@ -91,32 +86,24 @@ const Confirmation = () => {
     );
   }
 
-  // Find time slots with responses
   const timeSlotsWithResponses = meetingData.timeSlots?.filter((slot: TimeSlot) => 
     slot.responses && slot.responses.length > 0
   ) || [];
 
-  // Calculate overlapping availability for each time slot
   const overlappingTimeSlots = timeSlotsWithResponses.map((slot: TimeSlot) => {
-    // Start with creator's full availability
     let overlapStartMinutes = convertTimeToMinutes(slot.startTime);
     let overlapEndMinutes = convertTimeToMinutes(slot.endTime);
     
-    // Adjust based on each response
     slot.responses.forEach(response => {
       const responseStartMinutes = convertTimeToMinutes(response.startTime || "");
       const responseEndMinutes = convertTimeToMinutes(response.endTime || "");
       
       if (responseStartMinutes && responseEndMinutes) {
-        // Update overlap to be the later start time
         overlapStartMinutes = Math.max(overlapStartMinutes, responseStartMinutes);
-        
-        // Update overlap to be the earlier end time
         overlapEndMinutes = Math.min(overlapEndMinutes, responseEndMinutes);
       }
     });
     
-    // Only include slots where there's still a valid overlap
     if (overlapStartMinutes < overlapEndMinutes) {
       return {
         ...slot,
@@ -127,7 +114,6 @@ const Confirmation = () => {
     return null;
   }).filter(Boolean);
 
-  // Format minutes back to time string (e.g., "9:30 AM")
   function formatMinutesToTime(minutes: number): string {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -136,12 +122,10 @@ const Confirmation = () => {
     return `${displayHours}:${mins.toString().padStart(2, '0')} ${period}`;
   }
 
-  // Format names for display
   const responderNames = [...new Set(timeSlotsWithResponses.flatMap((slot: TimeSlot) => 
     slot.responses?.map((r: any) => r.responderName as string) || []
   ))];
   
-  // Display names without the friend labels
   const displayNames = [
     meetingData.creator?.name || "Abby", 
     ...responderNames
@@ -185,7 +169,7 @@ const Confirmation = () => {
       <div className="space-y-4">
         <button
           onClick={copyLink}
-          className="action-button w-full py-4 bg-purple-light text-purple-700 rounded-xl flex items-center justify-center"
+          className="action-button w-full"
         >
           Copy link to send to friends
           {copied ? <Check className="w-5 h-5 ml-2" /> : <Link className="w-5 h-5 ml-2" />}
