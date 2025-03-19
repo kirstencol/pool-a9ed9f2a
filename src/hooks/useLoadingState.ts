@@ -7,16 +7,15 @@ interface UseLoadingStateOptions {
 }
 
 export function useLoadingState({
-  minimumLoadingTime = 800,
-  safetyTimeoutDuration = 5000
+  minimumLoadingTime = 400, // Reduced from 800ms for faster loading
+  safetyTimeoutDuration = 3000 // Reduced from 5000ms to handle issues faster
 }: UseLoadingStateOptions = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const loadStartTime = useRef(Date.now());
   const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const safetyTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasFinishedRef = useRef(false);
-  const finishAttemptCountRef = useRef(0);
-
+  
   // Clear all timers on unmount
   useEffect(() => {
     return () => {
@@ -29,6 +28,22 @@ export function useLoadingState({
     };
   }, []);
 
+  // Always set a safety timeout on mount
+  useEffect(() => {
+    safetyTimerRef.current = setTimeout(() => {
+      console.log("Global safety timeout reached, forcing load completion");
+      setIsLoading(false);
+      hasFinishedRef.current = true;
+      safetyTimerRef.current = null;
+    }, safetyTimeoutDuration);
+    
+    return () => {
+      if (safetyTimerRef.current) {
+        clearTimeout(safetyTimerRef.current);
+      }
+    };
+  }, [safetyTimeoutDuration]);
+
   // Function to start loading state
   const startLoading = useCallback(() => {
     // If already loading and not finished, don't restart the loading process
@@ -36,7 +51,6 @@ export function useLoadingState({
     
     // Reset finished state
     hasFinishedRef.current = false;
-    finishAttemptCountRef.current = 0;
     
     // Clear any existing timers
     if (loadingTimerRef.current) {
@@ -64,10 +78,6 @@ export function useLoadingState({
   const finishLoading = useCallback(() => {
     if (!isLoading || hasFinishedRef.current) return; // Don't do anything if we're already done loading
     
-    // Increment attempt counter for debugging
-    finishAttemptCountRef.current += 1;
-    console.log(`Attempt #${finishAttemptCountRef.current} to finish loading`);
-    
     const elapsedTime = Date.now() - loadStartTime.current;
     
     if (elapsedTime < minimumLoadingTime) {
@@ -76,8 +86,6 @@ export function useLoadingState({
       if (loadingTimerRef.current) {
         clearTimeout(loadingTimerRef.current);
       }
-      
-      console.log(`Delaying finish by ${minimumLoadingTime - elapsedTime}ms to meet minimum time`);
       
       loadingTimerRef.current = setTimeout(() => {
         console.log("Minimum loading time met, finishing loading");

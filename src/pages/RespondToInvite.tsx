@@ -37,43 +37,61 @@ const RespondToInvite = () => {
         if (initAttemptedRef.current) return;
         initAttemptedRef.current = true;
         
+        // Immediately process invite ID
+        const effectiveInviteId = rawInviteId || "demo_invite";
+        setInviteId(effectiveInviteId);
+        
+        // For demo invites, set up creator/responder names immediately 
+        if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+          setCreatorName("Abby");
+          setResponderName(userName || currentUserFromStorage || 
+                         (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
+        }
+        
         await initializeDemoData();
         console.log("RespondToInvite - Demo data initialized");
         setIsInitialized(true);
+        
+        // For demo IDs, move to loaded state immediately
+        if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+          console.log("RespondToInvite - Demo ID, moving to loaded state immediately");
+          setLoadingState('loaded');
+        }
       } catch (error) {
         console.error("Error initializing demo data:", error);
         // Still mark as initialized to prevent hanging
         setIsInitialized(true);
+        
+        // For demo IDs, still move to loaded state even if there's an error
+        if (rawInviteId && ["demo_invite", "burt_demo", "carrie_demo"].includes(rawInviteId)) {
+          setLoadingState('loaded');
+        }
       }
     };
     
-    // Add a slight delay to initialization to avoid frame drops
-    const timer = setTimeout(() => {
-      initialize();
-    }, 50);
+    // Start initialization immediately
+    initialize();
     
-    // Set a safety timeout to force completion after 5 seconds
+    // Set a safety timeout to force completion after 2 seconds
     loadingTimeoutRef.current = setTimeout(() => {
       console.log("RespondToInvite - Safety timeout reached, forcing completion");
       setIsInitialized(true);
       setLoadingState('loaded');
-    }, 5000);
+    }, 2000);
     
     return () => {
-      clearTimeout(timer);
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
       }
     };
-  }, []);
+  }, [rawInviteId, userName, currentUserFromStorage]);
 
   // Define loadData function with useCallback to prevent recreation
   const loadData = useCallback(async () => {
     if (!isInitialized) return;
     
     // Process the invite ID
-    const effectiveInviteId = rawInviteId || "demo_invite";
-    setInviteId(effectiveInviteId);
+    const effectiveInviteId = inviteId || rawInviteId || "demo_invite";
     
     // Only redirect Carrie to CarrieFlow, not Burt
     const effectiveUserName = userName || currentUserFromStorage;
@@ -83,8 +101,9 @@ const RespondToInvite = () => {
       return;
     }
     
-    // For demo IDs, create mock data immediately
-    if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+    // For demo IDs, create mock data immediately if not already done
+    if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId) && 
+        loadingState === 'loading') {
       console.log("Creating immediate mock data for demo:", effectiveInviteId);
       
       setCreatorName("Abby");
@@ -93,43 +112,31 @@ const RespondToInvite = () => {
       
       // Move to loaded state
       setLoadingState('loaded');
-      
-      // Still try to load meeting data in the background
-      loadMeetingFromStorage(effectiveInviteId)
-        .then(meeting => {
-          console.log("Background loaded meeting data:", meeting);
-        })
-        .catch(err => {
-          console.error("Background loading error:", err);
-        });
-      
       return;
     }
     
-    // Load the meeting data for non-demo IDs
-    try {
-      console.log("RespondToInvite - Loading meeting data for:", effectiveInviteId);
-      const meeting = await loadMeetingFromStorage(effectiveInviteId);
-      console.log("RespondToInvite - Loaded meeting data:", meeting);
-      
-      if (!meeting) {
-        setLoadingState('error');
-        return;
-      }
-      
-      // Set creator and responder names
-      setCreatorName(meeting.creator?.name || "Abby");
-      setResponderName(userName || currentUserFromStorage || "Burt");
-      
-      // Add a slight delay to reduce UI jitter during state transitions
-      setTimeout(() => {
+    // For non-demo IDs, load the meeting data
+    if (loadingState === 'loading' && 
+        !["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+      try {
+        console.log("RespondToInvite - Loading meeting data for:", effectiveInviteId);
+        const meeting = await loadMeetingFromStorage(effectiveInviteId);
+        
+        if (!meeting) {
+          setLoadingState('error');
+          return;
+        }
+        
+        // Set creator and responder names
+        setCreatorName(meeting.creator?.name || "Abby");
+        setResponderName(userName || currentUserFromStorage || "Burt");
         setLoadingState('loaded');
-      }, 200);
-    } catch (err) {
-      console.error("Error loading meeting:", err);
-      setLoadingState('error');
+      } catch (err) {
+        console.error("Error loading meeting:", err);
+        setLoadingState('error');
+      }
     }
-  }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate, isInitialized]);
+  }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate, isInitialized, inviteId, loadingState]);
 
   // After initialization, load meeting data
   useEffect(() => {
@@ -138,12 +145,23 @@ const RespondToInvite = () => {
     }
   }, [isInitialized, loadData]);
 
+  // Final safety timeout
+  useEffect(() => {
+    const finalTimeout = setTimeout(() => {
+      if (loadingState === 'loading') {
+        console.log("Final safety timeout reached, forcing loaded state");
+        setLoadingState('loaded');
+      }
+    }, 3000);
+    
+    return () => clearTimeout(finalTimeout);
+  }, [loadingState]);
+
   // Show loading state
-  if (loadingState === 'loading' || contextLoading || !isInitialized) {
+  if (loadingState === 'loading' || contextLoading) {
     return <Loading 
       message="Loading invitation..." 
       subtitle="Please wait while we prepare your time options" 
-      delay={250} // Longer delay for initial load to reduce flash
     />;
   }
 

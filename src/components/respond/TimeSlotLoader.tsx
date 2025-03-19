@@ -22,81 +22,16 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     loadMeetingFromStorage
   } = useMeeting();
   
-  // Add a state to track if we've attempted to load
   const [loadAttempted, setLoadAttempted] = useState(false);
-  // Add a ref to prevent multiple load callbacks
   const hasCalledLoadedCallback = useRef(false);
-  // Track whether we've created fallback slots
-  const createdFallbackSlots = useRef(false);
-
-  // Use useCallback to prevent recreating this function on every render
-  const loadTimeSlots = useCallback(async () => {
-    console.log("TimeSlotLoader - Loading time slots for invite ID:", inviteId);
-    
-    if (loadAttempted) {
-      console.log("TimeSlotLoader - Already attempted loading, skipping");
-      return;
-    }
-    
-    setLoadAttempted(true);
-    
-    try {
-      // Check if we already have time slots in context
-      if (timeSlots && timeSlots.length > 0) {
-        // Remove duplicate time slots by using a Map with slot IDs as keys
-        const uniqueTimeSlots = Array.from(
-          new Map(timeSlots.map(slot => [slot.id, slot])).values()
-        );
-        
-        if (uniqueTimeSlots.length > 0) {
-          console.log("TimeSlotLoader - Using time slots from context:", uniqueTimeSlots);
-          setLocalTimeSlots(uniqueTimeSlots);
-          
-          if (!hasCalledLoadedCallback.current) {
-            console.log("TimeSlotLoader - Signaling time slots loaded from context");
-            hasCalledLoadedCallback.current = true;
-            setTimeout(() => onTimeSlotsLoaded(), 50);
-          }
-          return;
-        }
-      }
-      
-      if (!inviteId) {
-        console.error("TimeSlotLoader - No invite ID provided");
-        createFallbackTimeSlots();
-        return;
-      }
-      
-      // Try to get time slots directly from storage
-      console.log("TimeSlotLoader - Trying to load time slots directly for:", inviteId);
-      
-      const meeting = await loadMeetingFromStorage(inviteId);
-      
-      if (meeting?.timeSlots && meeting.timeSlots.length > 0) {
-        console.log("TimeSlotLoader - Loaded time slots from storage:", meeting.timeSlots);
-        setLocalTimeSlots(meeting.timeSlots);
-        
-        if (!hasCalledLoadedCallback.current) {
-          console.log("TimeSlotLoader - Signaling time slots loaded from storage");
-          hasCalledLoadedCallback.current = true;
-          setTimeout(() => onTimeSlotsLoaded(), 50);
-        }
-      } else {
-        console.log("TimeSlotLoader - No time slots found in meeting, creating fallback");
-        createFallbackTimeSlots();
-      }
-    } catch (error) {
-      console.error("TimeSlotLoader - Error loading time slots:", error);
-      createFallbackTimeSlots();
-    }
-  }, [inviteId, loadMeetingFromStorage, onTimeSlotsLoaded, setLocalTimeSlots, timeSlots, loadAttempted]);
+  const hasSetFallbackSlots = useRef(false);
 
   // Create fallback time slots for demo flows
   const createFallbackTimeSlots = useCallback(() => {
-    if (createdFallbackSlots.current) return;
-    createdFallbackSlots.current = true;
+    if (hasSetFallbackSlots.current) return;
+    hasSetFallbackSlots.current = true;
     
-    console.log("TimeSlotLoader - Creating fallback time slots");
+    console.log("TimeSlotLoader - CREATING FALLBACK TIME SLOTS");
     
     // Create mock time slots for demo flows
     const mockTimeSlots: TimeSlot[] = [
@@ -132,9 +67,79 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     if (!hasCalledLoadedCallback.current) {
       console.log("TimeSlotLoader - Signaling fallback time slots loaded");
       hasCalledLoadedCallback.current = true;
-      setTimeout(() => onTimeSlotsLoaded(), 50);
+      onTimeSlotsLoaded();
     }
   }, [inviteId, onTimeSlotsLoaded, setLocalTimeSlots]);
+
+  // Use useCallback to prevent recreating this function on every render
+  const loadTimeSlots = useCallback(async () => {
+    console.log("TimeSlotLoader - Loading time slots for invite ID:", inviteId);
+    
+    if (loadAttempted) {
+      console.log("TimeSlotLoader - Already attempted loading, skipping");
+      return;
+    }
+    
+    setLoadAttempted(true);
+    
+    try {
+      // If we already have time slots locally, use them
+      if (localTimeSlots && localTimeSlots.length > 0) {
+        console.log("TimeSlotLoader - Already have local time slots, using them");
+        if (!hasCalledLoadedCallback.current) {
+          hasCalledLoadedCallback.current = true;
+          onTimeSlotsLoaded();
+        }
+        return;
+      }
+      
+      // Check if we already have time slots in context
+      if (timeSlots && timeSlots.length > 0) {
+        console.log("TimeSlotLoader - Using time slots from context:", timeSlots);
+        setLocalTimeSlots(timeSlots);
+        
+        if (!hasCalledLoadedCallback.current) {
+          hasCalledLoadedCallback.current = true;
+          onTimeSlotsLoaded();
+        }
+        return;
+      }
+      
+      if (!inviteId) {
+        console.error("TimeSlotLoader - No invite ID provided");
+        createFallbackTimeSlots();
+        return;
+      }
+      
+      // Immediately create fallback slots for known demo IDs
+      if (inviteId === "burt_demo" || inviteId === "carrie_demo" || inviteId === "demo_invite") {
+        console.log("TimeSlotLoader - Known demo ID, creating fallback time slots");
+        createFallbackTimeSlots();
+        return;
+      }
+      
+      // Try to get time slots directly from storage
+      console.log("TimeSlotLoader - Trying to load time slots directly for:", inviteId);
+      
+      const meeting = await loadMeetingFromStorage(inviteId);
+      
+      if (meeting?.timeSlots && meeting.timeSlots.length > 0) {
+        console.log("TimeSlotLoader - Loaded time slots from storage:", meeting.timeSlots);
+        setLocalTimeSlots(meeting.timeSlots);
+        
+        if (!hasCalledLoadedCallback.current) {
+          hasCalledLoadedCallback.current = true;
+          onTimeSlotsLoaded();
+        }
+      } else {
+        console.log("TimeSlotLoader - No time slots found in meeting, creating fallback");
+        createFallbackTimeSlots();
+      }
+    } catch (error) {
+      console.error("TimeSlotLoader - Error loading time slots:", error);
+      createFallbackTimeSlots();
+    }
+  }, [inviteId, loadMeetingFromStorage, onTimeSlotsLoaded, setLocalTimeSlots, timeSlots, loadAttempted, localTimeSlots, createFallbackTimeSlots]);
 
   // Run once on mount
   useEffect(() => {
@@ -143,13 +148,13 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
       loadTimeSlots();
     }, 50);
     
-    // Force completion after a safety timeout
+    // Force completion after a shorter safety timeout
     const safetyTimer = setTimeout(() => {
       if (!hasCalledLoadedCallback.current) {
         console.log("TimeSlotLoader - Safety timeout reached, forcing completion");
         createFallbackTimeSlots();
       }
-    }, 3000);
+    }, 2000); // Reduced from 3000ms for faster fallback
     
     return () => {
       clearTimeout(timer);
@@ -157,7 +162,8 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     };
   }, [loadTimeSlots, createFallbackTimeSlots]);
 
-  return null; // This is a logic-only component, no UI
+  // No render output - this is just a logic component
+  return null;
 };
 
 export default TimeSlotLoader;
