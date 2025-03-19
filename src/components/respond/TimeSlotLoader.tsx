@@ -32,9 +32,9 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     if (hasSetFallbackSlots.current) return;
     hasSetFallbackSlots.current = true;
     
-    console.log("TimeSlotLoader - CREATING FALLBACK TIME SLOTS");
+    console.log("TimeSlotLoader - CREATING FALLBACK TIME SLOTS for", inviteId);
     
-    // Create mock time slots specific for each demo ID
+    // Create mock time slots specific for Burt's demo
     if (inviteId === "burt_demo") {
       const burtTimeSlots: TimeSlot[] = [
         {
@@ -99,12 +99,21 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
       setLocalTimeSlots(mockTimeSlots);
     }
     
+    // Always signal completion after setting fallback slots
     if (!hasCalledLoadedCallback.current) {
       console.log("TimeSlotLoader - Signaling fallback time slots loaded");
       hasCalledLoadedCallback.current = true;
       onTimeSlotsLoaded();
     }
   }, [inviteId, onTimeSlotsLoaded, setLocalTimeSlots]);
+
+  // For demo IDs, create fallback time slots immediately
+  useEffect(() => {
+    if (inviteId && isDemoId(inviteId)) {
+      console.log("TimeSlotLoader - Demo ID detected, creating fallback time slots immediately:", inviteId);
+      createFallbackTimeSlots();
+    }
+  }, [inviteId, createFallbackTimeSlots]);
 
   // Use useCallback to prevent recreating this function on every render
   const loadTimeSlots = useCallback(async () => {
@@ -146,10 +155,8 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
         return;
       }
       
-      // Immediately create fallback slots for known demo IDs to avoid loading delays
+      // Demo IDs are handled via separate effect to reduce flickering
       if (isDemoId(inviteId)) {
-        console.log("TimeSlotLoader - Known demo ID, creating fallback time slots immediately");
-        createFallbackTimeSlots();
         return;
       }
       
@@ -176,32 +183,31 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     }
   }, [inviteId, loadMeetingFromStorage, onTimeSlotsLoaded, setLocalTimeSlots, timeSlots, loadAttempted, localTimeSlots, createFallbackTimeSlots]);
 
-  // Run once on mount with no delay for demo IDs
+  // For non-demo IDs, try loading through loadTimeSlots
   useEffect(() => {
-    // For demo IDs, load immediately without delay
-    if (inviteId && isDemoId(inviteId)) {
+    if (inviteId && !isDemoId(inviteId)) {
       loadTimeSlots();
-      return;
     }
-    
-    // For non-demo IDs, add a slight delay
-    const timer = setTimeout(() => {
-      loadTimeSlots();
-    }, 50);
-    
-    // Force completion after a shorter safety timeout
-    const safetyTimer = setTimeout(() => {
+  }, [inviteId, loadTimeSlots]);
+  
+  // Add a short safety timeout to ensure we always signal completion
+  useEffect(() => {
+    const safetyTimeout = setTimeout(() => {
       if (!hasCalledLoadedCallback.current) {
         console.log("TimeSlotLoader - Safety timeout reached, forcing completion");
-        createFallbackTimeSlots();
+        
+        // If we don't have time slots yet, create fallbacks
+        if (localTimeSlots.length === 0) {
+          createFallbackTimeSlots();
+        } else {
+          hasCalledLoadedCallback.current = true;
+          onTimeSlotsLoaded();
+        }
       }
-    }, 500); // Reduced timeout for faster fallback
+    }, 800);
     
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(safetyTimer);
-    };
-  }, [loadTimeSlots, createFallbackTimeSlots, inviteId]);
+    return () => clearTimeout(safetyTimeout);
+  }, [createFallbackTimeSlots, localTimeSlots.length, onTimeSlotsLoaded]);
 
   return null;
 };

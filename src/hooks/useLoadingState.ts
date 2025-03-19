@@ -29,13 +29,15 @@ export function useLoadingState({
     };
   }, []);
 
-  // Always set a safety timeout on mount
+  // Always set a safety timeout on mount - but don't reset loading state
   useEffect(() => {
     safetyTimerRef.current = setTimeout(() => {
-      console.log("Global safety timeout reached, forcing load completion");
-      setIsLoading(false);
-      hasFinishedRef.current = true;
-      safetyTimerRef.current = null;
+      if (isLoading) {
+        console.log("Global safety timeout reached, forcing load completion");
+        setIsLoading(false);
+        hasFinishedRef.current = true;
+        safetyTimerRef.current = null;
+      }
     }, safetyTimeoutDuration);
     
     return () => {
@@ -43,7 +45,7 @@ export function useLoadingState({
         clearTimeout(safetyTimerRef.current);
       }
     };
-  }, [safetyTimeoutDuration]);
+  }, [safetyTimeoutDuration, isLoading]);
 
   // Function to start loading state
   const startLoading = useCallback(() => {

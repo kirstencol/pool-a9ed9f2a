@@ -41,6 +41,7 @@ export const loadMeetingFromLocalStorage = async (id: string): Promise<Meeting |
         id, // Ensure id is set
         participants: parsed.participants || [],
         locations: parsed.locations || [],
+        timeSlots: parsed.timeSlots || [],
         selectedTimeSlot: parsed.selectedTimeSlot || null,
         selectedLocation: parsed.selectedLocation || null,
         notes: parsed.notes || "",

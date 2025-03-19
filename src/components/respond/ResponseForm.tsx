@@ -25,11 +25,12 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, {slot: TimeSlot, startTime: string, endTime: string}>>(new Map());
   const [initDone, setInitDone] = useState(false);
   const initAttemptedRef = useRef(false);
+  const timeSlotsLoadedRef = useRef(false);
   
-  // Use shorter loading times for demo flows
+  // For demo flows, use very short loading times to prevent flickering
   const { isLoading, finishLoading, startLoading } = useLoadingState({
-    minimumLoadingTime: isDemoId(inviteId || "") ? 100 : 200,
-    safetyTimeoutDuration: 1000
+    minimumLoadingTime: isDemoId(inviteId || "") ? 400 : 500,
+    safetyTimeoutDuration: isDemoId(inviteId || "") ? 1000 : 2000
   });
   
   // Initialize demo data on component mount
@@ -64,10 +65,12 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
     return () => clearTimeout(safetyTimer);
   }, []);
   
-  // Start loading state
+  // Start loading state only after initialization is complete
   useEffect(() => {
-    startLoading();
-  }, [startLoading]);
+    if (initDone && !timeSlotsLoadedRef.current) {
+      startLoading();
+    }
+  }, [initDone, startLoading]);
 
   // Get response handlers from the submitter hook
   const { handleSubmit, handleCantMakeIt } = useResponseSubmitter({
@@ -87,6 +90,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   // Handler for when time slots are loaded
   const handleTimeSlotsLoaded = useCallback(() => {
     console.log("TimeSlotLoader signaled slots are loaded");
+    timeSlotsLoadedRef.current = true;
     finishLoading();
   }, [finishLoading]);
   
@@ -94,21 +98,25 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   useEffect(() => {
     if (localTimeSlots.length > 0 && isLoading) {
       console.log("Force finishing loading - we have time slots");
+      timeSlotsLoadedRef.current = true;
       finishLoading();
     }
   }, [localTimeSlots, isLoading, finishLoading]);
   
-  // Add final safety timeout - shorter for demo flows
+  // Add safety timeout for loading screen
   useEffect(() => {
+    if (!initDone) return;
+    
     const finalSafetyTimer = setTimeout(() => {
       if (isLoading) {
         console.log("ResponseForm - Final safety timeout reached, forcing completion");
+        timeSlotsLoadedRef.current = true;
         finishLoading();
       }
-    }, isDemoId(inviteId || "") ? 800 : 1500);
+    }, isDemoId(inviteId || "") ? 1000 : 2000);
     
     return () => clearTimeout(finalSafetyTimer);
-  }, [isLoading, finishLoading, inviteId]);
+  }, [isLoading, finishLoading, inviteId, initDone]);
   
   // Don't render anything until initialization is complete
   if (!initDone) {
