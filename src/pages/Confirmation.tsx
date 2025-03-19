@@ -33,6 +33,7 @@ const Confirmation = () => {
           const data = await loadMeetingFromStorage(inviteId);
           
           if (data) {
+            console.log("Loaded meeting data:", data);
             setMeetingData(data);
             if (data.creator?.name) {
               setCreatorName(data.creator.name || "Abby");
@@ -73,13 +74,19 @@ const Confirmation = () => {
     slot.responses && slot.responses.length > 0
   ) || [];
 
+  console.log("Time slots with responses:", timeSlotsWithResponses);
+
   // Calculate overlapping availability for each time slot
   const overlappingTimeSlots = calculateOverlappingTimeSlots(timeSlotsWithResponses);
+  
+  console.log("Overlapping time slots:", overlappingTimeSlots);
 
   // Format names for display - fixing the type issue here
   const responderNames: string[] = [...new Set(timeSlotsWithResponses.flatMap((slot: TimeSlot) => 
     (slot.responses || []).map((r: UserResponse) => r.responderName || "")
   ))].filter(Boolean) as string[];
+  
+  console.log("Responder names:", responderNames);
   
   // Display names with proper formatting
   let displayNames = meetingData.creator?.name || "Abby";
