@@ -69,7 +69,7 @@ const Confirmation = () => {
     return <FallbackState onGoBack={handleGoBack} />;
   }
 
-  // Find time slots with responses
+  // Find time slots with responses - don't filter, we need to show all for the demo
   const timeSlotsWithResponses = meetingData.timeSlots || [];
   console.log("Time slots with responses:", timeSlotsWithResponses);
 

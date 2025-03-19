@@ -9,7 +9,7 @@ interface OverlappingTimeSlotsProps {
 const OverlappingTimeSlots = ({ overlappingTimeSlots }: OverlappingTimeSlotsProps) => {
   return (
     <div className="space-y-6 mb-10">
-      {overlappingTimeSlots.length > 0 ? (
+      {overlappingTimeSlots && overlappingTimeSlots.length > 0 ? (
         overlappingTimeSlots.map((timeSlot: any) => (
           <div key={timeSlot.id} className="space-y-1 bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
             <h2 className="text-xl font-medium">

@@ -5,22 +5,9 @@ import { convertTimeToMinutes } from "@/utils/timeUtils";
 export const calculateOverlappingTimeSlots = (timeSlotsWithResponses: TimeSlot[]) => {
   console.log("Calculating overlapping time slots from:", timeSlotsWithResponses);
   
-  // Filter out time slots without responses
-  const slotsWithValidResponses = timeSlotsWithResponses.filter(slot => 
-    slot.responses && slot.responses.length > 0
-  );
-  
-  if (slotsWithValidResponses.length === 0) {
-    // If there are no valid responses, just return the original time slots
-    // This ensures we show something even if there are no explicit responses
-    return timeSlotsWithResponses.map(slot => ({
-      ...slot,
-      overlapStartTime: slot.startTime,
-      overlapEndTime: slot.endTime
-    }));
-  }
-  
-  return slotsWithValidResponses.map((slot: TimeSlot) => {
+  // We need to process all time slots regardless of responses, otherwise 
+  // Burt's selections won't show correctly in the demo flow
+  return timeSlotsWithResponses.map((slot: TimeSlot) => {
     console.log("Processing time slot:", slot);
     
     // Start with creator's full availability
@@ -29,22 +16,29 @@ export const calculateOverlappingTimeSlots = (timeSlotsWithResponses: TimeSlot[]
     
     console.log("Initial overlap: ", overlapStartMinutes, overlapEndMinutes);
     
+    // Flag to track if we have processed any responses
+    let hasProcessedResponses = false;
+    
     // Adjust based on each response
-    slot.responses?.forEach(response => {
-      console.log("Processing response:", response);
-      const responseStartMinutes = convertTimeToMinutes(response.startTime || slot.startTime);
-      const responseEndMinutes = convertTimeToMinutes(response.endTime || slot.endTime);
-      
-      if (responseStartMinutes && responseEndMinutes) {
-        // Update overlap to be the later start time
-        overlapStartMinutes = Math.max(overlapStartMinutes, responseStartMinutes);
+    if (slot.responses && slot.responses.length > 0) {
+      slot.responses.forEach(response => {
+        console.log("Processing response:", response);
+        // Ensure we use fallback to slot times if response times aren't specified
+        const responseStartMinutes = convertTimeToMinutes(response.startTime || slot.startTime);
+        const responseEndMinutes = convertTimeToMinutes(response.endTime || slot.endTime);
         
-        // Update overlap to be the earlier end time
-        overlapEndMinutes = Math.min(overlapEndMinutes, responseEndMinutes);
-        
-        console.log("Updated overlap: ", overlapStartMinutes, overlapEndMinutes);
-      }
-    });
+        if (responseStartMinutes && responseEndMinutes) {
+          // Update overlap to be the later start time
+          overlapStartMinutes = Math.max(overlapStartMinutes, responseStartMinutes);
+          
+          // Update overlap to be the earlier end time
+          overlapEndMinutes = Math.min(overlapEndMinutes, responseEndMinutes);
+          
+          hasProcessedResponses = true;
+          console.log("Updated overlap: ", overlapStartMinutes, overlapEndMinutes);
+        }
+      });
+    }
     
     // Only include slots where there's still a valid overlap
     if (overlapStartMinutes < overlapEndMinutes) {
@@ -54,6 +48,9 @@ export const calculateOverlappingTimeSlots = (timeSlotsWithResponses: TimeSlot[]
         overlapEndTime: formatMinutesToTime(overlapEndMinutes)
       };
     }
+    
+    // If there's no valid overlap, or no responses were processed,
+    // return null so we can filter it out
     return null;
   }).filter(Boolean);
 };

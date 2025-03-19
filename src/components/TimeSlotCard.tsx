@@ -38,14 +38,31 @@ const TimeSlotCard = ({
   // Use either the custom display name from the timeSlot or the provided creatorName
   const displayCreatorName = timeSlot.creatorDisplayName || creatorName;
   
-  // Determine verb form based on whether the name includes "and"
-  const verbForm = displayCreatorName.includes(" and ") ? "are" : "is";
+  // Generate proper text for single or multiple people
+  const hasResponses = timeSlot.responses && timeSlot.responses.length > 0;
+  const responderNames = hasResponses 
+    ? timeSlot.responses.map(r => r.responderName).filter(Boolean)
+    : [];
+  
+  // Determine if we need to show multiple names
+  const showMultipleNames = selectedByUser && hasResponses;
+  
+  // Handle display text for availability
+  let availabilityText = "";
+  if (selectedByUser && !showTimeSelector) {
+    if (responderNames.length > 0) {
+      availabilityText = `You, ${displayCreatorName}${responderNames.length > 0 ? ` and ${responderNames.join(', ')}` : ''} are free ${startTime} - ${endTime}`;
+    } else {
+      availabilityText = `You and ${displayCreatorName} are free ${startTime} - ${endTime}`;
+    }
+  } else {
+    availabilityText = `${displayCreatorName} is free ${timeSlot.startTime} - ${timeSlot.endTime}`;
+  }
 
   // Debug logs to help diagnose the issue
   console.log("TimeSlotCard - Display Creator Name:", displayCreatorName);
-  console.log("TimeSlotCard - Verb Form:", verbForm);
-  console.log("TimeSlotCard - CreatorDisplayName from timeSlot:", timeSlot.creatorDisplayName);
-  console.log("TimeSlotCard - CreatorName prop:", creatorName);
+  console.log("TimeSlotCard - Responder Names:", responderNames);
+  console.log("TimeSlotCard - Availability Text:", availabilityText);
 
   useEffect(() => {
     if (selectedByUser && showTimeSelector) {
@@ -130,9 +147,7 @@ const TimeSlotCard = ({
             "text-sm",
             selectedByUser && !showTimeSelector ? "text-purple-700" : "text-gray-600"
           )}>
-            {selectedByUser && !showTimeSelector ? 
-              `You and ${displayCreatorName} are free ${startTime} - ${endTime}` :
-              `${displayCreatorName} ${verbForm} free ${timeSlot.startTime} - ${timeSlot.endTime}`}
+            {availabilityText}
           </div>
         )}
       </div>
