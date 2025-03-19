@@ -183,13 +183,6 @@ const Confirmation = () => {
       )}
 
       <div className="space-y-4">
-        <div className="p-4 bg-green-50 rounded-xl mb-4 text-center">
-          <p className="text-green-700 font-medium">Your meeting data is saved!</p>
-          <p className="text-green-600 text-sm">
-            Your unique link ID: <span className="font-mono bg-white px-2 py-1 rounded">{meetingData?.id || 'demo_invite'}</span>
-          </p>
-        </div>
-        
         <button
           onClick={copyLink}
           className="action-button w-full py-4 bg-purple-light text-purple-700 rounded-xl flex items-center justify-center"
