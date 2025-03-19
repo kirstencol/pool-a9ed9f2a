@@ -7,8 +7,8 @@ interface UseLoadingStateOptions {
 }
 
 export function useLoadingState({
-  minimumLoadingTime = 400, // Reduced from 800ms for faster loading
-  safetyTimeoutDuration = 3000 // Reduced from 5000ms to handle issues faster
+  minimumLoadingTime = 300,
+  safetyTimeoutDuration = 2000
 }: UseLoadingStateOptions = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const loadStartTime = useRef(Date.now());

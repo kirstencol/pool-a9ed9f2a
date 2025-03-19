@@ -44,7 +44,10 @@ const RespondToInvite = () => {
         // For demo invites, set up creator/responder names immediately 
         if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
           setCreatorName("Abby");
-          setResponderName(userName || currentUserFromStorage || 
+          
+          // Use passed name parameter or the stored name
+          const effectiveUserName = userName || currentUserFromStorage;
+          setResponderName(effectiveUserName || 
                          (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
         }
         
@@ -61,23 +64,19 @@ const RespondToInvite = () => {
         console.error("Error initializing demo data:", error);
         // Still mark as initialized to prevent hanging
         setIsInitialized(true);
-        
-        // For demo IDs, still move to loaded state even if there's an error
-        if (rawInviteId && ["demo_invite", "burt_demo", "carrie_demo"].includes(rawInviteId)) {
-          setLoadingState('loaded');
-        }
+        setLoadingState('loaded'); // Force loaded state even on error for demo
       }
     };
     
     // Start initialization immediately
     initialize();
     
-    // Set a safety timeout to force completion after 2 seconds
+    // Set a safety timeout to force completion after 1.5 seconds
     loadingTimeoutRef.current = setTimeout(() => {
       console.log("RespondToInvite - Safety timeout reached, forcing completion");
       setIsInitialized(true);
       setLoadingState('loaded');
-    }, 2000);
+    }, 1500);
     
     return () => {
       if (loadingTimeoutRef.current) {
@@ -152,7 +151,7 @@ const RespondToInvite = () => {
         console.log("Final safety timeout reached, forcing loaded state");
         setLoadingState('loaded');
       }
-    }, 3000);
+    }, 2000);
     
     return () => clearTimeout(finalTimeout);
   }, [loadingState]);

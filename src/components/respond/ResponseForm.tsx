@@ -28,8 +28,8 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   
   // Use shorter minimum loading time and safety timeout
   const { isLoading, finishLoading, startLoading } = useLoadingState({
-    minimumLoadingTime: 300, // Reduced for faster response
-    safetyTimeoutDuration: 3000
+    minimumLoadingTime: 200,
+    safetyTimeoutDuration: 2000
   });
   
   // Initialize demo data on component mount
@@ -59,7 +59,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
         console.log("ResponseForm - Init safety timeout reached");
         setInitDone(true);
       }
-    }, 2000);
+    }, 1000);
     
     return () => clearTimeout(safetyTimer);
   }, []);
@@ -88,18 +88,16 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const handleTimeSlotsLoaded = useCallback(() => {
     console.log("TimeSlotLoader signaled slots are loaded");
     setHasAttemptedLoad(true);
-    
-    // Finish loading immediately when time slots are loaded
     finishLoading();
   }, [finishLoading]);
   
   // Force finish loading if we have time slots
   useEffect(() => {
-    if (localTimeSlots.length > 0 && isLoading && hasAttemptedLoad) {
+    if (localTimeSlots.length > 0 && isLoading) {
       console.log("Force finishing loading - we have time slots");
       finishLoading();
     }
-  }, [localTimeSlots, isLoading, hasAttemptedLoad, finishLoading]);
+  }, [localTimeSlots, isLoading, finishLoading]);
   
   // Add final safety timeout
   useEffect(() => {
@@ -108,7 +106,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
         console.log("ResponseForm - Final safety timeout reached, forcing completion");
         finishLoading();
       }
-    }, 3000);
+    }, 1500);
     
     return () => clearTimeout(finalSafetyTimer);
   }, [isLoading, finishLoading]);

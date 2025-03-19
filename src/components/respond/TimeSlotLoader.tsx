@@ -154,7 +154,7 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
         console.log("TimeSlotLoader - Safety timeout reached, forcing completion");
         createFallbackTimeSlots();
       }
-    }, 2000); // Reduced from 3000ms for faster fallback
+    }, 1000); // Reduced from 2000ms for faster fallback
     
     return () => {
       clearTimeout(timer);
@@ -162,7 +162,6 @@ const TimeSlotLoader: React.FC<TimeSlotLoaderProps> = ({
     };
   }, [loadTimeSlots, createFallbackTimeSlots]);
 
-  // No render output - this is just a logic component
   return null;
 };
 

@@ -100,7 +100,7 @@ export const initializeDemoData = async (): Promise<void> => {
     timeSlots: [
       {
         id: "1",
-        date: "2023-03-15",
+        date: "March 15",
         startTime: "3:00 PM",
         endTime: "5:00 PM",
         responses: [
@@ -154,6 +154,9 @@ export const createFallbackDemoMeeting = (id: string): Meeting => {
     ],
     participants: [],
     locations: [],
+    selectedTimeSlot: null,
+    selectedLocation: null,
+    notes: "",
     status: "draft" as const
   };
 };
