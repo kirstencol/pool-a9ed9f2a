@@ -22,6 +22,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
 }) => {
   const [localTimeSlots, setLocalTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, {slot: TimeSlot, startTime: string, endTime: string}>>(new Map());
+  const [initDone, setInitDone] = useState(false);
   
   // Use a longer minimum loading time to ensure all data is loaded
   const { isLoading, finishLoading } = useLoadingState({
@@ -32,8 +33,15 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   // Initialize demo data on component mount
   useEffect(() => {
     const init = async () => {
-      await initializeDemoData();
-      console.log("ResponseForm - Initialized demo data on mount");
+      try {
+        await initializeDemoData();
+        console.log("ResponseForm - Initialized demo data on mount");
+        setInitDone(true);
+      } catch (error) {
+        console.error("Error initializing demo data:", error);
+        // Still mark as initialized to prevent hanging
+        setInitDone(true);
+      }
     };
     
     init();
@@ -57,6 +65,11 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
 
   // Check if time slots are loaded from the TimeSlotLoader component
   const timeSlotsLoaded = localTimeSlots && localTimeSlots.length > 0;
+  
+  // Don't render anything until initialization is complete
+  if (!initDone) {
+    return <Loading message="Initializing..." subtitle="Setting up your meeting details" />;
+  }
   
   return (
     <div className="mb-6">

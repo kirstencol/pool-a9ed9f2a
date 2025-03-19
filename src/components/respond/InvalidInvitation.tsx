@@ -1,5 +1,5 @@
 
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,10 +30,11 @@ const InvalidInvitation: React.FC<InvalidInvitationProps> = memo(({
     return reason === 'loading' ? 'Loading Invitation' : 'Invalid Invitation';
   };
   
-  const handleGoHome = () => {
+  // Use useCallback to ensure the function doesn't change on re-renders
+  const handleGoHome = useCallback(() => {
     console.log("Navigating to homepage");
-    navigate("/");
-  };
+    navigate("/", { replace: true });
+  }, [navigate]);
   
   return (
     <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
