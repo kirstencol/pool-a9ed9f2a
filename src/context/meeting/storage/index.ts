@@ -16,11 +16,22 @@ import { loadMeetingFromSupabase } from './supabaseStorage';
 // Create a cache for demo meetings to prevent flickering
 const demoMeetingsCache = new Map<string, Meeting>();
 
+// Flag to track initialization
+let initializationStarted = false;
+
 // Re-export demo data initialization
 export { initializeDemoData, isDemoId } from './demoData';
 
 // Re-export the storage function for external use
 export const storeMeetingInStorage = storeInLocalStorage;
+
+// Initialize demo data if needed
+const ensureDemoDataInitialized = async () => {
+  if (initializationStarted) return;
+  
+  initializationStarted = true;
+  await initializeDemoData();
+};
 
 // Load meeting data from storage
 export const loadMeetingFromStorage = async (id: string): Promise<Meeting | null> => {
@@ -31,32 +42,23 @@ export const loadMeetingFromStorage = async (id: string): Promise<Meeting | null
       return demoMeetingsCache.get(id) || null;
     }
     
-    // Always check local storage first for demo IDs
+    // For demo IDs, ensure we've initialized the data
     if (isDemoId(id)) {
-      const storedMeeting = await loadMeetingFromLocalStorage(id);
+      await ensureDemoDataInitialized();
+    }
+    
+    // Always check local storage first for any ID
+    const storedMeeting = await loadMeetingFromLocalStorage(id);
+    
+    if (storedMeeting) {
+      console.log(`Loaded meeting data for ID: ${id} from localStorage`);
       
-      if (storedMeeting) {
-        console.log(`Loaded demo meeting data for ID: ${id} from localStorage`);
+      // Cache demo meetings for faster access
+      if (isDemoId(id)) {
         demoMeetingsCache.set(id, storedMeeting);
-        return storedMeeting;
       }
       
-      // If not found in localStorage but is a demo ID, 
-      // initialize demo data and try again
-      console.log(`Demo data not initialized yet, initializing for ${id}`);
-      await initializeDemoData();
-      const freshStoredMeeting = await loadMeetingFromLocalStorage(id);
-      
-      if (freshStoredMeeting) {
-        console.log(`Loaded fresh demo meeting data for ID: ${id}`);
-        demoMeetingsCache.set(id, freshStoredMeeting);
-        return freshStoredMeeting;
-      }
-      
-      // Create fallback data for demo IDs if still not found
-      const fallbackMeeting = createFallbackDemoMeeting(id);
-      demoMeetingsCache.set(id, fallbackMeeting);
-      return fallbackMeeting;
+      return storedMeeting;
     }
     
     // For non-demo IDs, try to load from Supabase
@@ -66,18 +68,26 @@ export const loadMeetingFromStorage = async (id: string): Promise<Meeting | null
       if (supabaseMeeting) {
         return supabaseMeeting;
       }
-      
-      // Try localStorage as fallback for non-demo IDs
-      const localMeeting = await loadMeetingFromLocalStorage(id);
-      if (localMeeting) {
-        return localMeeting;
-      }
+    }
+    
+    // Create fallback data for demo IDs if still not found
+    if (isDemoId(id)) {
+      const fallbackMeeting = createFallbackDemoMeeting(id);
+      demoMeetingsCache.set(id, fallbackMeeting);
+      return fallbackMeeting;
     }
     
     console.log(`No meeting data found for ID: ${id}`);
     return null;
   } catch (error) {
     console.error('Error loading meeting data:', error);
+    
+    // For demo IDs, always return fallback data on error
+    if (isDemoId(id)) {
+      const fallbackMeeting = createFallbackDemoMeeting(id);
+      return fallbackMeeting;
+    }
+    
     return null;
   }
 };

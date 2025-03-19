@@ -5,6 +5,7 @@ import { useMeeting } from "@/context/meeting";
 import Avatar from "@/components/Avatar";
 import { Check } from "lucide-react";
 import Loading from "@/components/Loading";
+import { useLoadingState } from "@/hooks/useLoadingState";
 
 const BurtConfirmed = () => {
   const navigate = useNavigate();
@@ -12,20 +13,21 @@ const BurtConfirmed = () => {
   const inviteId = searchParams.get('id') || 'burt_demo';
   
   const { loadMeetingFromStorage } = useMeeting();
+  const { isLoading, startLoading, finishLoading } = useLoadingState({
+    minimumLoadingTime: 500,
+    safetyTimeoutDuration: 2000
+  });
   
   const [meetingDate, setMeetingDate] = useState("");
   const [meetingStartTime, setMeetingStartTime] = useState("");
   const [meetingEndTime, setMeetingEndTime] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingAttempted, setLoadingAttempted] = useState(false);
 
   useEffect(() => {
     const loadMeetingData = async () => {
-      if (loadingAttempted) return;
-      setLoadingAttempted(true);
+      // Start loading
+      startLoading();
       
       try {
-        setIsLoading(true);
         console.log("BurtConfirmed: Loading meeting data for:", inviteId);
         const meetingData = await loadMeetingFromStorage(inviteId);
         
@@ -50,32 +52,13 @@ const BurtConfirmed = () => {
         setMeetingStartTime("9:00 AM");
         setMeetingEndTime("10:30 AM");
       } finally {
-        // Add a small delay to prevent flickering
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 100);
+        // Mark loading as finished - the hook will enforce minimum display time
+        finishLoading();
       }
     };
     
     loadMeetingData();
-    
-    // Safety timeout to prevent perpetual loading
-    const safetyTimeout = setTimeout(() => {
-      if (isLoading) {
-        console.log("BurtConfirmed: Safety timeout reached, ending loading state");
-        setIsLoading(false);
-        
-        // Set fallback data if needed
-        if (!meetingDate) {
-          setMeetingDate("March 1");
-          setMeetingStartTime("9:00 AM");
-          setMeetingEndTime("10:30 AM");
-        }
-      }
-    }, 2000);
-    
-    return () => clearTimeout(safetyTimeout);
-  }, [inviteId, loadMeetingFromStorage, isLoading, loadingAttempted, meetingDate]);
+  }, [inviteId, loadMeetingFromStorage, startLoading, finishLoading]);
 
   if (isLoading) {
     return <Loading message="Loading confirmation" subtitle="Just a moment..." />;

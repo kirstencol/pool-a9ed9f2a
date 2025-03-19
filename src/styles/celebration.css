@@ -5,7 +5,7 @@
   justify-content: center;
   width: 64px;
   height: 64px;
-  background-color: #4ADE80;
+  background-color: #8B5CF6; /* Purple background instead of green */
   border-radius: 50%;
   margin-bottom: 1rem;
   margin-inline: auto;
