@@ -1,15 +1,5 @@
 
-@import './base.css';
-@import './components.css';
-@import './layout.css';
-@import './animations.css';
-@import './celebration.css';
-
-/* Disable animations during page load to prevent flickering */
-.preload * {
-  -webkit-transition: none !important;
-  -moz-transition: none !important;
-  -ms-transition: none !important;
-  -o-transition: none !important;
-  transition: none !important;
-}
+@import "./base.css";
+@import "./components.css";
+@import "./animations.css";
+@import "./layout.css";

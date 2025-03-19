@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import { TimeSlot } from "@/types";
 import TimeSlotSelection from "./TimeSlotSelection";
 import Loading from "@/components/Loading";
@@ -8,7 +8,6 @@ import TimeSlotLoader from "./TimeSlotLoader";
 import { useResponseSubmitter } from "@/hooks/useResponseSubmitter";
 import NoTimeSlotsView from "./NoTimeSlotsView";
 import { initializeDemoData } from "@/context/meeting/storage";
-import { isDemoId } from "@/context/meeting/storage/demoData";
 
 interface ResponseFormProps {
   creatorName: string;
@@ -23,54 +22,18 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
 }) => {
   const [localTimeSlots, setLocalTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, {slot: TimeSlot, startTime: string, endTime: string}>>(new Map());
-  const [initDone, setInitDone] = useState(false);
-  const initAttemptedRef = useRef(false);
-  const timeSlotsLoadedRef = useRef(false);
   
-  // For demo flows, use very short loading times to prevent flickering
-  const { isLoading, finishLoading, startLoading } = useLoadingState({
-    minimumLoadingTime: isDemoId(inviteId || "") ? 400 : 500,
-    safetyTimeoutDuration: isDemoId(inviteId || "") ? 1000 : 2000
+  // Use a longer minimum loading time to ensure all data is loaded
+  const { isLoading, finishLoading } = useLoadingState({
+    minimumLoadingTime: 1500,
+    safetyTimeoutDuration: 5000
   });
   
   // Initialize demo data on component mount
   useEffect(() => {
-    const initDemo = async () => {
-      if (initAttemptedRef.current) return;
-      initAttemptedRef.current = true;
-      
-      console.log("ResponseForm - Starting demo data initialization");
-      
-      try {
-        await initializeDemoData();
-        console.log("ResponseForm - Demo data initialized");
-      } catch (err) {
-        console.error("Error initializing demo data:", err);
-      } finally {
-        // Mark as done regardless of result to prevent hanging
-        setInitDone(true);
-      }
-    };
-    
-    initDemo();
-    
-    // Safety timeout to force initialization completion after 500ms
-    const safetyTimer = setTimeout(() => {
-      if (!initDone) {
-        console.log("ResponseForm - Init safety timeout reached");
-        setInitDone(true);
-      }
-    }, 500);
-    
-    return () => clearTimeout(safetyTimer);
+    initializeDemoData();
+    console.log("ResponseForm - Initialized demo data on mount");
   }, []);
-  
-  // Start loading state only after initialization is complete
-  useEffect(() => {
-    if (initDone && !timeSlotsLoadedRef.current) {
-      startLoading();
-    }
-  }, [initDone, startLoading]);
 
   // Get response handlers from the submitter hook
   const { handleSubmit, handleCantMakeIt } = useResponseSubmitter({
@@ -79,49 +42,17 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
     inviteId
   });
 
-  const handleSelectTimeSlot = useCallback((slot: TimeSlot, startTime: string, endTime: string) => {
+  const handleSelectTimeSlot = (slot: TimeSlot, startTime: string, endTime: string) => {
     setSelectedTimeSlots(prev => {
       const newMap = new Map(prev);
       newMap.set(slot.id, { slot, startTime, endTime });
       return newMap;
     });
-  }, []);
+    console.log("Selected time slot:", slot, startTime, endTime);
+  };
 
-  // Handler for when time slots are loaded
-  const handleTimeSlotsLoaded = useCallback(() => {
-    console.log("TimeSlotLoader signaled slots are loaded");
-    timeSlotsLoadedRef.current = true;
-    finishLoading();
-  }, [finishLoading]);
-  
-  // Force finish loading if we have time slots
-  useEffect(() => {
-    if (localTimeSlots.length > 0 && isLoading) {
-      console.log("Force finishing loading - we have time slots");
-      timeSlotsLoadedRef.current = true;
-      finishLoading();
-    }
-  }, [localTimeSlots, isLoading, finishLoading]);
-  
-  // Add safety timeout for loading screen
-  useEffect(() => {
-    if (!initDone) return;
-    
-    const finalSafetyTimer = setTimeout(() => {
-      if (isLoading) {
-        console.log("ResponseForm - Final safety timeout reached, forcing completion");
-        timeSlotsLoadedRef.current = true;
-        finishLoading();
-      }
-    }, isDemoId(inviteId || "") ? 1000 : 2000);
-    
-    return () => clearTimeout(finalSafetyTimer);
-  }, [isLoading, finishLoading, inviteId, initDone]);
-  
-  // Don't render anything until initialization is complete
-  if (!initDone) {
-    return <Loading message="Initializing..." subtitle="Setting up your meeting details" />;
-  }
+  // Check if time slots are loaded from the TimeSlotLoader component
+  const timeSlotsLoaded = localTimeSlots && localTimeSlots.length > 0;
   
   return (
     <div className="mb-6">
@@ -130,16 +61,13 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
         inviteId={inviteId}
         localTimeSlots={localTimeSlots}
         setLocalTimeSlots={setLocalTimeSlots}
-        onTimeSlotsLoaded={handleTimeSlotsLoaded}
+        onTimeSlotsLoaded={finishLoading}
       />
       
       {/* Show loading state while time slots are being loaded */}
       {isLoading ? (
-        <Loading 
-          message="Preparing time slots..." 
-          subtitle="Just a moment while we get your options ready" 
-        />
-      ) : localTimeSlots.length === 0 ? (
+        <Loading message="Preparing time slots..." subtitle="Just a moment while we get your options ready" />
+      ) : !timeSlotsLoaded ? (
         <NoTimeSlotsView />
       ) : (
         <TimeSlotSelection

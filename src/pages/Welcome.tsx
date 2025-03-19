@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useMeeting } from "@/context/meeting";
@@ -14,19 +13,11 @@ const Welcome = () => {
   const [friend1, setFriend1] = useState("");
   const [friend2, setFriend2] = useState("");
   const [showDevTools, setShowDevTools] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    console.log("Welcome component mounted");
-    setIsLoaded(true);
-    return () => console.log("Welcome component unmounted");
-  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted with:", { name, friend1, friend2 });
     
-    if (!name.trim() || !friend1.trim()) return;
+    if (!name.trim() || !friend1.trim() || !friend2.trim()) return;
 
     setCurrentUser({
       id: crypto.randomUUID(),
@@ -35,51 +26,49 @@ const Welcome = () => {
     });
 
     addParticipant(friend1.trim());
-    
-    if (friend2.trim()) {
-      addParticipant(friend2.trim());
-    }
+    addParticipant(friend2.trim());
 
     navigate("/propose-time");
   };
-
-  const isFormValid = name.trim() && friend1.trim();
 
   const toggleDevTools = () => {
     setShowDevTools(!showDevTools);
   };
 
+  const goToRespondAsFriend = () => {
+    // Make sure demo data is initialized before navigating
+    initializeDemoData();
+    console.log("Navigating to Friend Selection Screen: /select-user?id=demo_invite");
+    navigate("/select-user?id=demo_invite");
+  };
+
   const goToRespondAsBurt = () => {
+    // Make sure demo data is initialized before navigating
     initializeDemoData();
     console.log("Navigating to Burt Selection Screen: /select-user?id=burt_demo");
     navigate("/select-user?id=burt_demo");
   };
 
   const goToRespondAsCarrie = () => {
+    // Make sure demo data is initialized before navigating
     initializeDemoData();
     console.log("Navigating to Carrie Selection Screen: /select-user?id=carrie_demo");
     navigate("/select-user?id=carrie_demo");
   };
   
   const goToAbbyLocationResponse = () => {
+    // Make sure demo data is initialized before navigating
     initializeDemoData();
     console.log("Navigating to Abby Location Response: /select-user?flow=abby-location-response");
     navigate("/select-user?flow=abby-location-response");
   };
 
   const goToBurtLocationConfirmation = () => {
+    // Make sure demo data is initialized before navigating
     initializeDemoData();
     console.log("Navigating to Burt Location Confirmation: /select-user?flow=burt-location-confirmation");
     navigate("/select-user?flow=burt-location-confirmation");
   };
-
-  if (!isLoaded) {
-    return (
-      <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
-        <p className="text-center">Loading welcome screen...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-md mx-auto px-6 py-12 animate-fade-in">
@@ -99,7 +88,7 @@ const Welcome = () => {
         <div>
           <input
             type="text"
-            placeholder="Who else? (required)"
+            placeholder="Who else?"
             value={friend1}
             onChange={(e) => setFriend1(e.target.value)}
             className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-purple-DEFAULT"
@@ -109,30 +98,31 @@ const Welcome = () => {
         <div>
           <input
             type="text"
-            placeholder="One more friend? (optional)"
+            placeholder="One more? Three's the magic number."
             value={friend2}
             onChange={(e) => setFriend2(e.target.value)}
             className="w-full border-b border-gray-300 py-2 focus:outline-none focus:border-purple-DEFAULT"
           />
         </div>
 
-        {name && (
+        {name && friend1 && friend2 && (
           <div className="flex -space-x-2 my-8 justify-center">
             <Avatar initial={name.charAt(0)} position="first" className="border-2 border-white" />
-            {friend1 && <Avatar initial={friend1.charAt(0)} position="second" className="border-2 border-white" />}
-            {friend2 && <Avatar initial={friend2.charAt(0)} position="third" className="border-2 border-white" />}
+            <Avatar initial={friend1.charAt(0)} position="second" className="border-2 border-white" />
+            <Avatar initial={friend2.charAt(0)} position="third" className="border-2 border-white" />
           </div>
         )}
         
         <button
           type="submit"
           className="action-button"
-          disabled={!isFormValid}
+          disabled={!name.trim() || !friend1.trim() || !friend2.trim()}
         >
           <ArrowRight size={20} />
         </button>
       </form>
 
+      {/* Developer tools section */}
       <div className="mt-12">
         <button
           onClick={toggleDevTools}
@@ -145,6 +135,13 @@ const Welcome = () => {
           <div className="mt-4 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
             <h2 className="text-sm font-medium mb-3">Developer Quick Access</h2>
             <div className="space-y-2">
+              <Button 
+                onClick={goToRespondAsFriend}
+                variant="outline"
+                className="w-full justify-start"
+              >
+                Test Friend's Response Flow
+              </Button>
               <Button 
                 onClick={goToRespondAsBurt}
                 variant="outline"

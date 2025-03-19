@@ -1,5 +1,5 @@
 
-import React, { memo, useCallback } from "react";
+import React, { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,24 +30,15 @@ const InvalidInvitation: React.FC<InvalidInvitationProps> = memo(({
     return reason === 'loading' ? 'Loading Invitation' : 'Invalid Invitation';
   };
   
-  // Use useCallback to ensure the function doesn't change on re-renders
-  const handleGoHome = useCallback(() => {
-    console.log("Navigating to homepage");
-    navigate("/", { replace: true });
-  }, [navigate]);
-  
-  // Remove animation classes that could cause flickering
-  const containerClass = "max-w-md mx-auto px-4 py-8";
-  
   return (
-    <div className={containerClass}>
+    <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
       <div className="text-center">
         <h1 className="text-2xl font-semibold mb-4">
           {getTitle()}
         </h1>
         <p className="text-gray-600 mb-6">{getMessage()}</p>
         <Button 
-          onClick={handleGoHome} 
+          onClick={() => navigate("/")} 
           className="flex items-center"
           variant={reason === 'loading' ? "secondary" : "default"}
         >

@@ -9,7 +9,6 @@ import { useMeeting } from "@/context/meeting";
 import { ArrowLeft, ArrowRight, CalendarX } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Avatar from "@/components/Avatar";
-import { initializeDemoData } from "@/context/meeting/storage";
 
 const CarrieFlow = () => {
   const navigate = useNavigate();
@@ -17,11 +16,6 @@ const CarrieFlow = () => {
   const { toast } = useToast();
   const searchParams = new URLSearchParams(location.search);
   const inviteId = searchParams.get("id") || "carrie_demo";
-  
-  useEffect(() => {
-    // Initialize demo data when component mounts
-    initializeDemoData();
-  }, []);
   
   const { creatorName, responderName, inviteTimeSlots, isLoading, inviteError } = useInviteData(inviteId, "Carrie");
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
@@ -91,28 +85,6 @@ const CarrieFlow = () => {
     return <div className="p-6">Error: Invalid or expired invitation</div>;
   }
 
-  // If we don't have inviteTimeSlots, create mock ones for the demo
-  const displayTimeSlots = inviteTimeSlots.length > 0 ? inviteTimeSlots : [
-    {
-      id: "mock1",
-      date: "March 15",
-      startTime: "3:00 PM",
-      endTime: "5:00 PM",
-      responses: [{
-        responderName: "Burt",
-        startTime: "3:30 PM",
-        endTime: "5:00 PM"
-      }]
-    },
-    {
-      id: "mock2",
-      date: "March 16",
-      startTime: "2:00 PM",
-      endTime: "4:00 PM",
-      responses: []
-    }
-  ];
-
   return (
     <div className="max-w-md mx-auto px-6 py-8 animate-fade-in">
       <button 
@@ -130,7 +102,7 @@ const CarrieFlow = () => {
 
       <div className="mb-6">
         <div className="space-y-3">
-          {displayTimeSlots.map((slot) => (
+          {inviteTimeSlots.map((slot) => (
             <TimeSlotCard
               key={slot.id}
               timeSlot={{

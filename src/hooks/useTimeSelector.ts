@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { parseTimeString, buildTimeString, isTimeWithinBounds } from "@/utils/timeUtils";
 
 interface UseTimeSelectorProps {
@@ -19,13 +19,12 @@ export const useTimeSelector = ({
   minTime = "",
   maxTime = ""
 }: UseTimeSelectorProps) => {
-  // Constants for time options
-  const hourOptions = useMemo(() => ["--", "12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"], []);
-  const minuteOptions = useMemo(() => ["00", "15", "30", "45"], []);
-  const periods = useMemo(() => ["am", "pm"], []);
+  const hourOptions = ["--", "12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"];
+  const minuteOptions = ["00", "15", "30", "45"];
+  const periods = ["am", "pm"];
 
   // Parse initial time string into components
-  const parsedTime = useMemo(() => parseTimeString(time), [time]);
+  const parsedTime = parseTimeString(time);
   const [hour, setHour] = useState<string>(parsedTime.hour);
   const [minute, setMinute] = useState<string>(parsedTime.minute);
   const [period, setPeriod] = useState<string>(parsedTime.period);
@@ -96,41 +95,37 @@ export const useTimeSelector = ({
   }, [hour, period, minuteOptions, minTime, maxTime, isEndTime, startTime]);
 
   // Handle time component changes
-  const handleHourChange = useCallback((value: string) => {
+  const handleHourChange = (value: string) => {
     setHour(value);
     
     // When hour changes, ensure minute is still valid
-    if (value !== "--" && period) {
-      const newValidMinutes = minuteOptions.filter(m => {
-        const testTime = buildTimeString(value, m, period);
-        return isTimeWithinBounds(testTime, minTime, maxTime, startTime, isEndTime);
-      });
-      
-      if (newValidMinutes.length > 0 && !newValidMinutes.includes(minute)) {
-        setMinute(newValidMinutes[0]);
-      }
+    const newValidMinutes = minuteOptions.filter(m => {
+      const testTime = buildTimeString(value, m, period);
+      return isTimeWithinBounds(testTime, minTime, maxTime, startTime, isEndTime);
+    });
+    
+    if (newValidMinutes.length > 0 && !newValidMinutes.includes(minute)) {
+      setMinute(newValidMinutes[0]);
     }
-  }, [minute, period, minuteOptions, minTime, maxTime, startTime, isEndTime]);
+  };
 
-  const handleMinuteChange = useCallback((value: string) => {
+  const handleMinuteChange = (value: string) => {
     setMinute(value);
-  }, []);
+  };
 
-  const handlePeriodChange = useCallback((value: string) => {
+  const handlePeriodChange = (value: string) => {
     setPeriod(value);
     
     // When period changes, ensure minute is still valid
-    if (hour !== "--") {
-      const newValidMinutes = minuteOptions.filter(m => {
-        const testTime = buildTimeString(hour, m, value);
-        return isTimeWithinBounds(testTime, minTime, maxTime, startTime, isEndTime);
-      });
-      
-      if (newValidMinutes.length > 0 && !newValidMinutes.includes(minute)) {
-        setMinute(newValidMinutes[0]);
-      }
+    const newValidMinutes = minuteOptions.filter(m => {
+      const testTime = buildTimeString(hour, m, value);
+      return isTimeWithinBounds(testTime, minTime, maxTime, startTime, isEndTime);
+    });
+    
+    if (newValidMinutes.length > 0 && !newValidMinutes.includes(minute)) {
+      setMinute(newValidMinutes[0]);
     }
-  }, [hour, minute, minuteOptions, minTime, maxTime, startTime, isEndTime]);
+  };
 
   return {
     hour,

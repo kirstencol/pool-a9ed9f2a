@@ -1,74 +1,45 @@
 
-// src/context/meeting/types.ts
 import { User, TimeSlot, Location, Meeting } from '@/types';
 
 export interface StoredMeeting {
   id?: string;
   creator?: User;
-  participants?: User[];
   timeSlots?: TimeSlot[];
   selectedTimeSlot?: TimeSlot | null;
   locations?: Location[];
   selectedLocation?: Location | null;
   notes?: string;
-  status?: 'draft' | 'pending' | 'confirmed';
-  responses?: any[];
+  responses?: {
+    responderName: string;  // Changed from 'name' to 'responderName' for consistency
+    timeSlotId: string;
+    startTime: string;
+    endTime: string;
+  }[];
 }
 
-// Core context state and operations
-export interface MeetingContextState {
+export interface MeetingContextType {
   currentUser: User | null;
-  participants: User[];
-  timeSlots: TimeSlot[];
-  selectedTimeSlot: TimeSlot | null;
-  locations: Location[];
-  selectedLocation: Location | null;
-  meetingNotes: string;
-  currentMeetingId: string;
-  isLoading: boolean;
-  error: string | null;
-}
-
-// User-related operations
-export interface UserOperations {
   setCurrentUser: (user: User) => void;
+  participants: User[];
   addParticipant: (name: string) => void;
   removeParticipant: (id: string) => void;
-}
-
-// Time slot operations
-export interface TimeSlotOperations {
+  timeSlots: TimeSlot[];
   addTimeSlot: (timeSlot: TimeSlot) => void;
-  addTimeSlotsBatch: (timeSlots: TimeSlot[]) => Promise<TimeSlot[]>;
   removeTimeSlot: (id: string) => void;
   updateTimeSlot: (id: string, updates: Partial<TimeSlot>) => void;
+  selectedTimeSlot: TimeSlot | null;
   setSelectedTimeSlot: (timeSlot: TimeSlot | null) => void;
-  clearTimeSlots: () => void;
-  respondToTimeSlot: (timeSlotId: string, responderName: string, startTime: string, endTime: string) => Promise<boolean>;
-}
-
-// Location operations
-export interface LocationOperations {
+  locations: Location[];
   addLocation: (location: Location) => void;
   removeLocation: (id: string) => void;
+  selectedLocation: Location | null;
   setSelectedLocation: (location: Location | null) => void;
-  respondToLocation: (locationId: string, responderName: string, note?: string) => Promise<boolean>;
-}
-
-// Meeting data operations
-export interface MeetingDataOperations {
+  meetingNotes: string;
   setMeetingNotes: (notes: string) => void;
   clearMeetingData: () => void;
+  clearTimeSlots: () => void;
   getMeetingData: () => Partial<Meeting>;
-  generateShareableLink: () => Promise<{ id: string, url: string }>;
-  loadMeetingFromStorage: (id: string) => Promise<Meeting | null>;
-  storeMeetingInStorage: (id: string, meeting: Partial<StoredMeeting>) => Promise<boolean>;
+  generateShareableLink: () => { id: string, url: string };
+  storeMeetingInStorage: (id: string, meeting: StoredMeeting) => void;
+  loadMeetingFromStorage: (id: string) => StoredMeeting | null;
 }
-
-// Complete context type combining all operations
-export interface MeetingContextType extends 
-  MeetingContextState, 
-  UserOperations,
-  TimeSlotOperations,
-  LocationOperations,
-  MeetingDataOperations {}
