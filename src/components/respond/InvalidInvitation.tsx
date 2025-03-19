@@ -36,8 +36,13 @@ const InvalidInvitation: React.FC<InvalidInvitationProps> = memo(({
     navigate("/", { replace: true });
   }, [navigate]);
   
+  // Add a specific class to prevent flickering animation
+  const containerClass = reason === 'loading' 
+    ? "max-w-md mx-auto px-4 py-8" 
+    : "max-w-md mx-auto px-4 py-8 animate-fade-in";
+  
   return (
-    <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
+    <div className={containerClass}>
       <div className="text-center">
         <h1 className="text-2xl font-semibold mb-4">
           {getTitle()}

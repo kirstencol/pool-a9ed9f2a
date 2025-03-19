@@ -1,5 +1,5 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 interface UseLoadingStateOptions {
   minimumLoadingTime?: number;
@@ -13,24 +13,47 @@ export function useLoadingState({
   const [isLoading, setIsLoading] = useState(true);
   const loadStartTime = useRef(Date.now());
   const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const safetyTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Setup safety timeout to prevent infinite loading
+  // Clear all timers on unmount
   useEffect(() => {
-    const safetyTimer = setTimeout(() => {
-      console.log("Safety timeout reached, forcing load completion");
-      setIsLoading(false);
-    }, safetyTimeoutDuration);
-    
     return () => {
-      clearTimeout(safetyTimer);
       if (loadingTimerRef.current) {
         clearTimeout(loadingTimerRef.current);
       }
+      if (safetyTimerRef.current) {
+        clearTimeout(safetyTimerRef.current);
+      }
     };
+  }, []);
+
+  // Function to start loading state
+  const startLoading = useCallback(() => {
+    // Clear any existing timers
+    if (loadingTimerRef.current) {
+      clearTimeout(loadingTimerRef.current);
+      loadingTimerRef.current = null;
+    }
+    if (safetyTimerRef.current) {
+      clearTimeout(safetyTimerRef.current);
+    }
+
+    // Reset loading state
+    loadStartTime.current = Date.now();
+    setIsLoading(true);
+    
+    // Set up safety timeout
+    safetyTimerRef.current = setTimeout(() => {
+      console.log("Safety timeout reached, forcing load completion");
+      setIsLoading(false);
+      safetyTimerRef.current = null;
+    }, safetyTimeoutDuration);
   }, [safetyTimeoutDuration]);
 
   // Function to finish loading with minimum duration enforcement
-  const finishLoading = () => {
+  const finishLoading = useCallback(() => {
+    if (!isLoading) return; // Don't do anything if we're already done loading
+    
     const elapsedTime = Date.now() - loadStartTime.current;
     
     if (elapsedTime < minimumLoadingTime) {
@@ -43,17 +66,23 @@ export function useLoadingState({
       loadingTimerRef.current = setTimeout(() => {
         setIsLoading(false);
         loadingTimerRef.current = null;
+        
+        // Clear safety timer since we're done loading
+        if (safetyTimerRef.current) {
+          clearTimeout(safetyTimerRef.current);
+          safetyTimerRef.current = null;
+        }
       }, minimumLoadingTime - elapsedTime);
     } else {
       setIsLoading(false);
+      
+      // Clear safety timer since we're done loading
+      if (safetyTimerRef.current) {
+        clearTimeout(safetyTimerRef.current);
+        safetyTimerRef.current = null;
+      }
     }
-  };
-
-  // Function to reset loading state
-  const startLoading = () => {
-    loadStartTime.current = Date.now();
-    setIsLoading(true);
-  };
+  }, [isLoading, minimumLoadingTime]);
 
   return {
     isLoading,

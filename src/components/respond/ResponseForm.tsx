@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { TimeSlot } from "@/types";
 import TimeSlotSelection from "./TimeSlotSelection";
 import Loading from "@/components/Loading";
@@ -23,17 +23,19 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const [localTimeSlots, setLocalTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, {slot: TimeSlot, startTime: string, endTime: string}>>(new Map());
   const [initDone, setInitDone] = useState(false);
+  const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
   
-  // Use a longer minimum loading time to ensure all data is loaded
-  const { isLoading, finishLoading } = useLoadingState({
-    minimumLoadingTime: 800,
-    safetyTimeoutDuration: 3000
+  // Use a shorter minimum loading time to reduce flickering
+  const { isLoading, finishLoading, startLoading } = useLoadingState({
+    minimumLoadingTime: 600,
+    safetyTimeoutDuration: 5000 // Increased for better reliability
   });
   
-  // Initialize demo data on component mount
-  useEffect(() => {
-    const init = async () => {
+  // Initialize demo data on component mount - with useCallback to prevent recreations
+  const initializeDemoDataOnce = useCallback(async () => {
+    if (!initDone) {
       try {
+        console.log("ResponseForm - Starting demo data initialization");
         await initializeDemoData();
         console.log("ResponseForm - Initialized demo data on mount");
         setInitDone(true);
@@ -42,10 +44,13 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
         // Still mark as initialized to prevent hanging
         setInitDone(true);
       }
-    };
-    
-    init();
-  }, []);
+    }
+  }, [initDone]);
+
+  useEffect(() => {
+    startLoading(); // Explicitly start loading state
+    initializeDemoDataOnce();
+  }, [initializeDemoDataOnce, startLoading]);
 
   // Get response handlers from the submitter hook
   const { handleSubmit, handleCantMakeIt } = useResponseSubmitter({
@@ -54,17 +59,25 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
     inviteId
   });
 
-  const handleSelectTimeSlot = (slot: TimeSlot, startTime: string, endTime: string) => {
+  const handleSelectTimeSlot = useCallback((slot: TimeSlot, startTime: string, endTime: string) => {
     setSelectedTimeSlots(prev => {
       const newMap = new Map(prev);
       newMap.set(slot.id, { slot, startTime, endTime });
       return newMap;
     });
     console.log("Selected time slot:", slot, startTime, endTime);
-  };
+  }, []);
 
-  // Check if time slots are loaded from the TimeSlotLoader component
+  // Memoize the time slots loaded flag to prevent unnecessary re-renders
   const timeSlotsLoaded = localTimeSlots && localTimeSlots.length > 0;
+  
+  // Add a useEffect to detect when loading is finished
+  useEffect(() => {
+    if (hasAttemptedLoad && timeSlotsLoaded) {
+      console.log("Time slots loaded, finishing loading state");
+      finishLoading();
+    }
+  }, [hasAttemptedLoad, timeSlotsLoaded, finishLoading]);
   
   // Don't render anything until initialization is complete
   if (!initDone) {
@@ -78,7 +91,13 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
         inviteId={inviteId}
         localTimeSlots={localTimeSlots}
         setLocalTimeSlots={setLocalTimeSlots}
-        onTimeSlotsLoaded={finishLoading}
+        onTimeSlotsLoaded={() => {
+          console.log("TimeSlotLoader signaled slots are loaded");
+          setHasAttemptedLoad(true);
+          if (timeSlotsLoaded) {
+            finishLoading();
+          }
+        }}
       />
       
       {/* Show loading state while time slots are being loaded */}
