@@ -8,12 +8,13 @@ interface UseLoadingStateOptions {
 
 export function useLoadingState({
   minimumLoadingTime = 800,
-  safetyTimeoutDuration = 3000
+  safetyTimeoutDuration = 5000
 }: UseLoadingStateOptions = {}) {
   const [isLoading, setIsLoading] = useState(true);
   const loadStartTime = useRef(Date.now());
   const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const safetyTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const hasFinishedRef = useRef(false);
 
   // Clear all timers on unmount
   useEffect(() => {
@@ -29,6 +30,12 @@ export function useLoadingState({
 
   // Function to start loading state
   const startLoading = useCallback(() => {
+    // If already loading and not finished, don't restart the loading process
+    if (isLoading && !hasFinishedRef.current) return;
+    
+    // Reset finished state
+    hasFinishedRef.current = false;
+    
     // Clear any existing timers
     if (loadingTimerRef.current) {
       clearTimeout(loadingTimerRef.current);
@@ -46,13 +53,14 @@ export function useLoadingState({
     safetyTimerRef.current = setTimeout(() => {
       console.log("Safety timeout reached, forcing load completion");
       setIsLoading(false);
+      hasFinishedRef.current = true;
       safetyTimerRef.current = null;
     }, safetyTimeoutDuration);
-  }, [safetyTimeoutDuration]);
+  }, [isLoading, safetyTimeoutDuration]);
 
   // Function to finish loading with minimum duration enforcement
   const finishLoading = useCallback(() => {
-    if (!isLoading) return; // Don't do anything if we're already done loading
+    if (!isLoading || hasFinishedRef.current) return; // Don't do anything if we're already done loading
     
     const elapsedTime = Date.now() - loadStartTime.current;
     
@@ -64,6 +72,7 @@ export function useLoadingState({
       }
       
       loadingTimerRef.current = setTimeout(() => {
+        hasFinishedRef.current = true;
         setIsLoading(false);
         loadingTimerRef.current = null;
         
@@ -74,6 +83,7 @@ export function useLoadingState({
         }
       }, minimumLoadingTime - elapsedTime);
     } else {
+      hasFinishedRef.current = true;
       setIsLoading(false);
       
       // Clear safety timer since we're done loading

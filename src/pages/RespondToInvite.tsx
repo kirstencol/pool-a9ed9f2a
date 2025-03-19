@@ -2,7 +2,7 @@
 // src/pages/RespondToInvite.tsx
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { useMeeting } from "@/context/meeting";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import InvitationHeader from "@/components/respond/InvitationHeader";
 import ResponseForm from "@/components/respond/ResponseForm";
 import InvalidInvitation from "@/components/respond/InvalidInvitation";
@@ -23,11 +23,19 @@ const RespondToInvite = () => {
   const [loadingState, setLoadingState] = useState<'loading'|'loaded'|'error'>('loading');
   const [inviteId, setInviteId] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState(false);
+  const initAttemptedRef = useRef(false);
+  const didMountRef = useRef(false);
 
   // Initialize demo data first
   useEffect(() => {
+    if (didMountRef.current) return;
+    didMountRef.current = true;
+    
     const initialize = async () => {
       try {
+        if (initAttemptedRef.current) return;
+        initAttemptedRef.current = true;
+        
         await initializeDemoData();
         console.log("RespondToInvite - Demo data initialized");
         setIsInitialized(true);
@@ -38,7 +46,12 @@ const RespondToInvite = () => {
       }
     };
     
-    initialize();
+    // Add a slight delay to initialization to avoid frame drops
+    const timer = setTimeout(() => {
+      initialize();
+    }, 50);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Define loadData function with useCallback to prevent recreation
@@ -70,7 +83,11 @@ const RespondToInvite = () => {
         setCreatorName("Abby");
         setResponderName(userName || currentUserFromStorage || 
                        (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
-        setLoadingState('loaded');
+        
+        // Add a slight delay to reduce UI jitter
+        setTimeout(() => {
+          setLoadingState('loaded');
+        }, 200);
         return;
       }
       
@@ -82,7 +99,11 @@ const RespondToInvite = () => {
       // Set creator and responder names
       setCreatorName(meeting.creator?.name || "Abby");
       setResponderName(userName || currentUserFromStorage || "Burt");
-      setLoadingState('loaded');
+      
+      // Add a slight delay to reduce UI jitter during state transitions
+      setTimeout(() => {
+        setLoadingState('loaded');
+      }, 200);
     } catch (err) {
       console.error("Error loading meeting:", err);
       
@@ -93,7 +114,10 @@ const RespondToInvite = () => {
         setCreatorName("Abby");
         setResponderName(userName || currentUserFromStorage || 
                       (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
-        setLoadingState('loaded');
+        
+        setTimeout(() => {
+          setLoadingState('loaded');
+        }, 200);
         return;
       }
       
@@ -110,7 +134,11 @@ const RespondToInvite = () => {
 
   // Show loading state
   if (loadingState === 'loading' || contextLoading || !isInitialized) {
-    return <Loading message="Loading invitation..." subtitle="Please wait while we prepare your time options" />;
+    return <Loading 
+      message="Loading invitation..." 
+      subtitle="Please wait while we prepare your time options" 
+      delay={250} // Longer delay for initial load to reduce flash
+    />;
   }
 
   // Show error state
@@ -119,7 +147,7 @@ const RespondToInvite = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-8 animate-fade-in">
+    <div className="max-w-md mx-auto px-4 py-8">
       <InvitationHeader 
         creatorName={creatorName} 
         responderName={responderName} 

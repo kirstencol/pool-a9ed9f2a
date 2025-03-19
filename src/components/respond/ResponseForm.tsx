@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { TimeSlot } from "@/types";
 import TimeSlotSelection from "./TimeSlotSelection";
 import Loading from "@/components/Loading";
@@ -24,6 +24,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, {slot: TimeSlot, startTime: string, endTime: string}>>(new Map());
   const [initDone, setInitDone] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
+  const initAttemptedRef = useRef(false);
   
   // Use a shorter minimum loading time to reduce flickering
   const { isLoading, finishLoading, startLoading } = useLoadingState({
@@ -33,9 +34,12 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   
   // Initialize demo data on component mount - with useCallback to prevent recreations
   const initializeDemoDataOnce = useCallback(async () => {
-    if (!initDone) {
+    if (!initDone && !initAttemptedRef.current) {
       try {
+        // Set flag immediately to prevent multiple attempts
+        initAttemptedRef.current = true;
         console.log("ResponseForm - Starting demo data initialization");
+        
         await initializeDemoData();
         console.log("ResponseForm - Initialized demo data on mount");
         setInitDone(true);
@@ -49,7 +53,13 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
 
   useEffect(() => {
     startLoading(); // Explicitly start loading state
-    initializeDemoDataOnce();
+    
+    // Add a slight delay before initialization to reduce concurrent rendering
+    const timer = setTimeout(() => {
+      initializeDemoDataOnce();
+    }, 20);
+    
+    return () => clearTimeout(timer);
   }, [initializeDemoDataOnce, startLoading]);
 
   // Get response handlers from the submitter hook
@@ -69,19 +79,23 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   }, []);
 
   // Memoize the time slots loaded flag to prevent unnecessary re-renders
-  const timeSlotsLoaded = localTimeSlots && localTimeSlots.length > 0;
+  const timeSlotsLoaded = localTimeSlots.length > 0;
   
   // Add a useEffect to detect when loading is finished
   useEffect(() => {
     if (hasAttemptedLoad && timeSlotsLoaded) {
       console.log("Time slots loaded, finishing loading state");
-      finishLoading();
+      const timer = setTimeout(() => {
+        finishLoading();
+      }, 100); // Short delay to reduce state transition jitter
+      
+      return () => clearTimeout(timer);
     }
   }, [hasAttemptedLoad, timeSlotsLoaded, finishLoading]);
   
   // Don't render anything until initialization is complete
   if (!initDone) {
-    return <Loading message="Initializing..." subtitle="Setting up your meeting details" />;
+    return <Loading message="Initializing..." subtitle="Setting up your meeting details" delay={150} />;
   }
   
   return (
@@ -95,14 +109,21 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
           console.log("TimeSlotLoader signaled slots are loaded");
           setHasAttemptedLoad(true);
           if (timeSlotsLoaded) {
-            finishLoading();
+            // Add a slight delay before finishing loading
+            setTimeout(() => {
+              finishLoading();
+            }, 200);
           }
         }}
       />
       
       {/* Show loading state while time slots are being loaded */}
       {isLoading ? (
-        <Loading message="Preparing time slots..." subtitle="Just a moment while we get your options ready" />
+        <Loading 
+          message="Preparing time slots..." 
+          subtitle="Just a moment while we get your options ready" 
+          delay={200} // Slightly longer delay for smoother transition
+        />
       ) : !timeSlotsLoaded ? (
         <NoTimeSlotsView />
       ) : (
