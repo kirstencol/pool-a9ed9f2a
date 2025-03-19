@@ -25,6 +25,7 @@ const RespondToInvite = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const initAttemptedRef = useRef(false);
   const didMountRef = useRef(false);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize demo data first
   useEffect(() => {
@@ -51,7 +52,19 @@ const RespondToInvite = () => {
       initialize();
     }, 50);
     
-    return () => clearTimeout(timer);
+    // Set a safety timeout to force completion after 5 seconds
+    loadingTimeoutRef.current = setTimeout(() => {
+      console.log("RespondToInvite - Safety timeout reached, forcing completion");
+      setIsInitialized(true);
+      setLoadingState('loaded');
+    }, 5000);
+    
+    return () => {
+      clearTimeout(timer);
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Define loadData function with useCallback to prevent recreation
@@ -70,26 +83,34 @@ const RespondToInvite = () => {
       return;
     }
     
-    // Load the meeting data
+    // For demo IDs, create mock data immediately
+    if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
+      console.log("Creating immediate mock data for demo:", effectiveInviteId);
+      
+      setCreatorName("Abby");
+      setResponderName(userName || currentUserFromStorage || 
+                     (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
+      
+      // Move to loaded state
+      setLoadingState('loaded');
+      
+      // Still try to load meeting data in the background
+      loadMeetingFromStorage(effectiveInviteId)
+        .then(meeting => {
+          console.log("Background loaded meeting data:", meeting);
+        })
+        .catch(err => {
+          console.error("Background loading error:", err);
+        });
+      
+      return;
+    }
+    
+    // Load the meeting data for non-demo IDs
     try {
       console.log("RespondToInvite - Loading meeting data for:", effectiveInviteId);
       const meeting = await loadMeetingFromStorage(effectiveInviteId);
       console.log("RespondToInvite - Loaded meeting data:", meeting);
-      
-      if (!meeting && ["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
-        // For demo IDs, create mock data if loading failed
-        console.log("Creating mock meeting data for demo:", effectiveInviteId);
-        
-        setCreatorName("Abby");
-        setResponderName(userName || currentUserFromStorage || 
-                       (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
-        
-        // Add a slight delay to reduce UI jitter
-        setTimeout(() => {
-          setLoadingState('loaded');
-        }, 200);
-        return;
-      }
       
       if (!meeting) {
         setLoadingState('error');
@@ -106,21 +127,6 @@ const RespondToInvite = () => {
       }, 200);
     } catch (err) {
       console.error("Error loading meeting:", err);
-      
-      // For demo IDs, create mock data if loading failed
-      if (["demo_invite", "burt_demo", "carrie_demo"].includes(effectiveInviteId)) {
-        console.log("Creating mock data after error for demo:", effectiveInviteId);
-        
-        setCreatorName("Abby");
-        setResponderName(userName || currentUserFromStorage || 
-                      (effectiveInviteId === "burt_demo" ? "Burt" : "Carrie"));
-        
-        setTimeout(() => {
-          setLoadingState('loaded');
-        }, 200);
-        return;
-      }
-      
       setLoadingState('error');
     }
   }, [rawInviteId, userName, currentUserFromStorage, loadMeetingFromStorage, navigate, isInitialized]);

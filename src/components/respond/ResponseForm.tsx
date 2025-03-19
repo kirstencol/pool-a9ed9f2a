@@ -24,7 +24,9 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, {slot: TimeSlot, startTime: string, endTime: string}>>(new Map());
   const [initDone, setInitDone] = useState(false);
   const [hasAttemptedLoad, setHasAttemptedLoad] = useState(false);
+  const [forcedTimeSlotsLoaded, setForcedTimeSlotsLoaded] = useState(false);
   const initAttemptedRef = useRef(false);
+  const timeSlotsLoadedTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Use a shorter minimum loading time to reduce flickering
   const { isLoading, finishLoading, startLoading } = useLoadingState({
@@ -59,8 +61,21 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
       initializeDemoDataOnce();
     }, 20);
     
-    return () => clearTimeout(timer);
-  }, [initializeDemoDataOnce, startLoading]);
+    // Force complete loading after 10 seconds to prevent eternal loading states
+    const safetyTimer = setTimeout(() => {
+      console.log("ResponseForm - Safety timeout reached, forcing completion");
+      finishLoading();
+      setForcedTimeSlotsLoaded(true);
+    }, 10000);
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(safetyTimer);
+      if (timeSlotsLoadedTimeoutRef.current) {
+        clearTimeout(timeSlotsLoadedTimeoutRef.current);
+      }
+    };
+  }, [initializeDemoDataOnce, startLoading, finishLoading]);
 
   // Get response handlers from the submitter hook
   const { handleSubmit, handleCantMakeIt } = useResponseSubmitter({
@@ -78,20 +93,34 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
     console.log("Selected time slot:", slot, startTime, endTime);
   }, []);
 
-  // Memoize the time slots loaded flag to prevent unnecessary re-renders
-  const timeSlotsLoaded = localTimeSlots.length > 0;
-  
-  // Add a useEffect to detect when loading is finished
-  useEffect(() => {
-    if (hasAttemptedLoad && timeSlotsLoaded) {
-      console.log("Time slots loaded, finishing loading state");
-      const timer = setTimeout(() => {
-        finishLoading();
-      }, 100); // Short delay to reduce state transition jitter
-      
-      return () => clearTimeout(timer);
+  // Handler for when time slots are loaded
+  const handleTimeSlotsLoaded = useCallback(() => {
+    console.log("TimeSlotLoader signaled slots are loaded");
+    setHasAttemptedLoad(true);
+    
+    // Clear any existing timeout
+    if (timeSlotsLoadedTimeoutRef.current) {
+      clearTimeout(timeSlotsLoadedTimeoutRef.current);
     }
-  }, [hasAttemptedLoad, timeSlotsLoaded, finishLoading]);
+    
+    // Set a timeout to finish loading
+    timeSlotsLoadedTimeoutRef.current = setTimeout(() => {
+      console.log("Finishing loading after time slots loaded");
+      finishLoading();
+      timeSlotsLoadedTimeoutRef.current = null;
+    }, 300);
+  }, [finishLoading]);
+  
+  // Force finish loading if time slots are loaded but loading state isn't finished
+  useEffect(() => {
+    if ((localTimeSlots.length > 0 || forcedTimeSlotsLoaded) && isLoading && hasAttemptedLoad) {
+      console.log("Force finishing loading state - slots present but still loading");
+      finishLoading();
+    }
+  }, [localTimeSlots, isLoading, hasAttemptedLoad, finishLoading, forcedTimeSlotsLoaded]);
+  
+  // Check if we have time slots
+  const timeSlotsLoaded = localTimeSlots.length > 0 || forcedTimeSlotsLoaded;
   
   // Don't render anything until initialization is complete
   if (!initDone) {
@@ -105,16 +134,7 @@ const ResponseForm: React.FC<ResponseFormProps> = ({
         inviteId={inviteId}
         localTimeSlots={localTimeSlots}
         setLocalTimeSlots={setLocalTimeSlots}
-        onTimeSlotsLoaded={() => {
-          console.log("TimeSlotLoader signaled slots are loaded");
-          setHasAttemptedLoad(true);
-          if (timeSlotsLoaded) {
-            // Add a slight delay before finishing loading
-            setTimeout(() => {
-              finishLoading();
-            }, 200);
-          }
-        }}
+        onTimeSlotsLoaded={handleTimeSlotsLoaded}
       />
       
       {/* Show loading state while time slots are being loaded */}

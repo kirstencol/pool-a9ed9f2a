@@ -4,8 +4,20 @@ import { Meeting } from '@/types';
 import { StoredMeeting } from './types';
 import { supabase } from '@/integrations/supabase/client';
 
+// Flag to track if demo data has been initialized
+let demoDataInitialized = false;
+
 // Initialize demo data
-export const initializeDemoData = () => {
+export const initializeDemoData = async () => {
+  // Only initialize once per session
+  if (demoDataInitialized) {
+    console.log("Demo data already initialized, skipping");
+    return;
+  }
+  
+  console.log("Initializing demo data in localStorage");
+  demoDataInitialized = true;
+
   // Initialize Abby's demo data
   const abbyDemoData: Partial<StoredMeeting> = {
     creator: {
@@ -40,7 +52,7 @@ export const initializeDemoData = () => {
   };
   
   // Store Abby's demo data
-  storeMeetingInStorage("demo_invite", abbyDemoData);
+  await storeMeetingInStorage("demo_invite", abbyDemoData);
   
   // Initialize Burt's demo data (with Abby as the creator)
   const burtDemoData: Partial<StoredMeeting> = {
@@ -76,7 +88,7 @@ export const initializeDemoData = () => {
   };
   
   // Store Burt's demo data
-  storeMeetingInStorage("burt_demo", burtDemoData);
+  await storeMeetingInStorage("burt_demo", burtDemoData);
   
   // Initialize Carrie's demo data
   const carrieDemoData: Partial<StoredMeeting> = {
@@ -104,7 +116,9 @@ export const initializeDemoData = () => {
   };
   
   // Store Carrie's demo data
-  storeMeetingInStorage("carrie_demo", carrieDemoData);
+  await storeMeetingInStorage("carrie_demo", carrieDemoData);
+  
+  console.log("Demo data initialization complete");
 };
 
 // Store meeting data in local storage for demo purposes, or in Supabase in production
@@ -125,15 +139,57 @@ export const storeMeetingInStorage = async (id: string, meeting: Partial<StoredM
 // Load meeting data from storage
 export const loadMeetingFromStorage = async (id: string): Promise<Meeting | null> => {
   try {
-    // Check if this is a demo ID
+    // Always check local storage first for demo IDs
     if (id === "demo_invite" || id === "burt_demo" || id === "carrie_demo") {
-      // Try to load from local storage first (for demo purposes)
       const storedMeeting = localStorage.getItem(`meeting_${id}`);
       
       if (storedMeeting) {
         console.log(`Loaded demo meeting data for ID: ${id} from localStorage`);
         return JSON.parse(storedMeeting) as Meeting;
       }
+      
+      // If not found in localStorage but is a demo ID, 
+      // initialize demo data and try again
+      if (!demoDataInitialized) {
+        console.log(`Demo data not initialized yet, initializing for ${id}`);
+        await initializeDemoData();
+        const freshStoredMeeting = localStorage.getItem(`meeting_${id}`);
+        
+        if (freshStoredMeeting) {
+          console.log(`Loaded fresh demo meeting data for ID: ${id}`);
+          return JSON.parse(freshStoredMeeting) as Meeting;
+        }
+      }
+      
+      // Create fallback data for demo IDs if still not found
+      console.log(`Creating fallback meeting data for demo ID: ${id}`);
+      return {
+        id,
+        creator: {
+          id: "abby-id",
+          name: "Abby",
+          initial: "A"
+        },
+        timeSlots: [
+          {
+            id: "1",
+            date: "March 15",
+            startTime: "3:00 PM",
+            endTime: "5:00 PM",
+            responses: []
+          },
+          {
+            id: "2",
+            date: "March 16",
+            startTime: "2:00 PM",
+            endTime: "4:00 PM",
+            responses: []
+          }
+        ],
+        participants: [],
+        locations: [],
+        status: "draft"
+      };
     }
     
     // For non-demo IDs, try to load from Supabase

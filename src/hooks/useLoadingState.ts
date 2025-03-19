@@ -15,6 +15,7 @@ export function useLoadingState({
   const loadingTimerRef = useRef<NodeJS.Timeout | null>(null);
   const safetyTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasFinishedRef = useRef(false);
+  const finishAttemptCountRef = useRef(0);
 
   // Clear all timers on unmount
   useEffect(() => {
@@ -35,6 +36,7 @@ export function useLoadingState({
     
     // Reset finished state
     hasFinishedRef.current = false;
+    finishAttemptCountRef.current = 0;
     
     // Clear any existing timers
     if (loadingTimerRef.current) {
@@ -62,6 +64,10 @@ export function useLoadingState({
   const finishLoading = useCallback(() => {
     if (!isLoading || hasFinishedRef.current) return; // Don't do anything if we're already done loading
     
+    // Increment attempt counter for debugging
+    finishAttemptCountRef.current += 1;
+    console.log(`Attempt #${finishAttemptCountRef.current} to finish loading`);
+    
     const elapsedTime = Date.now() - loadStartTime.current;
     
     if (elapsedTime < minimumLoadingTime) {
@@ -71,7 +77,10 @@ export function useLoadingState({
         clearTimeout(loadingTimerRef.current);
       }
       
+      console.log(`Delaying finish by ${minimumLoadingTime - elapsedTime}ms to meet minimum time`);
+      
       loadingTimerRef.current = setTimeout(() => {
+        console.log("Minimum loading time met, finishing loading");
         hasFinishedRef.current = true;
         setIsLoading(false);
         loadingTimerRef.current = null;
@@ -83,6 +92,7 @@ export function useLoadingState({
         }
       }, minimumLoadingTime - elapsedTime);
     } else {
+      console.log("Elapsed time exceeds minimum, finishing loading immediately");
       hasFinishedRef.current = true;
       setIsLoading(false);
       
